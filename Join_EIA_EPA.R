@@ -12,10 +12,20 @@ setwd("C:/Users/laure/Documents/Gen_Plant_Emissions/")
 ## Read in Data ###
 ###################
 
-pm25 = read_excel("Data/eGRID2020 DRAFT PM Emissions.xlsx", sheet=9)
 crosswalk = read.csv("Data/epa_eia_crosswalk.csv")
 emissions = read.csv("Data/CAMD/facilities_emissions.csv")
 
+#pm25
+pm25=NULL
+for(y in 2018:2020){
+  sheetname=paste(y, "PM Unit-level Data")
+  pm25_temp = read_excel("Data/eGRID2020 DRAFT PM Emissions.xlsx", sheet=sheetname, skip=1)
+  pm25=rbind(pm25, pm25_temp)
+}
+pm25 = pm25%>%
+  group_by(YEAR, ORISPL, UNITID)%>%
+  summarise(pm25 = sum(PM25AN))
+#pm25 reported in tons
 
 ####### 
 # EIA 923 For Annual Generation
@@ -101,6 +111,10 @@ eia_collapsed = eia_joined%>%
   summarise(NET_GEN = sum(NET_GEN),
             Capacity = sum(Capacity))
 
+## Join CAMD with PM25
+nrow(emissions)
+emissions = left_join(emissions, pm25, by=c("facilityId"="ORISPL", "unitId"="UNITID", "year"="YEAR"))
+nrow(emissions)
 #############
 #Join with CAMD
 camd_eia_data = left_join(emissions, eia_collapsed, by=c("facilityId"="CAMD_PLANT_ID", "unitId"="CAMD_UNIT_ID", "year"="YEAR"))
@@ -115,7 +129,9 @@ camd_eia_data_coal <- camd_eia_data_coal %>%
   mutate(nox_lbs = noxMass*2000,
          NOX_RATE = nox_lbs/NET_GEN,
          so2_lbs = so2Mass*2000,
-         so2_rate = so2_lbs/NET_GEN)
+         so2_rate = so2_lbs/NET_GEN,
+         pm25_lbs = pm25*2000,
+         pm25_rate = pm25_lbs/NET_GEN)
 
 ggplot(camd_eia_data_coal)+
   geom_point(aes(x=NET_GEN, y=NOX_RATE, color=factor(year)))+
@@ -138,7 +154,27 @@ ggsave(filename="Gen_Plant_Emissions/Figures/So2Rate_AnnualGen_coal.jpg",
        width=8)
 
 ggplot(camd_eia_data_coal)+
-  geom_point(aes(x=NET_GEN, y=NOX_RATE, color=factor(year)))+
+  geom_point(aes(x=NET_GEN, y=so2_rate, color=factor(year)))+
+  ylim(0,30)+
+  ylab("SO2 Rate (lbs/MWh)")+
+  xlab("Annual Net Generation (MWh)")+
+  theme_bw()
+ggsave(filename="Gen_Plant_Emissions/Figures/So2Rate_AnnualGen_coal.jpg",
+       height=5,
+       width=8)
+
+ggplot(camd_eia_data_coal%>%filter(year>=2018))+
+  geom_point(aes(x=NET_GEN, y=pm25_rate, color=factor(year)))+
+  ylim(0,5)+
+  ylab("PM2.5 Rate (lbs/MWh)")+
+  xlab("Annual Net Generation (MWh)")+
+  theme_bw()
+ggsave(filename="Gen_Plant_Emissions/Figures/PM25_AnnualGen_coal.jpg",
+       height=5,
+       width=8)
+
+ggplot(camd_eia_data_coal)+
+  geom_point(aes(x=Capacity, y=NOX_RATE, color=factor(year)))+
   ylim(0,19)+
   ylab("NOx Rate (lbs/MWh)")+
   xlab("Capacity (MW)")+
@@ -148,12 +184,22 @@ ggsave(filename="Gen_Plant_Emissions/Figures/NoxRate_Capacity_coal.jpg",
        width=8)
 
 ggplot(camd_eia_data_coal)+
-  geom_point(aes(x=NET_GEN, y=so2_rate, color=factor(year)))+
+  geom_point(aes(x=Capacity, y=so2_rate, color=factor(year)))+
   ylim(0,30)+
   ylab("SO2 Rate (lbs/MWh)")+
   xlab("Capacity (MW)")+
   theme_bw()
 ggsave(filename="Gen_Plant_Emissions/Figures/So2Rate_Capacity_coal.jpg",
+       height=5,
+       width=8)
+
+ggplot(camd_eia_data_coal%>%filter(year>=2018))+
+  geom_point(aes(x=Capacity, y=pm25_rate, color=factor(year)))+
+  ylim(0,5)+
+  ylab("PM2.5 Rate (lbs/MWh)")+
+  xlab("Capacity (MW)")+
+  theme_bw()
+ggsave(filename="Gen_Plant_Emissions/Figures/PM25_Capacity_coal.jpg",
        height=5,
        width=8)
 
@@ -223,7 +269,17 @@ ggsave(filename="Gen_Plant_Emissions/Figures/So2Rate_AnnualGen_natgas.jpg",
        width=8)
 
 ggplot(camd_eia_data_natgas)+
-  geom_point(aes(x=NET_GEN, y=NOX_RATE, color=factor(year)))+
+  geom_point(aes(x=NET_GEN, y=pm25_rate, color=factor(year)))+
+  ylim(0,30)+
+  ylab("PM25 Rate (lbs/MWh)")+
+  xlab("Annual Net Generation (MWh)")+
+  theme_bw()
+ggsave(filename="Gen_Plant_Emissions/Figures/PM25_AnnualGen_natgas.jpg",
+       height=5,
+       width=8)
+
+ggplot(camd_eia_data_natgas)+
+  geom_point(aes(x=Capacity, y=NOX_RATE, color=factor(year)))+
   ylim(0,19)+
   ylab("NOx Rate (lbs/MWh)")+
   xlab("Capacity (MW)")+
@@ -233,7 +289,7 @@ ggsave(filename="Gen_Plant_Emissions/Figures/NoxRate_Capacity_natgas.jpg",
        width=8)
 
 ggplot(camd_eia_data_natgas)+
-  geom_point(aes(x=NET_GEN, y=so2_rate, color=factor(year)))+
+  geom_point(aes(x=Capacity, y=so2_rate, color=factor(year)))+
   ylim(0,30)+
   ylab("SO2 Rate (lbs/MWh)")+
   xlab("Capacity (MW)")+
@@ -272,3 +328,11 @@ ggplot(data=yearly_natgas_emissions)+
 ggsave(filename="Gen_Plant_Emissions/Figures/So2Rate_timeseries_natgas.jpg",
        height=5,
        width=8)
+
+
+######################
+## Notes for future Lauren
+### 
+#Powergenome clusters at the EIA Generator level
+#This means that some CAMD Units will be in two separate clusters (For example a nat gas plant with both CT and ST)
+#IDK what to do about this 
