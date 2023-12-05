@@ -246,7 +246,9 @@ camd_eia_data_natgas <- camd_eia_data_natgas %>%
   mutate(nox_lbs = noxMass*2000,
          NOX_RATE = nox_lbs/NET_GEN,
          so2_lbs = so2Mass*2000,
-         so2_rate = so2_lbs/NET_GEN)
+         so2_rate = so2_lbs/NET_GEN,
+         pm25_lbs = pm25*2000,
+         pm25_rate = pm25_lbs/NET_GEN)
 
 ggplot(camd_eia_data_natgas)+
   geom_point(aes(x=NET_GEN, y=NOX_RATE, color=factor(year)))+
@@ -268,9 +270,9 @@ ggsave(filename="Gen_Plant_Emissions/Figures/So2Rate_AnnualGen_natgas.jpg",
        height=5,
        width=8)
 
-ggplot(camd_eia_data_natgas)+
+ggplot(camd_eia_data_natgas%>%filter(year>=2018))+
   geom_point(aes(x=NET_GEN, y=pm25_rate, color=factor(year)))+
-  ylim(0,30)+
+  ylim(0,3)+
   ylab("PM25 Rate (lbs/MWh)")+
   xlab("Annual Net Generation (MWh)")+
   theme_bw()
@@ -297,6 +299,16 @@ ggplot(camd_eia_data_natgas)+
 ggsave(filename="Gen_Plant_Emissions/Figures/So2Rate_Capacity_natgas.jpg",
        height=5,
        width=8)
+
+ggplot(camd_eia_data_natgas%>%filter(year>=2018))+
+  geom_point(aes(x=Capacity, y=pm25_rate, color=factor(year)))+
+  ylab("PM25 Rate (lbs/MWh)")+
+  xlab("Capacity (MW)")+
+  theme_bw()
+ggsave(filename="Gen_Plant_Emissions/Figures/PM25_AnnualGen_natgas.jpg",
+       height=5,
+       width=8)
+
 
 #Make generation weighted emissions over time
 yearly_natgas_emissions = camd_eia_data_natgas%>%
@@ -336,3 +348,20 @@ ggsave(filename="Gen_Plant_Emissions/Figures/So2Rate_timeseries_natgas.jpg",
 #Powergenome clusters at the EIA Generator level
 #This means that some CAMD Units will be in two separate clusters (For example a nat gas plant with both CT and ST)
 #IDK what to do about this 
+
+
+
+##########
+## What about missings?
+##
+
+missing=camd_eia_data%>%filter(is.na(NET_GEN))
+missing=left_join(missing, crosswalk, by=c("facilityId"="CAMD_PLANT_ID", "unitId"="CAMD_UNIT_ID"))
+
+#missings are largely present in EIA-860 but not in 923
+#think they might just be shut down a lot?
+notmissing=camd_eia_data%>%filter(!is.na(NET_GEN))
+mean(notmissing$so2Mass,na.rm=T)
+mean(missing$so2Mass,na.rm=T)
+
+#couple missings are because of mismatches in unit eg plant 56609
