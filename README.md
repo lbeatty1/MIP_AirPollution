@@ -8,3 +8,6 @@ https://www.eia.gov/electricity/data/eia923/
 
 EPA Data comes from CAMD which is mostly accessed via API by the script Get_CAMD.py
 However, additional data on PM2.5 comes from https://www.epa.gov/egrid/egrid-related-materials
+
+EPA-EIA Power Sector Data Crosswalk (epa_eia_crosswalk.csv) can be downloaded at 
+https://www.epa.gov/power-sector/power-sector-data-crosswalk
