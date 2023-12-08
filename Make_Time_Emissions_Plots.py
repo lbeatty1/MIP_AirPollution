@@ -46,14 +46,12 @@ eia860.columns = ['EIA_PLANT_ID', 'EIA_GENERATOR_ID', 'Capacity', 'RetirementYea
 eia860['YEAR'] = eia860['YEAR'].astype('int')
 eia923['YEAR'] = eia923['YEAR'].astype('int')
 
-# Join CAMD with Crosswalk
+# Join EIA together
 eia_joined = pd.merge(eia923, eia860, on=['EIA_PLANT_ID', 'EIA_GENERATOR_ID', 'YEAR'], how='left')
-# Additional code may be needed to handle the join validation as in R
 
 # Merge crosswalk into eia
 crosswalk = crosswalk[['CAMD_PLANT_ID', 'CAMD_UNIT_ID', 'CAMD_GENERATOR_ID', 'EIA_PLANT_ID', 'EIA_GENERATOR_ID', 'EIA_UNIT_TYPE']]
 eia_joined = pd.merge(eia_joined, crosswalk, on=['EIA_PLANT_ID', 'EIA_GENERATOR_ID'], how='left')
-# Additional code may be needed to handle the join validation as in R
 
 eia_collapsed = eia_joined.groupby(['CAMD_PLANT_ID', 'CAMD_UNIT_ID', 'YEAR']).agg({'NET_GEN': 'sum', 'Capacity': 'sum'}).reset_index()
 
@@ -72,13 +70,8 @@ camd_eia_data['so2_rate'] = camd_eia_data['so2_lbs'] / camd_eia_data['NET_GEN']
 camd_eia_data['pm25_lbs'] = camd_eia_data['pm25'] * 2000
 camd_eia_data['pm25_rate'] = camd_eia_data['pm25_lbs'] / camd_eia_data['NET_GEN']
 
-#write to csv
-camd_eia_data.to_csv('Data/generator_emissions_rates.csv', index=False)
-
 # Examine Coal
 camd_eia_data_coal = camd_eia_data[camd_eia_data['primaryFuelInfo'].str.contains("Coal") & (camd_eia_data['facilityId'] < 880000)]
-
-import matplotlib.pyplot as plt
 
 # Plotting NOx Rate vs. Annual Net Generation for Coal
 plt.scatter(camd_eia_data_coal['NET_GEN'], camd_eia_data_coal['NOX_RATE'], c=camd_eia_data_coal['year'])

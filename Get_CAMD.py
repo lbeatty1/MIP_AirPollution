@@ -36,7 +36,7 @@ def fetch_data(endpoint, year):
 
 # Fetch facilities attributes data
 facilities_attributes_data = []
-for year in range(2015, 2021):
+for year in range(2015, 2022):
     endpoint = f"facilities-mgmt/facilities/attributes"
     facilities_attributes_data.extend(fetch_data(endpoint, year))
 
@@ -46,7 +46,7 @@ facilities_attributes_df.to_csv(data_directory+"CAMD/facilities_attributes.csv",
 
 # Fetch facilities emissions data
 facilities_emissions_data = []
-for year in range(2015, 2021):
+for year in range(2020, 2022):
     endpoint = f"emissions-mgmt/emissions/apportioned/annual"
     facilities_emissions_data.extend(fetch_data(endpoint, year))
 
