@@ -16,6 +16,6 @@ https://www.epa.gov/power-sector/power-sector-data-crosswalk
 
 Get_CAMD.py - pulls EPA data from their API, sends to data directory
 
-Calculate_Model_Emissions.py - Takes EIA, EPA data, calculates emissions from MIP models, outputs shapefiles to be processed by inmap
+Calculate_Model_Emissions.py - Takes EIA, EPA data, calculates emissions from MIP models, outputs shapefiles to be processed by inmap.  Also kicks out a csv of generator-level predicted emissions called predicted_emissions.csv
 
 run_airpollution.sh - runs all of the scripts in sequential order, including InMap.  It pulls InMap settings from InMap_config.toml
