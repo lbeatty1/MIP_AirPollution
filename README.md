@@ -11,3 +11,9 @@ However, additional data on PM2.5 comes from https://www.epa.gov/egrid/egrid-rel
 
 EPA-EIA Power Sector Data Crosswalk (epa_eia_crosswalk.csv) can be downloaded at 
 https://www.epa.gov/power-sector/power-sector-data-crosswalk
+
+## Repo
+
+Get_CAMD.py - pulls EPA data from their API, sends to data directory
+Calculate_Model_Emissions.ipynb - Takes EIA, EPA data, calculates emissions from MIP models, outputs shapefiles to be processed by inmap
+run_airpollution.sh - runs all of the scripts in sequential order, includeing InMap
