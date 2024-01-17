@@ -12,6 +12,10 @@ However, additional data on PM2.5 comes from https://www.epa.gov/egrid/egrid-rel
 EPA-EIA Power Sector Data Crosswalk (epa_eia_crosswalk.csv) can be downloaded at 
 https://www.epa.gov/power-sector/power-sector-data-crosswalk
 
+Other emissions data comes from 
+https://www.epa.gov/air-emissions-modeling/2020-emissions-modeling-platform
+which collects emissions data from NEI and links it to electricity generation ids in CAMD
+
 ## Repo
 
 Get_CAMD.py - pulls EPA data from their API, sends to data directory
