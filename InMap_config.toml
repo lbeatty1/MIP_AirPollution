@@ -31,12 +31,12 @@ HTTPAddress = ":8080"
 
 # OutputFile specifies the path to the desired output shapefile location. It can
 # include environment variables.
-OutputFile = "InMap/MIP_InMap_Output/${outputfile}.shp"
+OutputFile = "${outputloc}/${outputfile}.shp"
 
 # LogFile specifies the path to the desired logfile location. It can include
 # environment variables. If LogFile is left blank, the logfile will be saved in
 # the same location as the OutputFile.
-LogFile = "InMap/MIP_InMap_Output/${outputfile}.log"
+#LogFile = "InMap/MIP_InMap_Output/${outputfile}.log"
 
 # OutputVariables specifies which model variables should be included in the
 # output file. Each output variable is defined by the desired name and an
@@ -52,6 +52,20 @@ LogFile = "InMap/MIP_InMap_Output/${outputfile}.log"
 PrimPM25 = "PrimaryPM25"
 SOx = "SOx"
 NOx = "NOx"
+BaselineNOx = "BaselineNOxConcentration"
+BaselineSOx = "BaselineSOxConcentration"
+Asian = "Asian"
+Black = "Black"
+Latino = "Latino"
+Native = "Native"
+TotalPop = "TotalPop"
+WhiteNoLat = "WhiteNoLat"
+allcause = "allcause"
+asianmort = "asianmort"
+blackmort = "blackmort"
+latinomort = "latinomort"
+nativemort = "nativemort"
+whnolmort = "whnolmort"
 
 # VarGrid provides information for specifying the variable resolution grid.
 [VarGrid]
