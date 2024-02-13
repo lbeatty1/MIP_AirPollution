@@ -20,6 +20,8 @@ which collects emissions data from NEI and links it to electricity generation id
 
 Get_CAMD.py - pulls EPA data from their API, sends to data directory
 
-Calculate_Model_Emissions.py - Takes EIA, EPA data, calculates emissions from MIP models, outputs shapefiles to be processed by inmap.  Also kicks out a csv of generator-level predicted emissions called predicted_emissions.csv
+Calculate_Model_Emissions.ipynb - Takes EIA, EPA data, calculates emissions from MIP models, outputs shapefiles to be processed by inmap.  
+InMap_SR.ipynb - takes emissions output and uses source-receptor matrices to calculate exposures
+Plot_Output.ipynb - takes InMap Output (full inmap) and plots exposures and deaths.
 
 run_airpollution.sh - runs all of the scripts in sequential order, including InMap.  It pulls InMap settings from InMap_config.toml
