@@ -21,7 +21,7 @@ EmissionsShapefiles = [
 
 # EmissionUnits gives the units that the input emissions are in.
 # Acceptable values are 'tons/year' and 'kg/year'.
-EmissionUnits = "kg/year"
+EmissionUnits = "tons/year"
 
 # HTTPAddress is the address for hosting the HTML user interface.
 # If HTTPAddress is `:8080`, then the GUI

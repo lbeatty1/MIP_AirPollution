@@ -20,8 +20,8 @@ model='GenX'
 ## Read in all data
 emissions = pd.DataFrame()
 scenarios = ['26z-short-base-50', '26z-short-current-policies', '26z-short-base-200', '26z-short-no-ccs']
-scenarios=['26z-short-base-50', '26z-short-current-policies', '26z-short-base-200']
-years = ['2020', '2030']
+years = ['2020', '2030', '2040', '2050']
+
 for scenario in scenarios:
     print('reading: '+scenario)
     for year in years:
