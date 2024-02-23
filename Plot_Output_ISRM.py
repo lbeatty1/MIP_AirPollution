@@ -179,4 +179,5 @@ for year in years:
     plt.legend()
 
     plt.savefig('MIP_AirPollution/Figures/Output/ISRM_deathrate_by_scenario_'+year+'.jpg', format='jpg',dpi=300, bbox_inches='tight')
-
+    plt.savefig('MIP_results_comparison/AirPollution/ISRM_deathrate_by_scenario_'+year+'.jpg', format='jpg',
+                dpi=300, bbox_inches='tight')
