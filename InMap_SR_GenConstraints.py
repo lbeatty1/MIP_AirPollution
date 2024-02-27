@@ -51,7 +51,6 @@ p = poly(sr)
 
 #%%
 years = ['2030', '2040', '2050']
-cluster_exposure_coefs = pd.DataFrame()
 
 for year in years:
     emis = gpd.read_file('InMap/MIP_Emissions/marginal_emissions_'+year+'.shp')
@@ -124,6 +123,7 @@ for year in years:
     exposure_data_collapsed = exposure_data.groupby(['Race', 'Cluster','Pollutant']).agg({'Exposure':'sum'}).reset_index()
     exposure_data_collapsed['year']=year
 
-    cluster_exposure_coefs = pd.concat([cluster_exposure_coefs, exposure_data_collapsed])
+    exposure_data_collapsed.to_csv('MIP_AirPollution/marginal_gen_exposure_coefs_'+year+'.csv')
 
-cluster_exposure_coefs.to_csv('MIP_AirPollution/marginal_gen_exposure_coefs.csv')
+
+# %%
