@@ -16,6 +16,9 @@ Other emissions data comes from
 https://www.epa.gov/air-emissions-modeling/2020-emissions-modeling-platform
 which collects emissions data from NEI and links it to electricity generation ids in CAMD
 
+dpr-data.xlsx - comes from the 'report data' at https://www.eia.gov/petroleum/drilling/
+This gives me oil and gas production by basin.
+
 ## Repo
 
 Get_CAMD.py - pulls EPA data from their API, sends to data directory
