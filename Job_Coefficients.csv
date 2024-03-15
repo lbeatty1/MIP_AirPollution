@@ -7,7 +7,7 @@ Biomass,,123,jobs/GW capacity
 Biomass,,346,jobs/GW capacity additions
 Biomass,,1588,jobs/GW retired capacity
 Coal,underground mining production,0.151,jobs/thousand short tons
-Coal,surface mining production  ,0.0191,jobs/thousand short tons
+Coal,surface mining production,0.0191,jobs/thousand short tons
 Coal,mining,87.6,jobs/GW capacity
 Coal,,266,jobs/GW capacity
 Coal,,690,jobs/GW retired capacity
@@ -17,15 +17,15 @@ CO2,injection,5.7,jobs/million $ CO2 operating cost
 CO2,injection,2.42,jobs/million $ CO2 capital cost
 CO2,,4.8,jobs/million $ transmission operating cost
 CO2,,10.8,jobs/million $ transmission capital cost
-Electricity transmission,grid,444,jobs/GW transmission capacity 
+Electricity transmission,grid,444,jobs/GW transmission capacity
 Electricity transmission,transmission grid,4.99,jobs/million $ capital cost
 Electricity transmission,grid distribution,4.45,jobs/million $ capital cost
 Natural gas,natural gas production in Niobrara basin,0.00501,jobs/mmcf 
 Natural gas,natural gas production in Appalachian basin,0.00183,jobs/mmcf
-Natural gas, natural gas production in Bakken basin,0.00916,jobs/mmcf 
+Natural gas, natural gas production in Bakken basin,0.00916,jobs/mmcf
 Natural gas, natural gas production in New Mexico,0.00535,jobs/mmcf
 Natural gas, natural gas production in Texas,0.018467,jobs/mmcf
-Natural gas, natural gas production Other ,0.00947,jobs/mmcf
+Natural gas, natural gas production Other,0.00947,jobs/mmcf
 Natural gas, natural gas consumption upstream,0.00268,jobs/mmcf
 Natural gas,,123,jobs/GW capacity
 Natural gas,,346,jobs/GW capacity additions
@@ -33,7 +33,7 @@ Natural gas,,1588,jobs/GW retired capacity
 Natural gas,tds,0.00191,jobs/mmcf natural gas production
 Natural gas,natural gas consumption tds,0.00661,jobs/mmcf
 Nuclear,,513,jobs/GW capacity
-Nuclear,,"9,930",jobs/GW capacity additions
+Nuclear,,9930,jobs/GW capacity additions
 Nuclear,,1510,jobs/GW retired capacity
 Oil,production in Appalachian basin,0.392,jobs/thousand bbls
 Oil,production in Andarko basin,0.185,jobs/thousand bbls
@@ -49,9 +49,9 @@ Oil,trans,0.0184,jobs/thousand bbls of consumption
 Oil,trans construction,0.0153,jobs/thousand bbls of production
 Solar,distributed solar,541,jobs/GW capacity
 Solar, utility-scale solar,448,jobs/GW capacity
-Solar,distributed solar ,"35,337",jobs/GW capacity additions
+Solar,distributed solar ,35337,jobs/GW capacity additions
 Solar,utility-scale solar ,6468,jobs/GW capacity additions
-Solar,solar manufacturing capacity  ,"21,370",jobs/GW
+Solar,solar manufacturing capacity,21370,jobs/GW
 Wind,,894,jobs/GW capacity
 Wind,,263,jobs/GW apacity additions
-Wind,,194,jobs/wind manufacturing facility 
+Wind,,194,jobs/wind manufacturing facilityï¿½
