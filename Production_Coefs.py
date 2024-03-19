@@ -16,29 +16,10 @@ scenario = '26z-short-base-50'
 
 job_coefs = pd.read_csv('MIP_AirPollution/Job_Coefficients.csv')
 
+#################################################
+### Get coal/oil/ng production by state #########
+#################################################
 
-#################
-## Read and format mip outputs
-generation = pd.read_csv("MIP_results_comparison/"+scenario+"/"+model+"_results_summary/generation.csv")
-
-capacity = pd.read_csv("MIP_results_comparison/"+scenario+"/"+model+"_results_summary/resource_capacity.csv")
-capacity.columns = capacity.columns.map(lambda x: x.lower())
-capacity = capacity[capacity['unit']=='MW']
-
-capacity = capacity.groupby(['zone', 'resource_name', 'tech_type', 'planning_year']).agg({'start_value': 'sum', 'end_value': 'sum'}).reset_index()
-
-##############
-## Read in oil and gas production by basin
-
-oil_gas_prod = pd.DataFrame()
-excel_file = pd.ExcelFile('Data/Jobs_Data/dpr-data.xlsx')
-for i in range(0,6):
-    basinname = excel_file.sheet_names[i]
-    tempdat = pd.read_excel(excel_file, sheet_name=basinname, skiprows=1)
-    tempdat.columns = ['Month', 'Rigcount', 'ProductionPerRig_bbld', 'ProductionChange_bbld', 'TotalProduction_bbld', 'ProductionPerRig_mcfd', 'ProductionChange_mcfd', 'TotalProduction_mcfd']
-    tempdat['Basin'] = basinname
-    oil_gas_prod = pd.concat([oil_gas_prod, tempdat])
-oil_gas_prod['Year'] = oil_gas_prod['Month'].apply(lambda x: pd.to_datetime(x).year)
 
 #Read in oil and gas production by state    
 #gas prod in million cubic feet per year
@@ -57,54 +38,25 @@ oilprod_state = pd.read_excel(excel_file, sheet_name=1, skiprows=2)
 oilprod_state = pd.melt(oilprod_state, id_vars=['Date'], var_name='Variable', value_name='Value')
 oilprod_state['Year'] = oilprod_state['Date'].apply(lambda x: pd.to_datetime(x).year)
 
-#construct NatGas as Niobrar, Appalachian, Bakken, New Mexico, Texas, Other
 gasprod_state = gasprod_state[~gasprod_state['Variable'].str.contains('Offshore|Onshore|U.S.')]
-#convert to mcf
 gasprod_state['mcf_annual']=gasprod_state['Value']*1000
 
-gas_prod_basins = oil_gas_prod
-gas_prod_basins['mcf_annual']=gas_prod_basins['TotalProduction_mcfd']*30.4
-gas_prod_basins = gas_prod_basins.groupby(['Year', 'Basin']).agg({'mcf_annual':'sum'}).reset_index()
-
-#keep basis in Mayfield
-gas_prod_basins = gas_prod_basins[gas_prod_basins['Basin'].isin(['Niobrara Region', 'Appalachia Region', 'Bakken Region'])]
-#drop states that contain comprise Niobrara Appalachia and Bakken
-gasprod_state = gasprod_state[~gasprod_state['Variable'].str.contains('Nebraska|Colorado|Kansas|Wyoming|New York|Ohio|Maryland|Pennsylvania|West Virginia|North Dakota|Montana')]
-gasprod_state['Variable'] = gasprod_state['Variable'].apply(lambda x: 'Other' if 'Texas' not in x and 'New Mexico' not in x else x)
-gasprod_state['Basin']=gasprod_state['Variable']
-gasprod_state = gasprod_state.groupby(['Basin', 'Year']).agg({'mcf_annual':'sum'}).reset_index()
-gasprod = pd.concat([gas_prod_basins, gasprod_state])
-
 #don't have 2023 onwards yet so lets take average from 18-22?  Why not?
-gasprod = gasprod[(gasprod['Year']<2023) & (gasprod['Year']>2017) & gasprod['Year'].notnull()]
-gasprod = gasprod.groupby(['Basin']).agg({'mcf_annual':'sum'}).reset_index()
+gasprod_state = gasprod_state[(gasprod_state['Year']<2023) & (gasprod_state['Year']>2017) & gasprod_state['Year'].notnull()]
+gasprod_state = gasprod_state.groupby(['Variable']).agg({'mcf_annual':'sum'}).reset_index()
+gasprod_state['State']= gasprod_state['Variable'].str.replace(' Dry Natural Gas Production \(Million Cubic Feet\)', '')
 
-
-#god these mayfield paper is so shoddy
-#Andarko basin is in fucking texas what the hell
+gasprod_state['Pct_total'] = gasprod_state['mcf_annual']/sum(gasprod_state['mcf_annual'])
 
 oilprod_state = oilprod_state[~oilprod_state['Variable'].str.contains('Alaska South|Alaska North|U.S.|PADD')]
 #convert to bbl
 oilprod_state['bbl_annual']=oilprod_state['Value']*1000
 
-oil_prod_basins = oil_gas_prod
-oil_prod_basins['bbl_annual']=oil_prod_basins['TotalProduction_bbld']*30.4
-oil_prod_basins = oil_prod_basins.groupby(['Year', 'Basin']).agg({'bbl_annual':'sum'}).reset_index()
-
-#keep basins in analysis
-oil_prod_basins = oil_prod_basins[oil_prod_basins['Basin'].isin(['Niobrara Region', 'Appalachia Region', 'Bakken Region', 'Andarko Region'])]
-#drop states that contain comprise Niobrara Appalachia and Bakken and Andarko
-oilprod_state = oilprod_state[~oilprod_state['Variable'].str.contains('Nebraska|Colorado|Kansas|Wyoming|New York|Ohio|Maryland|Pennsylvania|West Virginia|North Dakota|Montana|Oklahoma')]
-oilprod_state['Variable'] = oilprod_state['Variable'].apply(lambda x: 'Other' if 'Texas' not in x and 'New Mexico' not in x else x)
-oilprod_state['Basin']=oilprod_state['Variable']
-oilprod_state = oilprod_state.groupby(['Basin', 'Year']).agg({'bbl_annual':'sum'}).reset_index()
-oilprod = pd.concat([oil_prod_basins, oilprod_state])
-
 #don't have 2023 onwards yet so lets take average from 18-22?  Why not?
-oilprod = oilprod[(oilprod['Year']<2023) & (oilprod['Year']>2017) & oilprod['Year'].notnull()]
-oilprod = oilprod.groupby(['Basin']).agg({'bbl_annual':'sum'}).reset_index()
-
-
+oilprod_state = oilprod_state[(oilprod_state['Year']<2023) & (oilprod_state['Year']>2017) & oilprod_state['Year'].notnull()]
+oilprod_state = oilprod_state.groupby(['Variable']).agg({'bbl_annual':'sum'}).reset_index()
+oilprod_state['State'] = oilprod_state['Variable'].str.replace(' Field Production of Crude Oil \(Thousand Barrels\)', '')
+oilprod_state['Pct_total'] = oilprod_state['bbl_annual']/sum(oilprod_state['bbl_annual'])
 ########################
 ## Ok now do Coal ######
 ########################
@@ -120,7 +72,8 @@ coal = coal[['Coal-Producing State and Region1', 'Total_x', 'Total_y']]
 coal.columns = ['State', 'Surface_thousandtons', 'Underground_thousandtons']
 
 coal = coal.dropna(subset=['State'])
-coal = coal[~coal['State'].str.contains('\(Anthracite\)|\(East\)|\(West\)|\(Bituminous\)|\(Northern\)|\(Southern\)|River|Basin')]
+coal = coal[~coal['State'].str.contains('\(Anthracite\)|\(East\)|\(West\)|\(Bituminous\)|\(Northern\)|\(Southern\)|River|Basin|Region Total|U.S.|Other|Appalachia')]
+coal['State'] = coal['State'].str.replace('Total', '')
 
 #thankyou chatgpt
 states = [
@@ -142,3 +95,58 @@ coal.fillna(0, inplace=True)
 coal['Underground_pct']=coal['Underground_thousandtons']/sum(coal['Underground_thousandtons'])
 coal['Surface_pct'] = coal['Surface_thousandtons']/sum(coal['Surface_thousandtons'])
 
+pct_surface = sum(coal['Surface_thousandtons'])/(sum(coal['Surface_thousandtons'])+sum(coal['Underground_thousandtons']))
+
+##############################
+## divy up population by 26z region
+##############################
+
+counties = pd.read_excel('Data/Jobs_Data/co-est2022-pop.xlsx', skiprows=3)
+counties.columns = ['Location', '2020Base','2020', '2021', 'Pop']
+counties = counties[counties['Location'].str.startswith('.')]
+counties[['NAMELSAD', 'State']] = counties['Location'].str.split(', ', expand=True)
+counties['NAMELSAD'] = counties['NAMELSAD'].str[1:]
+counties = counties[['NAMELSAD', 'State', 'Pop']]
+
+statepop = counties.groupby('State').agg({'Pop':'sum'}).rename(columns={'Pop':'StatePop'})
+counties = pd.merge(counties, statepop, on='State', how='left')
+counties['pct_statepop'] = counties['Pop']/counties['StatePop']
+
+ipm_regions = gpd.read_file('Data/IPM_Regions/national_emm_boundaries.shp')
+counties_shape = gpd.read_file('Data/Jobs_Data/tl_2022_us_county.shp')
+
+ipm_regions = ipm_regions.to_crs(counties_shape.crs)
+
+intersection = gpd.overlay(ipm_regions, counties_shape, how='intersection')
+
+# Calculate the area of overlap for each intersecting polygon
+intersection['overlap_area'] = intersection.geometry.area
+#looks to me like ipm regions are supposed to be counties and slightly different resolutions causes more intersections than there should be
+intersection = intersection[intersection['overlap_area'] == intersection.groupby(['STATEFP', 'NAME'])['overlap_area'].transform('max')]
+
+state_fips_to_name = {
+    1: 'Alabama', 2: 'Alaska', 4: 'Arizona', 5: 'Arkansas', 6: 'California',
+    8: 'Colorado', 9: 'Connecticut', 10: 'Delaware', 11: 'District of Columbia',
+    12: 'Florida', 13: 'Georgia', 15: 'Hawaii', 16: 'Idaho', 17: 'Illinois',
+    18: 'Indiana', 19: 'Iowa', 20: 'Kansas', 21: 'Kentucky', 22: 'Louisiana',
+    23: 'Maine', 24: 'Maryland', 25: 'Massachusetts', 26: 'Michigan',
+    27: 'Minnesota', 28: 'Mississippi', 29: 'Missouri', 30: 'Montana',
+    31: 'Nebraska', 32: 'Nevada', 33: 'New Hampshire', 34: 'New Jersey',
+    35: 'New Mexico', 36: 'New York', 37: 'North Carolina', 38: 'North Dakota',
+    39: 'Ohio', 40: 'Oklahoma', 41: 'Oregon', 42: 'Pennsylvania',
+    44: 'Rhode Island', 45: 'South Carolina', 46: 'South Dakota',
+    47: 'Tennessee', 48: 'Texas', 49: 'Utah', 50: 'Vermont', 51: 'Virginia',
+    53: 'Washington', 54: 'West Virginia', 55: 'Wisconsin', 56: 'Wyoming'
+}
+
+# Map state FIPS codes to state names and create a new column
+intersection['STATEFP']=intersection['STATEFP'].astype(int)
+intersection['State'] = intersection['STATEFP'].map(state_fips_to_name)
+
+intersection = pd.merge(intersection, counties, how='left', on=['NAMELSAD', 'State'])
+
+pop_ipm = intersection.drop(columns='geometry').groupby('model_regi').agg({'Pop':'sum'}).reset_index().rename(columns={'Pop':'model_regi_pop'})
+intersection = pd.merge(intersection, pop_ipm, how='left', on='model_regi')
+intersection['pct_model_regi_pop'] = intersection['Pop']/intersection['model_regi_pop']
+
+county_modelregi = intersection[['model_regi', 'NAME', 'State', 'Pop', 'StatePop', 'model_regi_pop', 'pct_statepop', 'pct_model_regi_pop']]
