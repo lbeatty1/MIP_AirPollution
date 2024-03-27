@@ -15,7 +15,8 @@ model = 'GenX'
 scenario = '26z-short-base-50'
 
 job_coefs = pd.read_csv('MIP_AirPollution/Job_Coefficients.csv')
-
+generation = pd.read_csv("MIP_results_comparison/"+scenario+"/"+model+"_results_summary/generation.csv")
+generator_inputs = pd.read_csv("MIP_results_comparison/"+scenario+'/'+model+'_op_inputs/Inputs/Inputs_p1/Generators_data.csv')
 #################################################
 ### Get coal/oil/ng production by state #########
 #################################################
@@ -97,56 +98,73 @@ coal['Surface_pct'] = coal['Surface_thousandtons']/sum(coal['Surface_thousandton
 
 pct_surface = sum(coal['Surface_thousandtons'])/(sum(coal['Surface_thousandtons'])+sum(coal['Underground_thousandtons']))
 
-##############################
-## divy up population by 26z region
-##############################
 
-counties = pd.read_excel('Data/Jobs_Data/co-est2022-pop.xlsx', skiprows=3)
-counties.columns = ['Location', '2020Base','2020', '2021', 'Pop']
-counties = counties[counties['Location'].str.startswith('.')]
-counties[['NAMELSAD', 'State']] = counties['Location'].str.split(', ', expand=True)
-counties['NAMELSAD'] = counties['NAMELSAD'].str[1:]
-counties = counties[['NAMELSAD', 'State', 'Pop']]
+###################################################
+## Get Coal/NG consumption from model outputs #####
+##################################################
+generation = generation.rename(columns={'resource_name':'Resource'})
+generation = pd.merge(generation, generator_inputs, how='left', on='Resource').reset_index()
 
-statepop = counties.groupby('State').agg({'Pop':'sum'}).rename(columns={'Pop':'StatePop'})
-counties = pd.merge(counties, statepop, on='State', how='left')
-counties['pct_statepop'] = counties['Pop']/counties['StatePop']
+generation['fuel_consumption_mmbtu'] = generation['value']*generation['Heat_Rate_MMBTU_per_MWh']
+generation = generation.groupby(['planning_year', 'tech_type']).agg({'fuel_consumption_mmbtu':'sum'}).reset_index()
+generation['fuel_consumption_mcf'] = generation['fuel_consumption_mmbtu']/1.038
+generation['fuel_consumption_mmcf'] = generation['fuel_consumption_mcf']/1000
+######################################################
+## Distribute consumption to extraction from states ##
+######################################################
 
-ipm_regions = gpd.read_file('Data/IPM_Regions/national_emm_boundaries.shp')
-counties_shape = gpd.read_file('Data/Jobs_Data/tl_2022_us_county.shp')
+#natgas
+natgas_consumption = generation[(generation['tech_type']=='Natural Gas')|(generation['tech_type']=="CCS")]
+natgas_consumption = natgas_consumption.groupby('planning_year').agg({'fuel_consumption_mmcf':'sum'}).reset_index()
 
-ipm_regions = ipm_regions.to_crs(counties_shape.crs)
+prod = pd.merge(natgas_consumption.assign(key=1), gasprod_state.assign(key=1), on='key').drop('key', axis=1).reset_index()
+prod['State_level_production_mmcf'] = prod['fuel_consumption_mmcf']*prod['Pct_total']
 
-intersection = gpd.overlay(ipm_regions, counties_shape, how='intersection')
+######################################################
+## Predict jobs from state-level production
+#####################################################
+def map_state_to_region(state):
+    appalachian_states = ['Ohio', 'New York', 'Maryland', 'Pennsylvania', 'West Virginia']
+    bakken_states = ['Montana', 'North Dakota']
+    niobrara_states = ['Colorado', 'Kansas', 'Nebraska', 'Wyoming']
+    
+    if state in appalachian_states:
+        return 'Appalachian'
+    elif state in bakken_states:
+        return 'Bakken'
+    elif state in niobrara_states:
+        return 'Niobrara'
+    elif state=='Texas':
+        return 'Texas'
+    elif state=='New Mexico':
+        return 'New Mexico'
+    else:
+        return 'Other'
 
-# Calculate the area of overlap for each intersecting polygon
-intersection['overlap_area'] = intersection.geometry.area
-#looks to me like ipm regions are supposed to be counties and slightly different resolutions causes more intersections than there should be
-intersection = intersection[intersection['overlap_area'] == intersection.groupby(['STATEFP', 'NAME'])['overlap_area'].transform('max')]
+# Apply the function to create the 'region' column
+prod['region'] = prod['State'].apply(map_state_to_region)
+prod = pd.merge(prod, job_coefs[job_coefs['Resource']=='Natural gas'].rename(columns={'Subresource':'region'}), how='left', on='region')
 
-state_fips_to_name = {
-    1: 'Alabama', 2: 'Alaska', 4: 'Arizona', 5: 'Arkansas', 6: 'California',
-    8: 'Colorado', 9: 'Connecticut', 10: 'Delaware', 11: 'District of Columbia',
-    12: 'Florida', 13: 'Georgia', 15: 'Hawaii', 16: 'Idaho', 17: 'Illinois',
-    18: 'Indiana', 19: 'Iowa', 20: 'Kansas', 21: 'Kentucky', 22: 'Louisiana',
-    23: 'Maine', 24: 'Maryland', 25: 'Massachusetts', 26: 'Michigan',
-    27: 'Minnesota', 28: 'Mississippi', 29: 'Missouri', 30: 'Montana',
-    31: 'Nebraska', 32: 'Nevada', 33: 'New Hampshire', 34: 'New Jersey',
-    35: 'New Mexico', 36: 'New York', 37: 'North Carolina', 38: 'North Dakota',
-    39: 'Ohio', 40: 'Oklahoma', 41: 'Oregon', 42: 'Pennsylvania',
-    44: 'Rhode Island', 45: 'South Carolina', 46: 'South Dakota',
-    47: 'Tennessee', 48: 'Texas', 49: 'Utah', 50: 'Vermont', 51: 'Virginia',
-    53: 'Washington', 54: 'West Virginia', 55: 'Wisconsin', 56: 'Wyoming'
-}
+prod['jobs'] = prod['State_level_production_mmcf']*prod['Parameter Value']
+prod['employment'] = 'Natural Gas Production'
+employment = prod[['planning_year', 'State', 'jobs', 'employment']]
 
-# Map state FIPS codes to state names and create a new column
-intersection['STATEFP']=intersection['STATEFP'].astype(int)
-intersection['State'] = intersection['STATEFP'].map(state_fips_to_name)
+#################################################
+### COAL ########################################
+#################################################
+#ignores imports -- probably ok
+#20.1mmBTu per short ton
 
-intersection = pd.merge(intersection, counties, how='left', on=['NAMELSAD', 'State'])
+coal_consumption = generation[(generation['tech_type']=='Coal')]
+coal_consumption = coal_consumption.groupby('planning_year').agg({'fuel_consumption_mmbtu':'sum'}).reset_index()
 
-pop_ipm = intersection.drop(columns='geometry').groupby('model_regi').agg({'Pop':'sum'}).reset_index().rename(columns={'Pop':'model_regi_pop'})
-intersection = pd.merge(intersection, pop_ipm, how='left', on='model_regi')
-intersection['pct_model_regi_pop'] = intersection['Pop']/intersection['model_regi_pop']
+prod = pd.merge(coal_consumption.assign(key=1), coal.assign(key=1), on='key').drop('key', axis=1).reset_index()
+prod['fuel_consumption_thousandtons'] = prod['fuel_consumption_mmbtu']/(20.1*1000)
+prod['State_level_surface_production_thousandtons'] = prod['fuel_consumption_thousandtons']*prod['Surface_pct']*pct_surface
+prod['State_level_underground_production_thousandtons'] = prod['fuel_consumption_thousandtons']*prod['Underground_pct']*pct_surface
 
-county_modelregi = intersection[['model_regi', 'NAME', 'State', 'Pop', 'StatePop', 'model_regi_pop', 'pct_statepop', 'pct_model_regi_pop']]
+#coefs are 0.15/thousand short tons underground and 0.0191/thousand short tons surface
+prod['jobs'] = prod['State_level_surface_production_thousandtons']*0.0191+prod['State_level_underground_production_thousandtons']*0.151
+prod['employment'] = 'Coal Production'
+employment = pd.concat([employment, prod[['planning_year', 'State', 'jobs', 'employment']]])
+

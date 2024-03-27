@@ -20,12 +20,12 @@ CO2,,10.8,jobs/million $ transmission capital cost
 Electricity transmission,grid,444,jobs/GW transmission capacity
 Electricity transmission,transmission grid,4.99,jobs/million $ capital cost
 Electricity transmission,grid distribution,4.45,jobs/million $ capital cost
-Natural gas,natural gas production in Niobrara basin,0.00501,jobs/mmcf 
-Natural gas,natural gas production in Appalachian basin,0.00183,jobs/mmcf
-Natural gas, natural gas production in Bakken basin,0.00916,jobs/mmcf
-Natural gas, natural gas production in New Mexico,0.00535,jobs/mmcf
-Natural gas, natural gas production in Texas,0.018467,jobs/mmcf
-Natural gas, natural gas production Other,0.00947,jobs/mmcf
+Natural gas,Niobrara,0.00501,jobs/mmcf 
+Natural gas,Appalachian,0.00183,jobs/mmcf
+Natural gas,Bakken,0.00916,jobs/mmcf
+Natural gas,New Mexico,0.00535,jobs/mmcf
+Natural gas,Texas,0.018467,jobs/mmcf
+Natural gas,Other,0.00947,jobs/mmcf
 Natural gas, natural gas consumption upstream,0.00268,jobs/mmcf
 Natural gas,,123,jobs/GW capacity
 Natural gas,,346,jobs/GW capacity additions
