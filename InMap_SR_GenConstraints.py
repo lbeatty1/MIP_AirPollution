@@ -49,7 +49,6 @@ p = poly(sr)
 
 #%%
 years = ['2030', '2040', '2050']
-years = ['2040', '2050']
 for year in years:
     emis = gpd.read_file('InMap/MIP_Emissions/marginal_emissions_'+year+'.shp')
     fact = 28766.639
@@ -122,4 +121,5 @@ for year in years:
     exposure_data_collapsed['year']=year
 
     exposure_data_collapsed.to_csv('MIP_AirPollution/marginal_gen_exposure_coefs_'+year+'.csv')
+
 
