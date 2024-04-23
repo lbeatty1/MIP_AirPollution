@@ -111,3 +111,8 @@ employment = pd.merge(transmission, model_region_pop, how='left', on='Region')
 employment['employment'] = 'transmission capacity'
 employment['jobs'] = employment['Jobs']*employment['pct_model_regi_pop']
 employment = employment[['Year', 'State', 'jobs', 'employment']]
+employment = employment.groupby(['State', 'Year', 'employment']).agg({'jobs':'sum'}).reset_index()
+
+#########################################
+## Now do investment in new capacity
+costs = pd.read_csv('MIP_results_comparison/case_settings/26-zone/CONUS_extra_inputs/network_costs_national_emm_split_ercot.csv')

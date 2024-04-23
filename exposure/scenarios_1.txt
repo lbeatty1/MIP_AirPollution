@@ -1,0 +1,2 @@
+--scenario-name base --inputs-dir in/foresight/base --outputs-dir out/base --include-module mip_modules.cap_pollution_exposure --save-expression GroupExposure --no-minimize-pollution-exposure
+--scenario-name current_policies --inputs-dir in/foresight/current_policies --outputs-dir out/current_policies --include-module mip_modules.cap_pollution_exposure --save-expression GroupExposure --no-minimize-pollution-exposure

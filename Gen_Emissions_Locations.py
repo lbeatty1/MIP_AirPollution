@@ -361,9 +361,7 @@ appendrows[ratecolumns]=appendrows[ratecolumns].apply(lambda x: x * ccspenalty)
 technology_rates_newsources = pd.concat([technology_rates_newsources, appendrows])
 
 
-# %%
 ### Now deal with new generation
-#Isolate retired sites -- dates and 
 new_sites = eia860.dropna(subset=["Technology"])
 new_sites = new_sites[new_sites['Technology'].str.contains('Natural Gas')]
 new_sites = pd.merge(new_sites, plants, how='left', on='EIA_PLANT_ID')
@@ -397,7 +395,9 @@ new_sites_total.columns = ['model_regi', 'Tot_Capacity']
 new_sites_df = pd.merge(new_sites_df, new_sites_total, how='left', on=['model_regi'])
 new_sites_df['pct_total']=new_sites_df['Capacity']/new_sites_df['Tot_Capacity']
 
-new_sites_df = new_sites_df[['pct_total', 'Longitude', 'Latitude']]
+new_sites_df = new_sites_df[['pct_total', 'Longitude', 'Latitude', 'model_regi']]
+new_sites_df = new_sites_df.rename(columns={'model_regi':'region'})
+
 newgenerators = generators_data[generators_data['Resource'].str.contains('naturalgas_')]
 newgenerators.loc[newgenerators['Resource'].str.contains('_ccavg'), 'technology']= 'Natural Gas Fired Combined Cycle'
 newgenerators.loc[newgenerators['Resource'].str.contains('_ctavg'), 'technology']= 'Natural Gas Fired Combustion Turbine'
@@ -405,6 +405,7 @@ newgenerators.loc[newgenerators['Resource'].str.contains('_ccccsavg'), 'technolo
 
 newgenerators = pd.merge(newgenerators, technology_rates_newsources, how='left', on=['technology', 'planning_year'])
 newgenerators = newgenerators.merge(new_sites_df, how="cross")
+newgenerators = newgenerators[newgenerators['region_x']==newgenerators['region_y']]
 
 newgenerators['nox_predicted']=newgenerators['pct_total']*newgenerators['nox_rate']
 newgenerators['so2_predicted']=newgenerators['pct_total']*newgenerators['so2_rate']
@@ -476,6 +477,7 @@ emissions_2050 = emissions_2050.dropna().reset_index(drop=True)
 
 
 emissions_2050.to_file(filename='InMap/MIP_Emissions/marginal_emissions_2050.shp')
+
 
 
 
