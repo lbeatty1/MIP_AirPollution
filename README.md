@@ -19,6 +19,7 @@ which collects emissions data from NEI and links it to electricity generation id
 dpr-data.xlsx - comes from the 'report data' at https://www.eia.gov/petroleum/drilling/
 This gives me oil and gas production by basin.
 
+co-est2022-pop.xlsx - gives county-level population data from the census https://www.census.gov/data/tables/time-series/demo/popest/2020s-counties-total.html#v2022
 ## Repo
 
 Get_CAMD.py - pulls EPA data from their API, sends to data directory
