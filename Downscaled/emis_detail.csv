@@ -724,3 +724,122 @@ planning_year, technology, nox_tons,so2_tons,pm25_tons,voc_tons,nh3_tons,model,s
 2050,Petroleum Liquids,3.4894191338729867,0.27197357389114296,4.447276227210443,0.5929374561657906,1.3490381447995783,GenX,26z-short-no-ccs,2024-02-20
 2050,Small Hydroelectric,0.0,0.0,0.0,0.0,0.0,GenX,26z-short-no-ccs,2024-02-20
 2050,Solar Photovoltaic,0.0,0.0,0.0,0.0,0.0,GenX,26z-short-no-ccs,2024-02-20
+2020,All Other,0.0,0.0,0.0,0.0,0.0,GenX,current_policies_short,2024-06-20
+2020,Batteries,0.0,0.0,0.0,0.0,0.0,GenX,current_policies_short,2024-06-20
+2020,Coal Integrated Gasification Combined Cycle,0.0,0.0,0.0,0.0,0.0,GenX,current_policies_short,2024-06-20
+2020,Conventional Hydroelectric,0.0,0.0,0.0,0.0,0.0,GenX,current_policies_short,2024-06-20
+2020,Conventional Steam Coal,527332.1083049721,732749.9004737635,47873.00771040177,9929.658533683523,3581.632821832605,GenX,current_policies_short,2024-06-20
+2020,Geothermal,0.0,0.0,0.0,0.0,0.0,GenX,current_policies_short,2024-06-20
+2020,Hydroelectric Pumped Storage,0.0,0.0,0.0,0.0,0.0,GenX,current_policies_short,2024-06-20
+2020,Landfill Gas,0.0,0.0,0.0,0.0,0.0,GenX,current_policies_short,2024-06-20
+2020,Municipal Solid Waste,0.0,0.0,0.0,0.0,0.0,GenX,current_policies_short,2024-06-20
+2020,Natural Gas Fired Combined Cycle,107656.35761282372,4215.548633073957,38229.21463385999,8379.688407286994,23865.653699373113,GenX,current_policies_short,2024-06-20
+2020,Natural Gas Fired Combustion Turbine,0.0,0.0,0.0,0.0,0.0,GenX,current_policies_short,2024-06-20
+2020,Natural Gas Internal Combustion Engine,0.0,0.0,0.0,0.0,0.0,GenX,current_policies_short,2024-06-20
+2020,Natural Gas Steam Turbine,104647.68570469547,15408.1555892046,5728.573755879289,2921.757109730323,1678.6499246095943,GenX,current_policies_short,2024-06-20
+2020,Natural Gas with Compressed Air Storage,0.0,0.0,0.0,0.0,0.0,GenX,current_policies_short,2024-06-20
+2020,Nuclear,0.0,0.0,0.0,0.0,0.0,GenX,current_policies_short,2024-06-20
+2020,Offshore Wind Turbine,0.0,0.0,0.0,0.0,0.0,GenX,current_policies_short,2024-06-20
+2020,Onshore Wind Turbine,0.0,0.0,0.0,0.0,0.0,GenX,current_policies_short,2024-06-20
+2020,Other Gases,0.0,0.0,0.0,0.0,0.0,GenX,current_policies_short,2024-06-20
+2020,Other Natural Gas,0.0,0.0,0.0,0.0,0.0,GenX,current_policies_short,2024-06-20
+2020,Other Waste Biomass,0.0,0.0,0.0,0.0,0.0,GenX,current_policies_short,2024-06-20
+2020,Petroleum Coke,0.0,0.0,0.0,0.0,0.0,GenX,current_policies_short,2024-06-20
+2020,Petroleum Liquids,4755.063268708657,3946.6358843976104,233.200207012802,43.41965759143124,135.70031093792576,GenX,current_policies_short,2024-06-20
+2020,Solar Photovoltaic,0.0,0.0,0.0,0.0,0.0,GenX,current_policies_short,2024-06-20
+2020,Solar Thermal with Energy Storage,0.0,0.0,0.0,0.0,0.0,GenX,current_policies_short,2024-06-20
+2020,Solar Thermal without Energy Storage,0.0,0.0,0.0,0.0,0.0,GenX,current_policies_short,2024-06-20
+2020,Wood/Wood Waste Biomass,0.0,0.0,0.0,0.0,0.0,GenX,current_policies_short,2024-06-20
+2027,Batteries,0.0,0.0,0.0,0.0,0.0,GenX,current_policies_short,2024-06-20
+2027,Biomass,12704.729627769173,8614.131382397149,1686.269273166038,683.9425432084472,1148.194472123577,GenX,current_policies_short,2024-06-20
+2027,Conventional Hydroelectric,0.0,0.0,0.0,0.0,0.0,GenX,current_policies_short,2024-06-20
+2027,Conventional Steam Coal,,,,,,GenX,current_policies_short,2024-06-20
+2027,Geothermal,0.0,0.0,0.0,0.0,0.0,GenX,current_policies_short,2024-06-20
+2027,Hydroelectric Pumped Storage,0.0,0.0,0.0,0.0,0.0,GenX,current_policies_short,2024-06-20
+2027,Natural Gas Fired Combined Cycle,,,,,,GenX,current_policies_short,2024-06-20
+2027,Natural Gas Fired Combustion Turbine,0.0,0.0,0.0,0.0,0.0,GenX,current_policies_short,2024-06-20
+2027,Natural Gas Internal Combustion Engine,0.0,0.0,0.0,0.0,0.0,GenX,current_policies_short,2024-06-20
+2027,Natural Gas Steam Turbine,121.27409935067418,6.0386800965393395,6.256410994315346,3.838271322941343,2.2156704891657095,GenX,current_policies_short,2024-06-20
+2027,Nuclear,0.0,0.0,0.0,0.0,0.0,GenX,current_policies_short,2024-06-20
+2027,Offshore Wind Turbine,0.0,0.0,0.0,0.0,0.0,GenX,current_policies_short,2024-06-20
+2027,Onshore Wind Turbine,0.0,0.0,0.0,0.0,0.0,GenX,current_policies_short,2024-06-20
+2027,Petroleum Liquids,,,,,,GenX,current_policies_short,2024-06-20
+2027,Small Hydroelectric,0.0,0.0,0.0,0.0,0.0,GenX,current_policies_short,2024-06-20
+2027,Solar Photovoltaic,0.0,0.0,0.0,0.0,0.0,GenX,current_policies_short,2024-06-20
+2030,Batteries,0.0,0.0,0.0,0.0,0.0,GenX,current_policies_short,2024-06-20
+2030,Biomass,11214.255013339505,9401.19769357649,1706.6987208270414,713.6441156700062,884.314059849762,GenX,current_policies_short,2024-06-20
+2030,Conventional Hydroelectric,0.0,0.0,0.0,0.0,0.0,GenX,current_policies_short,2024-06-20
+2030,Conventional Steam Coal,,,,,,GenX,current_policies_short,2024-06-20
+2030,Geothermal,0.0,0.0,0.0,0.0,0.0,GenX,current_policies_short,2024-06-20
+2030,Hydroelectric Pumped Storage,0.0,0.0,0.0,0.0,0.0,GenX,current_policies_short,2024-06-20
+2030,Natural Gas Fired Combined Cycle,,,,,,GenX,current_policies_short,2024-06-20
+2030,Natural Gas Fired Combustion Turbine,0.0,0.0,0.0,0.0,0.0,GenX,current_policies_short,2024-06-20
+2030,Natural Gas Internal Combustion Engine,0.0,0.0,0.0,0.0,0.0,GenX,current_policies_short,2024-06-20
+2030,Natural Gas Steam Turbine,148.34977318413007,17.99073863610171,7.58551556191166,4.25245717913357,2.2585034304329694,GenX,current_policies_short,2024-06-20
+2030,Nuclear,0.0,0.0,0.0,0.0,0.0,GenX,current_policies_short,2024-06-20
+2030,Offshore Wind Turbine,0.0,0.0,0.0,0.0,0.0,GenX,current_policies_short,2024-06-20
+2030,Onshore Wind Turbine,0.0,0.0,0.0,0.0,0.0,GenX,current_policies_short,2024-06-20
+2030,Petroleum Liquids,,,,,,GenX,current_policies_short,2024-06-20
+2030,Small Hydroelectric,0.0,0.0,0.0,0.0,0.0,GenX,current_policies_short,2024-06-20
+2030,Solar Photovoltaic,0.0,0.0,0.0,0.0,0.0,GenX,current_policies_short,2024-06-20
+2035,Batteries,0.0,0.0,0.0,0.0,0.0,GenX,current_policies_short,2024-06-20
+2035,Biomass,8581.505090108692,7767.264359737968,1453.2331121634618,526.0385906471312,687.2115942654693,GenX,current_policies_short,2024-06-20
+2035,Conventional Hydroelectric,0.0,0.0,0.0,0.0,0.0,GenX,current_policies_short,2024-06-20
+2035,Conventional Steam Coal,,,,,,GenX,current_policies_short,2024-06-20
+2035,Geothermal,0.0,0.0,0.0,0.0,0.0,GenX,current_policies_short,2024-06-20
+2035,Hydroelectric Pumped Storage,0.0,0.0,0.0,0.0,0.0,GenX,current_policies_short,2024-06-20
+2035,Natural Gas Fired Combined Cycle,,,,,,GenX,current_policies_short,2024-06-20
+2035,Natural Gas Fired Combustion Turbine,0.0,0.0,0.0,0.0,0.0,GenX,current_policies_short,2024-06-20
+2035,Natural Gas Internal Combustion Engine,0.0,0.0,0.0,0.0,0.0,GenX,current_policies_short,2024-06-20
+2035,Natural Gas Steam Turbine,430.9039637230232,308.3471998263026,59.26079276471807,16.372500287331356,4.299522143606252,GenX,current_policies_short,2024-06-20
+2035,Nuclear,0.0,0.0,0.0,0.0,0.0,GenX,current_policies_short,2024-06-20
+2035,Offshore Wind Turbine,0.0,0.0,0.0,0.0,0.0,GenX,current_policies_short,2024-06-20
+2035,Onshore Wind Turbine,0.0,0.0,0.0,0.0,0.0,GenX,current_policies_short,2024-06-20
+2035,Petroleum Liquids,0.0,0.0,0.0,0.0,0.0,GenX,current_policies_short,2024-06-20
+2035,Small Hydroelectric,0.0,0.0,0.0,0.0,0.0,GenX,current_policies_short,2024-06-20
+2035,Solar Photovoltaic,0.0,0.0,0.0,0.0,0.0,GenX,current_policies_short,2024-06-20
+2040,Batteries,0.0,0.0,0.0,0.0,0.0,GenX,current_policies_short,2024-06-20
+2040,Biomass,7344.625713199409,7572.992978221917,1164.996491240437,299.0087715645313,634.0155001499279,GenX,current_policies_short,2024-06-20
+2040,Conventional Hydroelectric,0.0,0.0,0.0,0.0,0.0,GenX,current_policies_short,2024-06-20
+2040,Conventional Steam Coal,,,,,,GenX,current_policies_short,2024-06-20
+2040,Geothermal,0.0,0.0,0.0,0.0,0.0,GenX,current_policies_short,2024-06-20
+2040,Hydroelectric Pumped Storage,0.0,0.0,0.0,0.0,0.0,GenX,current_policies_short,2024-06-20
+2040,Natural Gas Fired Combined Cycle,,,,,,GenX,current_policies_short,2024-06-20
+2040,Natural Gas Fired Combustion Turbine,0.0,0.0,0.0,0.0,0.0,GenX,current_policies_short,2024-06-20
+2040,Natural Gas Internal Combustion Engine,0.0,0.0,0.0,0.0,0.0,GenX,current_policies_short,2024-06-20
+2040,Natural Gas Steam Turbine,326.65331977886683,388.0915077735634,65.6989208193729,15.319718552106016,3.5363777547521145,GenX,current_policies_short,2024-06-20
+2040,Nuclear,0.0,0.0,0.0,0.0,0.0,GenX,current_policies_short,2024-06-20
+2040,Offshore Wind Turbine,0.0,0.0,0.0,0.0,0.0,GenX,current_policies_short,2024-06-20
+2040,Onshore Wind Turbine,0.0,0.0,0.0,0.0,0.0,GenX,current_policies_short,2024-06-20
+2040,Petroleum Liquids,0.0,0.0,0.0,0.0,0.0,GenX,current_policies_short,2024-06-20
+2040,Small Hydroelectric,0.0,0.0,0.0,0.0,0.0,GenX,current_policies_short,2024-06-20
+2040,Solar Photovoltaic,0.0,0.0,0.0,0.0,0.0,GenX,current_policies_short,2024-06-20
+2045,Biomass,6753.038959964462,5207.605242636525,810.8317460608606,185.9624571202885,639.6421851722638,GenX,current_policies_short,2024-06-20
+2045,Conventional Hydroelectric,0.0,0.0,0.0,0.0,0.0,GenX,current_policies_short,2024-06-20
+2045,Conventional Steam Coal,,,,,,GenX,current_policies_short,2024-06-20
+2045,Geothermal,0.0,0.0,0.0,0.0,0.0,GenX,current_policies_short,2024-06-20
+2045,Hydroelectric Pumped Storage,0.0,0.0,0.0,0.0,0.0,GenX,current_policies_short,2024-06-20
+2045,Natural Gas Fired Combined Cycle,,,,,,GenX,current_policies_short,2024-06-20
+2045,Natural Gas Fired Combustion Turbine,0.0,0.0,0.0,0.0,0.0,GenX,current_policies_short,2024-06-20
+2045,Natural Gas Internal Combustion Engine,0.0,0.0,0.0,0.0,0.0,GenX,current_policies_short,2024-06-20
+2045,Natural Gas Steam Turbine,173.02023908202025,65.33356858859729,33.68703565669306,7.414820739283702,1.4670143173000108,GenX,current_policies_short,2024-06-20
+2045,Nuclear,0.0,0.0,0.0,0.0,0.0,GenX,current_policies_short,2024-06-20
+2045,Offshore Wind Turbine,0.0,0.0,0.0,0.0,0.0,GenX,current_policies_short,2024-06-20
+2045,Onshore Wind Turbine,0.0,0.0,0.0,0.0,0.0,GenX,current_policies_short,2024-06-20
+2045,Petroleum Liquids,0.0,0.0,0.0,0.0,0.0,GenX,current_policies_short,2024-06-20
+2045,Small Hydroelectric,0.0,0.0,0.0,0.0,0.0,GenX,current_policies_short,2024-06-20
+2045,Solar Photovoltaic,0.0,0.0,0.0,0.0,0.0,GenX,current_policies_short,2024-06-20
+2050,Biomass,3828.5478372312537,186.61299160310958,291.8646675223959,62.74370893416355,630.6706909731677,GenX,current_policies_short,2024-06-20
+2050,Conventional Hydroelectric,0.0,0.0,0.0,0.0,0.0,GenX,current_policies_short,2024-06-20
+2050,Conventional Steam Coal,,,,,,GenX,current_policies_short,2024-06-20
+2050,Geothermal,0.0,0.0,0.0,0.0,0.0,GenX,current_policies_short,2024-06-20
+2050,Hydroelectric Pumped Storage,0.0,0.0,0.0,0.0,0.0,GenX,current_policies_short,2024-06-20
+2050,Natural Gas Fired Combined Cycle,,,,,,GenX,current_policies_short,2024-06-20
+2050,Natural Gas Fired Combustion Turbine,0.0,0.0,0.0,0.0,0.0,GenX,current_policies_short,2024-06-20
+2050,Natural Gas Internal Combustion Engine,0.0,0.0,0.0,0.0,0.0,GenX,current_policies_short,2024-06-20
+2050,Natural Gas Steam Turbine,96.17931373685202,0.0,22.64642566772046,0.0,0.0,GenX,current_policies_short,2024-06-20
+2050,Nuclear,0.0,0.0,0.0,0.0,0.0,GenX,current_policies_short,2024-06-20
+2050,Onshore Wind Turbine,0.0,0.0,0.0,0.0,0.0,GenX,current_policies_short,2024-06-20
+2050,Petroleum Liquids,0.0,0.0,0.0,0.0,0.0,GenX,current_policies_short,2024-06-20
+2050,Small Hydroelectric,0.0,0.0,0.0,0.0,0.0,GenX,current_policies_short,2024-06-20
+2050,Solar Photovoltaic,0.0,0.0,0.0,0.0,0.0,GenX,current_policies_short,2024-06-20

@@ -570,7 +570,7 @@ tot_emissions['date_stamp']=pd.to_datetime('today').date()
 
 print(tot_emissions)
 
-tot_emissions.to_csv('MIP_AirPollution/emis.csv', mode='a', index=False, header=False)
+tot_emissions.to_csv('MIP_AirPollution/Downscaled/emis.csv', mode='a', index=False, header=False)
 
 #Now do by technology
 tot_emissions = emissions.groupby(['planning_year', 'technology']).agg({'nox_predicted':'sum', 'so2_predicted':'sum', 'pm25_predicted':'sum', 'voc_predicted':'sum', 'nh3_predicted':'sum'}).reset_index()
@@ -580,5 +580,5 @@ tot_emissions['date_stamp']=pd.to_datetime('today').date()
 
 print(tot_emissions)
 
-tot_emissions.to_csv('MIP_AirPollution/emis_detail.csv', mode='a', index=False, header=False)
+tot_emissions.to_csv('MIP_AirPollution/Downscaled/emis_detail.csv', mode='a', index=False, header=False)
 
