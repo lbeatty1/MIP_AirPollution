@@ -24,8 +24,9 @@ co-est2022-pop.xlsx - gives county-level population data from the census https:/
 
 Get_CAMD.py - pulls EPA data from their API, sends to data directory
 
-Calculate_Model_Emissions.ipynb - Takes EIA, EPA data, calculates emissions from MIP models, outputs shapefiles to be processed by inmap.  
+The other parts of the code are split into two folders: Downscaled and Endogenous. The Downcaled code takes MIP outputs and generates concentrations while the endogenous folder calculates cluster-level population-weighted marginal generation impacts on air pollution exposure.
+
+Downscaled
+Calculate_Model_Emissions.py - Takes EIA, EPA data, calculates emissions from MIP models, outputs shapefiles to be processed by inmap.  
 InMap_SR.ipynb - takes emissions output and uses source-receptor matrices to calculate exposures
 Plot_Output.ipynb - takes InMap Output (full inmap) and plots exposures and deaths.
-
-run_airpollution.sh - runs all of the scripts in sequential order, including InMap.  It pulls InMap settings from InMap_config.toml
