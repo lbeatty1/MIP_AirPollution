@@ -33,4 +33,4 @@ technology_map = {
     'naturalgas_fframe_ct' : 'Natural Gas CT',
     'naturalgas_hframe_cc_95_ccs' : 'Natural Gas CCS'
 }
-print("loaded technology map")
+print("loaded technology dictionary")

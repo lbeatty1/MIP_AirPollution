@@ -13,26 +13,25 @@ from matplotlib.colors import LinearSegmentedColormap
 
 os.chdir('C:/Users/lbeatty/Documents/Lauren_MIP_Contribution/')
 
+from MIP_AirPollution.Downscaled.settings import *
 model='GenX'
 
 
 #%%
 ## Read in all data
 emissions = pd.DataFrame()
-scenarios = ['26z-short-base-50', '26z-short-current-policies', '26z-short-base-200', '26z-short-no-ccs']
-years = ['2020', '2030', '2040', '2050']
 
-for scenario in scenarios:
+for scenario in scenario_dictionary:
     print('reading: '+scenario)
-    for year in years:
-        temp = gpd.read_file('InMap/MIP_InMap_Output/'+scenario+'/'+model+'/ISRM_result_'+year+'.shp')
+    for file, year in year_inputs.items():
+        temp = gpd.read_file('InMap/MIP_InMap_Output/'+scenario+'/'+model+'/ISRM_result_'+f"{year}"+'.shp')
         temp['year']=year
         temp['scenario']=scenario
         emissions = pd.concat([emissions, temp])
         print(year)
 
 #make file directories
-for scenario in scenarios:
+for scenario in scenario_dictionary:
     if not os.path.exists('MIP_AirPollution/Figures/Output/' + scenario + '/' + model + '/'):
         os.makedirs('MIP_AirPollution/Figures/Output/' + scenario + '/' + model )
 
@@ -57,16 +56,17 @@ quant_dict={}
 
 #%%
 print('making concentration plots')
-for scenario in scenarios:
-    for year in years:
-        print('concentration: '+scenario+year)
+for scenario in scenario_dictionary:
+    for file, year in year_inputs.items():
+        print('concentration: '+scenario+f"{year}")
 
         emissions_temp = emissions[emissions['year']==year]
         emissions_temp = emissions_temp[emissions_temp['scenario']==scenario]
         for column in columns_to_plot:
 
             #want scales to be the same for each plot
-            if year=='2020':
+            if year==2027:
+                print("Defining scale")
                 q = 0.99  # Truncate results at the 99th percentile for better visualization
                 cut = np.quantile(emissions_temp[column], q)
                 quant_dict[column]=cut
@@ -87,17 +87,18 @@ for scenario in scenarios:
             cbar.ax.tick_params(labelsize=14)
 
             plt.axis('off')
-            plt.savefig('MIP_AirPollution/Figures/Output/' + scenario + '/' + model + '/ISRM_' +year+'_'+ column + '_concentrationmap.jpg', format='jpg',
+            plt.savefig('MIP_AirPollution/Figures/Output/' + scenario + '/' + model + '/ISRM_' +f"{year}"+'_'+ column + '_concentrationmap.jpg', format='jpg',
                         dpi=300, bbox_inches='tight')
-            plt.savefig('MIP_results_comparison/'+scenario+'/AirPollution/ISRM_'+year+'_'+ column + '_concentrationmap.jpg', format='jpg',
+            plt.savefig('MIP_results_comparison/'+scenario+'/AirPollution/ISRM_'+f"{year}"+'_'+ column + '_concentrationmap.jpg', format='jpg',
                         dpi=300, bbox_inches='tight')
+
 
 #%%
 print('making death plots')
 deaths = pd.DataFrame(emissions[['Asiandeath', 'Blackdeath', 'Latinodeat', 'Nativedeat', 'WhiteNoL_1', 'year', 'scenario']])
 deaths = deaths.groupby(['scenario','year']).sum().reset_index()
 
-for scenario in scenarios:
+for scenario in scenario_dictionary:
     plt.figure(figsize=(10, 6))
     print('deaths: '+scenario)
 
@@ -136,7 +137,7 @@ death_rates['WhiteNoLatrate'] = death_rates['WhiteNoL_1']/death_rates['WhiteNoLa
 
 
 
-for scenario in scenarios:
+for scenario in scenario_dictionary:
     print('deathrates: '+scenario)
     plt.figure(figsize=(10, 6))
 
@@ -165,11 +166,11 @@ for scenario in scenarios:
 
 #%%
 ## plot death rates across scenario
-for year in years:
+for file, year in year_inputs.items():
     
     deaths_temp = death_rates[death_rates['year']==year]
 
-    if year=='2030':
+    if year==2027:
         cut = deaths_temp[['Asianrate', 'Blackrate', 'Latinorate', 'WhiteNoLatrate', 'Nativerate']].max().max()
         cut = cut*1.06
 
@@ -177,7 +178,7 @@ for year in years:
     bar_width = 0.7
     space_between_groups= 5
     index = np.arange(len(deaths_temp)) * (bar_width + space_between_groups)
-    plt.figure(figsize=(9, 6))
+    plt.figure(figsize=(12, 6))
 
     plt.bar(index, deaths_temp['Asianrate'], bar_width, label='Asian Death Rate', color='blue', alpha=0.7)
     plt.bar(index + bar_width, deaths_temp['Blackrate'], bar_width, label='Black Death Rate', color='green', alpha=0.7)
@@ -191,14 +192,14 @@ for year in years:
     plt.title('Death Rates by Scenario', fontsize=24)
     plt.xlabel('Scenario', fontsize=19)
     plt.ylabel('Death Rate', fontsize=19)
-    plt.xticks(index + 4*bar_width/2, deaths_temp.scenario, fontsize=11)
+    plt.xticks(index + 4*bar_width/2, deaths_temp.scenario, fontsize=11, rotation=-25, ha='left')
     plt.legend(fontsize=11)
     plt.yticks(fontsize=11)
 
 
 
-    plt.savefig('MIP_AirPollution/Figures/Output/ISRM_deathrate_by_scenario_'+year+'.jpg', format='jpg',dpi=300, bbox_inches='tight')
-    plt.savefig('MIP_results_comparison/AirPollution/ISRM_deathrate_by_scenario_'+year+'.jpg', format='jpg',
+    plt.savefig('MIP_AirPollution/Figures/Output/ISRM_deathrate_by_scenario_'+f"{year}"+'.jpg', format='jpg',dpi=300, bbox_inches='tight')
+    plt.savefig('MIP_results_comparison/AirPollution/ISRM_deathrate_by_scenario_'+f"{year}"+'.jpg', format='jpg',
                 dpi=300, bbox_inches='tight')
 
 # %%

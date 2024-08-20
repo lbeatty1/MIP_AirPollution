@@ -571,7 +571,7 @@ for key, value in scenario_dictionary.items():
         emissions_temp = emissions_temp.dropna().reset_index(drop=True)
 
         # Save to file
-        emissions_temp.to_file(filename=f'InMap/MIP_Emissions/{scenario}/{model}/emissions_{year}.shp')
+        emissions_temp.to_file(filename=f'InMap/MIP_Emissions/{scenario}/{model}/emissions_{value}.shp')
 
     ### Write total emissions to a csv
 

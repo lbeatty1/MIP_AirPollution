@@ -1,4 +1,3 @@
-#%%
 globals().clear()
 
 
@@ -23,11 +22,9 @@ import os
 
 os.chdir('C:/Users/lbeatty/Documents/Lauren_MIP_Contribution/')
 
-scenarios = ['26z-short-base-50', '26z-short-no-ccs', '26z-short-base-200', '26z-short-current-policies']
-model = 'GenX'
-
-years = ['2020','2030', '2040', '2050']
-
+#pull in settings from settings file
+from MIP_AirPollution.Downscaled.settings import *
+model='GenX'
 
 def rect(i, w, s, e, n):
     x = [w[i], e[i], e[i], w[i], w[i]]
@@ -155,12 +152,13 @@ def run_sr(emis, model, emis_units="tons/year"):
     print("Finished (%.0f seconds)               "%(time.time()-start))
     return ret
 
-#%%
-for scenario in scenarios:
-    for year in years:
-        emis = gpd.read_file('InMap/MIP_Emissions/'+scenario+'/'+model+'/emissions_'+year+'.shp')
+
+for scenario in scenario_dictionary:
+    for file, year in year_inputs.items():
+        emis = gpd.read_file('InMap/MIP_Emissions/'+scenario+'/'+model+'/emissions_'+f"{year}"+'.shp')
         print(emis.sum())
         resultsISRM = run_sr(emis, model="isrm")
         resultsISRM = resultsISRM.set_crs('PROJCS["Lambert_Conformal_Conic",GEOGCS["GCS_unnamed ellipse",DATUM["D_unknown",SPHEROID["Unknown",6370997,0]],PRIMEM["Greenwich",0],UNIT["Degree",0.0174532925199433]],PROJECTION["Lambert_Conformal_Conic_2SP"],PARAMETER["latitude_of_origin",40],PARAMETER["central_meridian",-97],PARAMETER["standard_parallel_1",33],PARAMETER["standard_parallel_2",45],PARAMETER["false_easting",0],PARAMETER["false_northing",0],UNIT["metre",1,AUTHORITY["EPSG","9001"]],AXIS["Easting",EAST],AXIS["Northing",NORTH]]')
 
-        resultsISRM.to_file(filename='InMap/MIP_InMap_Output/'+scenario+'/'+model+'/ISRM_result_'+year+'.shp', driver='ESRI Shapefile')
+        resultsISRM.to_file(filename='InMap/MIP_InMap_Output/'+scenario+'/'+model+'/ISRM_result_'+f"{year}"+'.shp', driver='ESRI Shapefile')
+        
