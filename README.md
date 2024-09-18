@@ -1,4 +1,4 @@
-# Gen_Plant_Emissions
+# Gen_Plant_Emissions -- EDIT TITLE
 Code to analyze emissions from generation facilities, and impute emissions for clusters from PowerGenome.
 
 ## Data
