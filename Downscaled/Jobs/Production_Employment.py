@@ -12,9 +12,9 @@ os.chdir('C:/Users/lbeatty/Documents/Lauren_MIP_Contribution/')
 
 ### define model/scenario
 model = 'GenX'
-scenario = '26z-short-base-50'
+scenario = 'full-base-1000'
 
-job_coefs = pd.read_csv('MIP_AirPollution/Job_Coefficients.csv')
+job_coefs = pd.read_csv('MIP_AirPollution/Downscaled/Jobs/Job_Coefficients.csv')
 generation = pd.read_csv("MIP_results_comparison/"+scenario+"/"+model+"_results_summary/generation.csv")
 generator_inputs = pd.read_csv("MIP_results_comparison/"+scenario+'/'+model+'_op_inputs/Inputs/Inputs_p1/Generators_data.csv')
 #################################################
@@ -167,4 +167,5 @@ prod['State_level_underground_production_thousandtons'] = prod['fuel_consumption
 prod['jobs'] = prod['State_level_surface_production_thousandtons']*0.0191+prod['State_level_underground_production_thousandtons']*0.151
 prod['employment'] = 'Coal Production'
 employment = pd.concat([employment, prod[['planning_year', 'State', 'jobs', 'employment']]])
+
 
