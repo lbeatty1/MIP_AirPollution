@@ -8,13 +8,15 @@ import pandas as pd
 import math
 from datetime import datetime
 
-os.chdir('C:/Users/lbeatty/Documents/Lauren_MIP_Contribution/')
+#os.chdir('C:/Users/lbeatty/Documents/Lauren_MIP_Contribution/')
+os.chdir('C:/Users/lfernandezintriago/OneDrive - Environmental Defense Fund - edf.org/Documents/GitHub/MIP Project')
 
 ### define model/scenario
 model = 'GenX'
-scenario = '26z-short-base-50'
+#scenario = '26z-short-base-50'
+scenario = 'full-base-200'
 
-job_coefs = pd.read_csv('MIP_AirPollution/Job_Coefficients.csv')
+job_coefs = pd.read_csv('MIP_AirPollution/Downscaled/Jobs/Job_Coefficients.csv')
 generation = pd.read_csv("MIP_results_comparison/"+scenario+"/"+model+"_results_summary/generation.csv")
 generator_inputs = pd.read_csv("MIP_results_comparison/"+scenario+'/'+model+'_op_inputs/Inputs/Inputs_p1/Generators_data.csv')
 #################################################
@@ -45,7 +47,7 @@ gasprod_state['mcf_annual']=gasprod_state['Value']*1000
 #don't have 2023 onwards yet so lets take average from 18-22?  Why not?
 gasprod_state = gasprod_state[(gasprod_state['Year']<2023) & (gasprod_state['Year']>2017) & gasprod_state['Year'].notnull()]
 gasprod_state = gasprod_state.groupby(['Variable']).agg({'mcf_annual':'sum'}).reset_index()
-gasprod_state['State']= gasprod_state['Variable'].str.replace(' Dry Natural Gas Production \(Million Cubic Feet\)', '')
+gasprod_state['State']= gasprod_state['Variable'].str.replace(r' Dry Natural Gas Production \(Million Cubic Feet\)', '')
 
 gasprod_state['Pct_total'] = gasprod_state['mcf_annual']/sum(gasprod_state['mcf_annual'])
 
@@ -56,7 +58,7 @@ oilprod_state['bbl_annual']=oilprod_state['Value']*1000
 #don't have 2023 onwards yet so lets take average from 18-22?  Why not?
 oilprod_state = oilprod_state[(oilprod_state['Year']<2023) & (oilprod_state['Year']>2017) & oilprod_state['Year'].notnull()]
 oilprod_state = oilprod_state.groupby(['Variable']).agg({'bbl_annual':'sum'}).reset_index()
-oilprod_state['State'] = oilprod_state['Variable'].str.replace(' Field Production of Crude Oil \(Thousand Barrels\)', '')
+oilprod_state['State'] = oilprod_state['Variable'].str.replace(r' Field Production of Crude Oil \(Thousand Barrels\)', '')
 oilprod_state['Pct_total'] = oilprod_state['bbl_annual']/sum(oilprod_state['bbl_annual'])
 ########################
 ## Ok now do Coal ######
@@ -73,7 +75,7 @@ coal = coal[['Coal-Producing State and Region1', 'Total_x', 'Total_y']]
 coal.columns = ['State', 'Surface_thousandtons', 'Underground_thousandtons']
 
 coal = coal.dropna(subset=['State'])
-coal = coal[~coal['State'].str.contains('\(Anthracite\)|\(East\)|\(West\)|\(Bituminous\)|\(Northern\)|\(Southern\)|River|Basin|Region Total|U.S.|Other|Appalachia')]
+coal = coal[~coal['State'].str.contains(r'\(Anthracite\)|\(East\)|\(West\)|\(Bituminous\)|\(Northern\)|\(Southern\)|River|Basin|Region Total|U.S.|Other|Appalachia')]
 coal['State'] = coal['State'].str.replace('Total', '')
 
 #thankyou chatgpt
@@ -147,7 +149,7 @@ prod = pd.merge(prod, job_coefs[job_coefs['Resource']=='Natural gas'].rename(col
 
 prod['jobs'] = prod['State_level_production_mmcf']*prod['Parameter Value']
 prod['employment'] = 'Natural Gas Production'
-employment = prod[['planning_year', 'State', 'jobs', 'employment']]
+employment_production = prod[['planning_year', 'State', 'jobs', 'employment']]
 
 #################################################
 ### COAL ########################################
@@ -166,5 +168,5 @@ prod['State_level_underground_production_thousandtons'] = prod['fuel_consumption
 #coefs are 0.15/thousand short tons underground and 0.0191/thousand short tons surface
 prod['jobs'] = prod['State_level_surface_production_thousandtons']*0.0191+prod['State_level_underground_production_thousandtons']*0.151
 prod['employment'] = 'Coal Production'
-employment = pd.concat([employment, prod[['planning_year', 'State', 'jobs', 'employment']]])
+employment_production = pd.concat([employment_production, prod[['planning_year', 'State', 'jobs', 'employment']]])
 

@@ -24,29 +24,28 @@ model = 'GenX'
 scenario = 'full-base-200'
 
 job_coefs = pd.read_csv('MIP_AirPollution/Downscaled/Jobs/Job_Coefficients.csv')
-new_capacity = pd.read_csv('MIP_results_comparison/'+scenario+'/'+model+'_results_summary/aggregated_capacity_calc.csv')
+retirement = pd.read_csv('MIP_results_comparison/'+scenario+'/'+model+'_results_summary/aggregated_capacity_calc.csv')
+
 
 
 #only need coefs for jobs/GW
-job_coefs = job_coefs[job_coefs['Units']=='jobs/GW capacity additions']
+job_coefs = job_coefs[job_coefs['Units']=='jobs/GW retired capacity']
 #i don't know what mining or transportation jobs from capacity go???
 job_coefs['Subresource'] = job_coefs['Subresource'].str.strip()
 
-
 job_coefs = job_coefs[(job_coefs['Subresource'].isna())|(job_coefs['Subresource']=='utility-scale solar')]
 job_coefs = job_coefs.rename(columns={'Resource':'tech_type'})
-#new_capacity.loc[new_capacity['resource_name'].str.contains('biomass'), 'tech_type'] = 'Biomass'
+#retirement.loc[retirement['resource_name'].str.contains('biomass'), 'tech_type'] = 'Biomass'
 
-new_capacity['tech_type'] = new_capacity['tech_type'].str.strip()
-new_capacity['tech_type'] = new_capacity['tech_type'].str.lower()
+retirement['tech_type'] = retirement['tech_type'].str.lower()
 job_coefs['tech_type']=job_coefs['tech_type'].str.lower()
-new_capacity = pd.merge(new_capacity, job_coefs, how='left', on='tech_type')
+retirement = pd.merge(retirement, job_coefs, how='left', on='tech_type')
 
 #nothing for hydro, batteries
-new_capacity['capacity_GW']=new_capacity['new_build_value']/1000
-new_capacity['jobs'] = new_capacity['capacity_GW']*new_capacity['Parameter Value']
+retirement['capacity_GW']=retirement['retired_value']/1000
+retirement['jobs'] = retirement['capacity_GW']*retirement['Parameter Value']
 
-employment_new_capacity = new_capacity.groupby(['zone', 'tech_type','planning_year']).agg({'jobs':'sum'}).reset_index()
+employment_retirement = retirement.groupby(['zone', 'tech_type','planning_year']).agg({'jobs':'sum'}).reset_index()
 
 ##############################
 ## divy up population by 26z region to states -- more code than I need but might be useful later
@@ -106,7 +105,9 @@ county_modelregi = intersection[['model_regi', 'NAME', 'State', 'Pop', 'StatePop
 # model region to states
 model_region_pop = county_modelregi.groupby(['model_regi', 'State']).agg({'pct_model_regi_pop':'sum'}).reset_index()
 model_region_pop = model_region_pop.rename(columns = {'model_regi':'zone'})
-employment_new_capacity = pd.merge(employment_new_capacity, model_region_pop, how='left', on='zone')
+employment_retirement = pd.merge(employment_retirement, model_region_pop, how='left', on='zone')
 
-employment_new_capacity['employment'] = employment_new_capacity['tech_type']+'new generation capacity'
-employment_new_capacity = employment_new_capacity[['planning_year', 'State', 'jobs', 'employment']]
+employment_retirement['employment'] = employment_retirement['tech_type']+' retired'
+employment_retirement = employment_retirement[['planning_year', 'State', 'jobs', 'employment']]# -*- coding: utf-8 -*-
+
+

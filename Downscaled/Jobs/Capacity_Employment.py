@@ -8,13 +8,17 @@ import pandas as pd
 import math
 from datetime import datetime
 
-os.chdir('C:/Users/lbeatty/Documents/Lauren_MIP_Contribution/')
+
+
+#os.chdir('C:/Users/lbeatty/Documents/Lauren_MIP_Contribution/')
+os.chdir('C:/Users/lfernandezintriago/OneDrive - Environmental Defense Fund - edf.org/Documents/GitHub/MIP Project')
 
 ### define model/scenario
 model = 'GenX'
-scenario = '26z-short-base-50'
+#scenario = '26z-short-base-50'
+scenario = 'full-base-200'
 
-job_coefs = pd.read_csv('MIP_AirPollution/Job_Coefficients.csv')
+job_coefs = pd.read_csv('MIP_AirPollution/Downscaled/Jobs/Job_Coefficients.csv')
 capacity = pd.read_csv('MIP_results_comparison/'+scenario+'/'+model+'_results_summary/resource_capacity.csv')
 
 #only need coefs for jobs/GW
@@ -34,7 +38,7 @@ capacity = pd.merge(capacity, job_coefs, how='left', on='tech_type')
 capacity['capacity_GW']=capacity['end_value']/1000
 capacity['jobs'] = capacity['capacity_GW']*capacity['Parameter Value']
 
-employment = capacity.groupby(['zone', 'tech_type','planning_year']).agg({'jobs':'sum'}).reset_index()
+employment_capacity = capacity.groupby(['zone', 'tech_type','planning_year']).agg({'jobs':'sum'}).reset_index()
 
 ##############################
 ## divy up population by 26z region to states -- more code than I need but might be useful later
@@ -94,7 +98,7 @@ county_modelregi = intersection[['model_regi', 'NAME', 'State', 'Pop', 'StatePop
 # model region to states
 model_region_pop = county_modelregi.groupby(['model_regi', 'State']).agg({'pct_model_regi_pop':'sum'}).reset_index()
 model_region_pop = model_region_pop.rename(columns = {'model_regi':'zone'})
-employment = pd.merge(employment, model_region_pop, how='left', on='zone')
+employment_capacity = pd.merge(employment_capacity, model_region_pop, how='left', on='zone')
 
-employment['employment'] = employment['tech_type']+' generation capacity'
-employment = employment[['planning_year', 'State', 'jobs', 'employment']]
+employment_capacity['employment'] = employment_capacity['tech_type']+' generation capacity'
+employment_capacity = employment_capacity[['planning_year', 'State', 'jobs', 'employment']]
