@@ -13,8 +13,8 @@ os.chdir('C:/Users/lfernandezintriago/OneDrive - Environmental Defense Fund - ed
 
 ### define model/scenario
 model = 'GenX'
-#scenario = '26z-short-base-50'
-scenario = 'full-base-200'
+
+scenario = 'full-base-1000'
 
 job_coefs = pd.read_csv('MIP_AirPollution/Downscaled/Jobs/Job_Coefficients.csv')
 generation = pd.read_csv("MIP_results_comparison/"+scenario+"/"+model+"_results_summary/generation.csv")
@@ -169,4 +169,5 @@ prod['State_level_underground_production_thousandtons'] = prod['fuel_consumption
 prod['jobs'] = prod['State_level_surface_production_thousandtons']*0.0191+prod['State_level_underground_production_thousandtons']*0.151
 prod['employment'] = 'Coal Production'
 employment_production = pd.concat([employment_production, prod[['planning_year', 'State', 'jobs', 'employment']]])
+
 

@@ -13,9 +13,9 @@ os.chdir('C:/Users/lbeatty/Documents/Lauren_MIP_Contribution/')
 
 ### define model/scenario
 model = 'GenX'
-scenario = '26z-short-base-50'
+scenario = 'full-base-1000'
 
-job_coefs = pd.read_csv('MIP_AirPollution/Job_Coefficients.csv')
+job_coefs = pd.read_csv('MIP_AirPollution/Downscaled/Jobs/Job_Coefficients.csv')
 transmission = pd.read_csv('MIP_results_comparison/'+scenario+'/'+model+'_results_summary/transmission.csv')
 
 #keep it simple -- 444 jobs/GW transmission capacity
@@ -113,6 +113,6 @@ employment['jobs'] = employment['Jobs']*employment['pct_model_regi_pop']
 employment = employment[['Year', 'State', 'jobs', 'employment']]
 employment = employment.groupby(['State', 'Year', 'employment']).agg({'jobs':'sum'}).reset_index()
 
-#########################################
-## Now do investment in new capacity
-costs = pd.read_csv('MIP_results_comparison/case_settings/26-zone/CONUS_extra_inputs/network_costs_national_emm_split_ercot.csv')
+# #########################################
+# ## Now do investment in new capacity
+# costs = pd.read_csv('MIP_results_comparison/case_settings/26-zone/CONUS_extra_inputs/network_costs_national_emm_split_ercot.csv')
