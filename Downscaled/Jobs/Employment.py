@@ -16,31 +16,48 @@ import math
 from datetime import datetime
 
 #os.chdir('C:/Users/lbeatty/Documents/Lauren_MIP_Contribution/')
-os.chdir('C:/Users/lfernandezintriago/OneDrive - Environmental Defense Fund - edf.org/Documents/GitHub/MIP Project/MIP_AirPollution/Downscaled/Jobs/')
+
+os.chdir('C:/Users/lfernandezintriago/OneDrive - Environmental Defense Fund - edf.org/Documents/GitHub/MIP Project/MIP_AirPollution/Downscaled/Jobs')
+
+
+with open('employment.csv', 'w') as file:
+    pass
+
+
+from FN_New_Capacity_Employment import calculate_employment_new_capacity
+from FN_Capacity_Employment     import calculate_employment_capacity
+from FN_Production_Employment   import calculate_employment_production
+from FN_Retired_Employment      import calculate_employment_retired_capacity
+from FN_Transmission_Employment import calculate_employment_transmission
 
 
 
-# Importing functions from existing scripts
-from New_Capacity_Employment import employment_new_capacity
-from Capacity_Employment import employment_capacity
-from Retired_Employment import employment_retirement
-from Production_Employment import employment_production
+model = 'GenX'
+#scenario_vector = ['full-base-50','full-base-200', 'full-base-1000', 'full-current-policies', 
+#'full-current-policies-commit', 'full-current-policies-retire', 
+#'full-base-200-tx-0', 'full-base-200-tx-15', 'full-base-200-tx-50']
 
-# Merging all employment DataFrames
-merged_employment = employment_new_capacity.merge(employment_capacity, on='State', how='outer', suffixes=('_new', '_capacity'))
-merged_employment = merged_employment.merge(employment_retirement, on='State', how='outer', suffixes=('', '_retired'))
-merged_employment = merged_employment.merge(employment_production, on='State', how='outer', suffixes=('', '_production'))
+scenario_vector = ['full-base-50']
 
+for sc in scenario_vector:
+    scenario = sc
+    print('running scenario: '+ scenario)
 
-#merged_employment.fillna(0, inplace=True)
+    employment_new_capacity  = calculate_employment_new_capacity(model, scenario)
+    employment_capacity      = calculate_employment_capacity(model, scenario)
+    employment_retired       = calculate_employment_retired_capacity(model, scenario)
+    employment_production    = calculate_employment_production(model, scenario)
+    employment_transmission  = calculate_employment_transmission(model, scenario) 
+    
+    
+    employment_concat = pd.concat([employment_new_capacity, employment_capacity])
+    employment_concat = pd.concat([employment_concat,employment_retired]) 
+    employment_concat = pd.concat([employment_concat,employment_production])
+    employment_concat = pd.concat([employment_concat,employment_transmission])
+    employment_concat= employment_concat.groupby(['planning_year', 'State'], as_index=False)['jobs'].sum()
+    print(employment_concat)
+    
+    employment_concat.to_csv('employment.csv',mode='a', index=False, header=False)
 
-# Calculating total jobs by state
-merged_employment['total_jobs'] = (merged_employment['jobs_new'] +
-                                   merged_employment['jobs_capacity'] +
-                                   merged_employment['jobs_retired'] +
-                                  merged_employment['jobs_production'])
-
-
-
-# Selecting relevant columns for final output
-#final_output = merged_employment[['State', 'total_jobs']]
+    
+    

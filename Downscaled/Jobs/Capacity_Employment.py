@@ -19,7 +19,8 @@ model = 'GenX'
 scenario = 'full-base-200'
 
 job_coefs = pd.read_csv('MIP_AirPollution/Downscaled/Jobs/Job_Coefficients.csv')
-capacity = pd.read_csv('MIP_results_comparison/'+scenario+'/'+model+'_results_summary/resource_capacity.csv')
+#capacity = pd.read_csv('MIP_results_comparison/'+scenario+'/'+model+'_results_summary/resource_capacity.csv')
+capacity = pd.read_csv('MIP_results_comparison/'+scenario+'/'+model+'_results_summary/aggregated_capacity_calc.csv')
 
 #only need coefs for jobs/GW
 job_coefs = job_coefs[job_coefs['Units']=='jobs/GW capacity']

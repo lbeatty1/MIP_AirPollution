@@ -23,6 +23,7 @@ model = 'GenX'
 #scenario = '26z-short-base-50'
 scenario = 'full-base-200'
 
+
 job_coefs = pd.read_csv('MIP_AirPollution/Downscaled/Jobs/Job_Coefficients.csv')
 new_capacity = pd.read_csv('MIP_results_comparison/'+scenario+'/'+model+'_results_summary/aggregated_capacity_calc.csv')
 

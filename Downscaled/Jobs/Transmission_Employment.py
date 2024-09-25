@@ -7,13 +7,16 @@ import numpy as np
 import pandas as pd
 import math
 from datetime import datetime
-import powergenome
+#import powergenome
 
-os.chdir('C:/Users/lbeatty/Documents/Lauren_MIP_Contribution/')
+
+#os.chdir('C:/Users/lbeatty/Documents/Lauren_MIP_Contribution/')
+os.chdir('C:/Users/lfernandezintriago/OneDrive - Environmental Defense Fund - edf.org/Documents/GitHub/MIP Project')
+
 
 ### define model/scenario
 model = 'GenX'
-scenario = 'full-base-1000'
+scenario = 'full-base-200'
 
 job_coefs = pd.read_csv('MIP_AirPollution/Downscaled/Jobs/Job_Coefficients.csv')
 transmission = pd.read_csv('MIP_results_comparison/'+scenario+'/'+model+'_results_summary/transmission.csv')
@@ -106,12 +109,12 @@ county_modelregi = intersection[['model_regi', 'NAME', 'State', 'Pop', 'StatePop
 # model region to states
 model_region_pop = county_modelregi.groupby(['model_regi', 'State']).agg({'pct_model_regi_pop':'sum'}).reset_index()
 model_region_pop = model_region_pop.rename(columns = {'model_regi':'Region'})
-employment = pd.merge(transmission, model_region_pop, how='left', on='Region')
+employment_transmission = pd.merge(transmission, model_region_pop, how='left', on='Region')
 
-employment['employment'] = 'transmission capacity'
-employment['jobs'] = employment['Jobs']*employment['pct_model_regi_pop']
-employment = employment[['Year', 'State', 'jobs', 'employment']]
-employment = employment.groupby(['State', 'Year', 'employment']).agg({'jobs':'sum'}).reset_index()
+employment_transmission['employment'] = 'transmission capacity'
+employment_transmission['jobs'] = employment_transmission['Jobs']*employment_transmission['pct_model_regi_pop']
+employment_transmission = employment_transmission[['Year', 'State', 'jobs', 'employment']]
+employment_transmission = employment_transmission.groupby(['State', 'Year', 'employment']).agg({'jobs':'sum'}).reset_index()
 
 # #########################################
 # ## Now do investment in new capacity
