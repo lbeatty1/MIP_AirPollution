@@ -171,6 +171,6 @@ def calculate_employment_production(model, scenario):
     prod['jobs'] = prod['State_level_surface_production_thousandtons']*0.0191+prod['State_level_underground_production_thousandtons']*0.151
     prod['employment'] = 'Coal Production'
     employment_production = pd.concat([employment_production, prod[['planning_year', 'State', 'jobs', 'employment']]])
-    employment_production['state'] = employment_production['state'].str.replace(' Dry Natural Gas Production \(Million Cubic Feet\)', '', regex=True)
+    employment_production['state'] = employment_production['State'].str.replace(r' Dry Natural Gas Production \(Million Cubic Feet\)', '', regex=True)
 
     return employment_production

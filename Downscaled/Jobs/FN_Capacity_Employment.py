@@ -19,7 +19,7 @@ def calculate_employment_capacity(model, scenario):
 
 
     #os.chdir('C:/Users/lbeatty/Documents/Lauren_MIP_Contribution/')
-    os.chdir('C:/Users/lfernandezintriago/OneDrive - Environmental Defense Fund - edf.org/Documents/GitHub/MIP Project')
+    #os.chdir('C:/Users/lfernandezintriago/OneDrive - Environmental Defense Fund - edf.org/Documents/GitHub/MIP Project')
     
     ### define model/scenario
     model = 'GenX'

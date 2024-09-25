@@ -15,12 +15,12 @@ import pandas as pd
 import math
 from datetime import datetime
 
-#os.chdir('C:/Users/lbeatty/Documents/Lauren_MIP_Contribution/')
+os.chdir('C:/Users/lbeatty/Documents/Lauren_MIP_Contribution/')
 
-os.chdir('C:/Users/lfernandezintriago/OneDrive - Environmental Defense Fund - edf.org/Documents/GitHub/MIP Project/MIP_AirPollution/Downscaled/Jobs')
+#os.chdir('C:/Users/lfernandezintriago/OneDrive - Environmental Defense Fund - edf.org/Documents/GitHub/MIP Project/MIP_AirPollution/Downscaled/Jobs')
 
 
-with open('employment.csv', 'w') as file:
+with open('MIP_AirPollution/Downscaled/Jobs/employment.csv', 'w') as file:
     pass
 
 
@@ -33,31 +33,36 @@ from FN_Transmission_Employment import calculate_employment_transmission
 
 
 model = 'GenX'
-#scenario_vector = ['full-base-50','full-base-200', 'full-base-1000', 'full-current-policies', 
-#'full-current-policies-commit', 'full-current-policies-retire', 
-#'full-base-200-tx-0', 'full-base-200-tx-15', 'full-base-200-tx-50']
+scenario_vector = ['full-base-50','full-base-200', 'full-base-1000', 'full-current-policies', 
+'full-current-policies-commit', 'full-current-policies-retire', 
+'full-base-200-tx-0', 'full-base-200-tx-15', 'full-base-200-tx-50']
 
-scenario_vector = ['full-base-50']
+#scenario_vector = ['full-base-50']
 
 for sc in scenario_vector:
     scenario = sc
     print('running scenario: '+ scenario)
 
     employment_new_capacity  = calculate_employment_new_capacity(model, scenario)
+    print('finished running new capacity')
     employment_capacity      = calculate_employment_capacity(model, scenario)
+    print('finished running capacity')
     employment_retired       = calculate_employment_retired_capacity(model, scenario)
+    print('finished running retirement')
     employment_production    = calculate_employment_production(model, scenario)
+    print('finished running resource extraction')
     employment_transmission  = calculate_employment_transmission(model, scenario) 
-    
+    print('finished running transmission')
     
     employment_concat = pd.concat([employment_new_capacity, employment_capacity])
     employment_concat = pd.concat([employment_concat,employment_retired]) 
     employment_concat = pd.concat([employment_concat,employment_production])
     employment_concat = pd.concat([employment_concat,employment_transmission])
     employment_concat= employment_concat.groupby(['planning_year', 'State'], as_index=False)['jobs'].sum()
+    employment_concat['scenario']=scenario
     print(employment_concat)
     
-    employment_concat.to_csv('employment.csv',mode='a', index=False, header=False)
+    employment_concat.to_csv('MIP_AirPollution/Downscaled/Jobs/employment.csv',mode='a', index=False, header=False)
 
     
     

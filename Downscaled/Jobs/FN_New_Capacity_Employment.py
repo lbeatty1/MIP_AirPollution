@@ -16,8 +16,6 @@ from datetime import datetime
 
 
 def calculate_employment_new_capacity(model, scenario):
-
-    os.chdir('C:/Users/lfernandezintriago/OneDrive - Environmental Defense Fund - edf.org/Documents/GitHub/MIP Project')
     
     job_coefs = pd.read_csv('MIP_AirPollution/Downscaled/Jobs/Job_Coefficients.csv')
     new_capacity = pd.read_csv('MIP_results_comparison/'+scenario+'/'+model+'_results_summary/aggregated_capacity_calc.csv')
