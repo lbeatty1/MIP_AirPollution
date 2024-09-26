@@ -28,12 +28,14 @@ def calculate_employment_retired_capacity(model, scenario):
     #i don't know what mining or transportation jobs from capacity go???
     job_coefs['Subresource'] = job_coefs['Subresource'].str.strip()
     
-    job_coefs = job_coefs[(job_coefs['Subresource'].isna())|(job_coefs['Subresource']=='utility-scale solar')]
+    job_coefs = job_coefs[(job_coefs['Subresource'].isna())]
     job_coefs = job_coefs.rename(columns={'Resource':'tech_type'})
     #retirement.loc[retirement['resource_name'].str.contains('biomass'), 'tech_type'] = 'Biomass'
     
     retirement['tech_type'] = retirement['tech_type'].str.lower()
     job_coefs['tech_type']=job_coefs['tech_type'].str.lower()
+    retirement.loc[retirement['tech_type'] == 'distributed solar', 'tech_type'] = 'solar'
+
     retirement = pd.merge(retirement, job_coefs, how='left', on='tech_type')
     
     #nothing for hydro, batteries

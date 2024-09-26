@@ -27,8 +27,10 @@ def calculate_employment_new_capacity(model, scenario):
     job_coefs['Subresource'] = job_coefs['Subresource'].str.strip()
     
     
-    job_coefs = job_coefs[(job_coefs['Subresource'].isna())|(job_coefs['Subresource']=='utility-scale solar')]
+    job_coefs = job_coefs[(job_coefs['Subresource'].isna())|(job_coefs['Subresource']=='utility-scale solar')|(job_coefs['Subresource']=='distributed solar')]
     job_coefs = job_coefs.rename(columns={'Resource':'tech_type'})
+    job_coefs.loc[job_coefs['Subresource'] == 'distributed solar', 'tech_type'] = 'distributed solar'
+
     #new_capacity.loc[new_capacity['resource_name'].str.contains('biomass'), 'tech_type'] = 'Biomass'
     
     new_capacity['tech_type'] = new_capacity['tech_type'].str.strip()
