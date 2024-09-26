@@ -50,3 +50,23 @@ for scenario in scenario_dictionary:
     plt.title('Percent Change in Energy Employment by State - 2027 to 2050', fontsize=15)
     plt.savefig('MIP_AirPollution/Figures/Output/' + scenario + '/' + model + '/jobs_change.jpg', format='jpg',
             dpi=300, bbox_inches='tight')
+
+### 
+#Plot overall employment relative to current_policies
+jobs_relative = jobs[jobs['planning_year']==2050]
+jobs_relative = jobs_relative.groupby(['scenario']).agg({'jobs':'sum'}).reset_index()
+counterfac_number = jobs_relative[jobs_relative['scenario']=='full-current-policies']
+counterfac_number = float(counterfac_number['jobs'])
+
+jobs_relative['percent_dif']=(jobs_relative['jobs']-counterfac_number)/counterfac_number
+jobs_relative = jobs_relative[jobs_relative['scenario']!='full-current-policies']
+plt.figure(figsize=(8, 6))  # Set the figure size
+plt.bar(jobs_relative['scenario'], jobs_relative['percent_dif'], color='skyblue') 
+
+# Add titles and labels
+plt.title('Percent Difference in Aggregate Jobs in \n 2050 Relative to Current Policies', fontsize=15)
+plt.xticks(rotation=-90)
+
+plt.show()
+plt.savefig('MIP_AirPollution/Figures/Output/Jobs_2050_relative_difference.jpg', format='jpg',
+            dpi=300, bbox_inches='tight')
