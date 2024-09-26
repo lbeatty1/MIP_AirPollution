@@ -70,3 +70,54 @@ plt.xticks(rotation=-90)
 plt.show()
 plt.savefig('MIP_AirPollution/Figures/Output/Jobs_2050_relative_difference.jpg', format='jpg',
             dpi=300, bbox_inches='tight')
+
+#now do map by state
+#plot 2027 to 2050 difference
+jobs_relative = jobs[jobs['planning_year']==2050]
+counterfac_numbers = jobs_relative[jobs_relative['scenario']=='full-current-policies']
+jobs_relative = pd.merge(jobs_relative, counterfac_numbers, on='State', how='left')
+jobs_relative['jobs_dif'] = (jobs_relative['jobs_x']-jobs_relative['jobs_y'])
+jobs_relative['pct_dif'] = (jobs_relative['jobs_dif']/jobs_relative['jobs_y'])*100
+
+min_pct = min(0, min(jobs_relative['pct_dif']))
+max_pct = max(jobs_relative['pct_dif'])
+
+min_abs = min(0, min(jobs_relative['jobs_dif']))
+max_abs = max(jobs_relative['jobs_dif'])
+
+for scenario in scenario_dictionary:
+    jobs_dif_temp=jobs_relative[jobs_relative['scenario_x']==scenario]
+
+    merged_data = states.merge(jobs_dif_temp, left_on='NAME', right_on='State',how='left')
+    
+    #plot pct
+    fig, ax = plt.subplots(1, 1, figsize=(10, 8))
+
+    merged_data.plot(column='pct_dif', 
+                     ax=ax, 
+                     legend=True, 
+                     cmap='OrRd',
+                     edgecolor='black',
+                     linewidth=0.5,
+                     vmin=min_pct,
+                     vmax=max_pct)
+
+    plt.title('Percent Difference in Energy Employment in 2050 \n Relative to Current Policies: '+ scenario, fontsize=15)
+    plt.savefig('MIP_AirPollution/Figures/Output/' + scenario + '/' + model + '/jobs_relative_current_policies_pct.jpg', format='jpg',
+            dpi=300, bbox_inches='tight')
+
+    #plot abs
+    fig, ax = plt.subplots(1, 1, figsize=(10, 8))
+
+    merged_data.plot(column='jobs_dif', 
+                     ax=ax, 
+                     legend=True, 
+                     cmap='OrRd',
+                     edgecolor='black',
+                     linewidth=0.5,
+                     vmin=min_abs,
+                     vmax=max_abs)
+
+    plt.title('Absolute Difference in Energy Employment in 2050 \n Relative to Current Policies: '+ scenario, fontsize=15)
+    plt.savefig('MIP_AirPollution/Figures/Output/' + scenario + '/' + model + '/jobs_relative_current_policies_abs.jpg', format='jpg',
+            dpi=300, bbox_inches='tight')
