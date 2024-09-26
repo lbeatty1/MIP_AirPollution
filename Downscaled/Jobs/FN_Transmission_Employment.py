@@ -17,6 +17,8 @@ from datetime import datetime
 
 def calculate_employment_transmission(model, scenario):
 
+    years=[2027,2030,2035,2040,2045,2050, 2055]
+
 
     job_coefs = pd.read_csv('MIP_AirPollution/Downscaled/Jobs/Job_Coefficients.csv')
     transmission = pd.read_csv('MIP_results_comparison/'+scenario+'/'+model+'_results_summary/transmission.csv')
@@ -28,24 +30,10 @@ def calculate_employment_transmission(model, scenario):
     transmission = pd.concat([transmission[['Region1','planning_year', 'start_value', 'end_value']].rename(columns={'Region1':'Region'}),
                               transmission[['Region2', 'planning_year', 'start_value', 'end_value']].rename(columns={'Region2':'Region'})])
     
-    # Create a new DataFrame with all interim years and interpolated values
-    interim_values = []
-    for i in range(len(transmission)):
-        start_year = transmission['planning_year'].iloc[i]
-        end_year = start_year+10
-        start_value = transmission['start_value'].iloc[i]
-        end_value = transmission['end_value'].iloc[i]
-        slope = (end_value - start_value) / (end_year - start_year)
-        interim_values.extend([start_value + slope * (year - start_year) for year in range(start_year, end_year)])
-    
-    years =  [value for value in transmission['planning_year'] for _ in range(10)]
-    years = [x + y for x, y in zip(years, list(range(0,10))*len(transmission))]
-    region = [value for value in transmission['Region'] for _ in range(10)]
-    
-    transmission = pd.DataFrame({'Region':region, 'Year':years, 'Value_GW':interim_values})
-    
     #get jobs estimates
-    
+    transmission = transmission.groupby(['Region', 'planning_year']).agg({'start_value':'sum'}).reset_index()
+    transmission = transmission.rename(columns={'start_value':'Value_GW', 'planning_year':'Year'})
+
     #Half in each region -- right now capacity is double counted
     transmission['Value_GW']=transmission['Value_GW']/2
     transmission = transmission.groupby(['Region', 'Year']).agg({'Value_GW':'sum'}).reset_index()

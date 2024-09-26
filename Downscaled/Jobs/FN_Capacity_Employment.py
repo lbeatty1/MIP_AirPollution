@@ -16,15 +16,6 @@ from datetime import datetime
 
 
 def calculate_employment_capacity(model, scenario):
-
-
-    #os.chdir('C:/Users/lbeatty/Documents/Lauren_MIP_Contribution/')
-    #os.chdir('C:/Users/lfernandezintriago/OneDrive - Environmental Defense Fund - edf.org/Documents/GitHub/MIP Project')
-    
-    ### define model/scenario
-    model = 'GenX'
-    #scenario = '26z-short-base-50'
-    scenario = 'full-base-200'
     
     job_coefs = pd.read_csv('MIP_AirPollution/Downscaled/Jobs/Job_Coefficients.csv')
     #capacity = pd.read_csv('MIP_results_comparison/'+scenario+'/'+model+'_results_summary/resource_capacity.csv')
@@ -32,7 +23,6 @@ def calculate_employment_capacity(model, scenario):
     
     #only need coefs for jobs/GW
     job_coefs = job_coefs[job_coefs['Units']=='jobs/GW capacity']
-    #i don't know what mining or transportation jobs from capacity go???
     job_coefs['Subresource'] = job_coefs['Subresource'].str.strip()
     
     job_coefs = job_coefs[(job_coefs['Subresource'].isna())|(job_coefs['Subresource']=='utility-scale solar')]
