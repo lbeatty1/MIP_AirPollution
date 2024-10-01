@@ -1,4 +1,3 @@
-#%% 
 # # Code to impute emissions rates, then output a file that specifies emissions per location per MWh of generation
 # The first challenge will be to get emissions rates (lb/mwh).  To do this I'll be taking EIA data on net generation and EPA data on emissions to calculate rates.  There will be many missings that I will fill in by taking capacity-weighted technology-planning_year means.
 # 
@@ -27,28 +26,60 @@ import numpy as np
 import geopandas as gpd
 import fiona
 import math
+import zipfile
 from shapely.geometry import Point
 
-os.chdir('C:/Users/lbeatty/Documents/Lauren_MIP_Contribution/')
-
+#os.chdir('C:/Users/lbeatty/Documents/Lauren_MIP_Contribution/')
+os.chdir('C:/Users/laure/Documents/Switch-USA-PG/')
 # READ EVERYTHING IN
 
-#PG existing gen units output
-existing_gen_units_2030 = pd.read_csv('MIP_results_comparison/case_settings/26-zone/usensys-inputs-short/usensys-inputs-short/2030/base_short_2030/extra_outputs/existing_gen_units.csv')
-existing_gen_units_2040 = pd.read_csv('MIP_results_comparison/case_settings/26-zone/usensys-inputs-short/usensys-inputs-short/2040/base_short_2040/extra_outputs/existing_gen_units.csv')
-existing_gen_units_2050 = pd.read_csv('MIP_results_comparison/case_settings/26-zone/usensys-inputs-short/usensys-inputs-short/2050/base_short_2050/extra_outputs/existing_gen_units.csv')
+existing_gen_units = pd.DataFrame()
+scenario='base_short'
+
+year_inputs = {
+    'p1': 2027,
+    'p2': 2030,
+    'p3': 2035,
+    'p4': 2040,
+    'p5': 2045,
+    'p6': 2050
+}
+
+
+#check if folder exists, and if not, unzip corresponding folder
+if not os.path.exists('GenX inputs/'+scenario+'/'):
+    with zipfile.ZipFile('GenX inputs/'+scenario+'.zip', 'r') as zip_ref:
+        zip_ref.extractall('GenX inputs/'+scenario+'/')
+else:
+
+    print('Data/GenX inputs/'+scenario+'/'+" already exists")
+
+
+existing_gen_units = pd.DataFrame()
+# get years and file input names
+for filename, year in year_inputs.items():
+    existing_gen_units_temp = pd.read_csv('GenX inputs/' + scenario + '/' + scenario + '/Inputs/Inputs_' + filename + '/extra_outputs/existing_gen_units.csv')
+    existing_gen_units_temp['planning_year'] = year
+    existing_gen_units = pd.concat([existing_gen_units, existing_gen_units_temp], ignore_index=True)
+
+#filter out by retirement year
+
+existing_gen_units = existing_gen_units.query('retirement_year>=planning_year')
 
 #PG generators data
-generators_data_2030 = pd.read_csv('MIP_results_comparison/case_settings/26-zone/usensys-inputs-short/usensys-inputs-short/2030/base_short_2030/Inputs/Generators_data.csv')
-generators_data_2040 = pd.read_csv('MIP_results_comparison/case_settings/26-zone/usensys-inputs-short/usensys-inputs-short/2030/base_short_2030/Inputs/Generators_data.csv')
-generators_data_2050 = pd.read_csv('MIP_results_comparison/case_settings/26-zone/usensys-inputs-short/usensys-inputs-short/2030/base_short_2030/Inputs/Generators_data.csv')
+for filename, year in year_inputs.items():
+    existing_gen_units_temp = pd.read_csv('MIP_results_comparison/ inputs/' + scenario + '/' + scenario + '/Inputs/Inputs_' + filename + '/extra_outputs/existing_gen_units.csv')
+    existing_gen_units_temp['planning_year'] = year
+    existing_gen_units = pd.concat([existing_gen_units, existing_gen_units_temp], ignore_index=True)
+
+generators_data=pd.DataFrame()
+for filename,year in year_inputs.items():
+    generators_data_temp = pd.read_csv('switch/26-zone/in/'+str(year)+'/'+scenario+'/gen_info.csv')
+    generators_data=pd.concat([generators_data, generators_data_temp])
 
 #filter by retirement year
 #the code was written when existing_gen_units varied by year so lots of artifacts of the way the old output looked
-existing_gen_units_2030 = existing_gen_units_2030.query('retirement_year>=2030')
-existing_gen_units_2040 = existing_gen_units_2030.query('retirement_year>=2040')
-existing_gen_units_2050 = existing_gen_units_2030.query('retirement_year>=2050')
-
+existing_gen_units = existing_gen_units.query('planning_year<retirement_year')
 
 #EIA-EPA Crosswalk
 crosswalk = pd.read_csv("Data/epa_eia_crosswalk.csv")
@@ -68,8 +99,6 @@ emissions = emissions.query('year==2020')
 # PM25
 pm25 = pd.read_excel("Data/eGRID2020 DRAFT PM Emissions.xlsx", sheet_name="2020 PM Unit-level Data", skiprows=1)
 
-
-# %%
 ## Read in and format NEI ####
 
 #nei data gives values for ammonia, vocs, and also pm2.5
@@ -94,7 +123,6 @@ nei = nei.rename(columns = {'oris_facility_code': 'CAMD_PLANT_ID', 'oris_boiler_
 
 
 
-#%%
 #####################
 ## Format columns ###
 #####################
