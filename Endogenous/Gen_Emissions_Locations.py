@@ -47,9 +47,9 @@ year_inputs = {
 
 
 #check if folder exists, and if not, unzip corresponding folder
-if not os.path.exists('GenX inputs/'+scenario+'/'):
-    with zipfile.ZipFile('GenX inputs/'+scenario+'.zip', 'r') as zip_ref:
-        zip_ref.extractall('GenX inputs/'+scenario+'/')
+if not os.path.exists('Data/GenX inputs/'+scenario+'/'):
+    with zipfile.ZipFile('Data/GenX inputs/'+scenario+'.zip', 'r') as zip_ref:
+        zip_ref.extractall('Data/GenX inputs/'+scenario+'/')
 else:
 
     print('Data/GenX inputs/'+scenario+'/'+" already exists")
@@ -58,7 +58,7 @@ else:
 existing_gen_units = pd.DataFrame()
 # get years and file input names
 for filename, year in year_inputs.items():
-    existing_gen_units_temp = pd.read_csv('GenX inputs/' + scenario + '/' + scenario + '/Inputs/Inputs_' + filename + '/extra_outputs/existing_gen_units.csv')
+    existing_gen_units_temp = pd.read_csv('Data/GenX inputs/' + scenario + '/' + scenario + '/Inputs/Inputs_' + filename + '/extra_outputs/existing_gen_units.csv')
     existing_gen_units_temp['planning_year'] = year
     existing_gen_units = pd.concat([existing_gen_units, existing_gen_units_temp], ignore_index=True)
 
@@ -67,19 +67,11 @@ for filename, year in year_inputs.items():
 existing_gen_units = existing_gen_units.query('retirement_year>=planning_year')
 
 #PG generators data
-for filename, year in year_inputs.items():
-    existing_gen_units_temp = pd.read_csv('MIP_results_comparison/ inputs/' + scenario + '/' + scenario + '/Inputs/Inputs_' + filename + '/extra_outputs/existing_gen_units.csv')
-    existing_gen_units_temp['planning_year'] = year
-    existing_gen_units = pd.concat([existing_gen_units, existing_gen_units_temp], ignore_index=True)
-
 generators_data=pd.DataFrame()
 for filename,year in year_inputs.items():
     generators_data_temp = pd.read_csv('switch/26-zone/in/'+str(year)+'/'+scenario+'/gen_info.csv')
+    generators_data_temp['planning_year']=year
     generators_data=pd.concat([generators_data, generators_data_temp])
-
-#filter by retirement year
-#the code was written when existing_gen_units varied by year so lots of artifacts of the way the old output looked
-existing_gen_units = existing_gen_units.query('planning_year<retirement_year')
 
 #EIA-EPA Crosswalk
 crosswalk = pd.read_csv("Data/epa_eia_crosswalk.csv")
@@ -126,22 +118,6 @@ nei = nei.rename(columns = {'oris_facility_code': 'CAMD_PLANT_ID', 'oris_boiler_
 #####################
 ## Format columns ###
 #####################
-
-# existing_gen_units
-existing_gen_units_2030['plant_id_eia']=existing_gen_units_2030['plant_id_eia'].astype(int)
-existing_gen_units_2040['plant_id_eia']=existing_gen_units_2040['plant_id_eia'].astype(int)
-existing_gen_units_2050['plant_id_eia']=existing_gen_units_2050['plant_id_eia'].astype(int)
-
-existing_gen_units_2030['generator_id']=existing_gen_units_2030['generator_id'].astype(str)
-existing_gen_units_2040['generator_id']=existing_gen_units_2040['generator_id'].astype(str)
-existing_gen_units_2050['generator_id']=existing_gen_units_2050['generator_id'].astype(str)
-
-existing_gen_units_2030['planning_year']=2030
-existing_gen_units_2040['planning_year']=2040
-existing_gen_units_2050['planning_year']=2050
-
-#bind all into one
-existing_gen_units = pd.concat([existing_gen_units_2030, existing_gen_units_2040, existing_gen_units_2050])
 existing_gen_units = existing_gen_units.rename(columns={'generator_id': 'EIA_GENERATOR_ID', 'plant_id_eia':'EIA_PLANT_ID'})
 
 ## EPA-EIA crosswalk
@@ -195,7 +171,6 @@ emissions = emissions.rename(columns = {'facilityId': 'CAMD_PLANT_ID', 'unitId':
 #####################################################################################
 ### 2. Merge EIA and EPA data into existing_gen_units using the EPA-EIA crosswalk
 ##################################################################################
-#%%
 #join existing_gen_units with crosswalk
 existing_gen_units = pd.merge(existing_gen_units, crosswalk, on=['EIA_GENERATOR_ID', 'EIA_PLANT_ID'],how='left')
 
@@ -216,7 +191,6 @@ existing_gen_units = pd.merge(existing_gen_units, nei, on=['CAMD_PLANT_ID', 'CAM
 #fill in missing capacities
 existing_gen_units['capacity_mw']=existing_gen_units['capacity_mw'].combine_first(existing_gen_units['Capacity'])
 
-#%%
 #########################################################################################
 ### 3. Impute generation for generators with missing generation.  To do this, I take plant-level generation and distribute that generation to generators based on each generator's capacity.
 ##########################################################################################
@@ -224,7 +198,6 @@ existing_gen_units['capacity_mw']=existing_gen_units['capacity_mw'].combine_firs
 # I'm going to calculate plant-level 'missing generation'
 # Then divy up the missing generation to generators according to capacity in MW
 
-#%%
 summed_plant_gen = existing_gen_units.groupby(['EIA_PLANT_ID', 'planning_year']).agg({'NET_GEN_GENERATOR': 'sum'}).reset_index()
 summed_plant_gen.columns=['EIA_PLANT_ID', 'planning_year', 'sum_generator_gen']
 
@@ -234,7 +207,6 @@ existing_gen_units['missing_generator_generation']=existing_gen_units['NET_GEN_G
 existing_gen_units['missing_generation'] = existing_gen_units['NET_GEN_PLANT'] - existing_gen_units['sum_generator_gen']
 
 
-#%%
 missing_generators = existing_gen_units.query('missing_generator_generation==1').\
     groupby(['EIA_PLANT_ID', 'planning_year']).\
     agg({'capacity_mw': 'sum'}).\
@@ -243,7 +215,6 @@ missing_generators.columns=['EIA_PLANT_ID', 'planning_year', 'missing_generator_
 
 existing_gen_units = pd.merge(existing_gen_units, missing_generators, on=['EIA_PLANT_ID', 'planning_year'], how='left')
 
-# %%
 ## Make imputation
 
 existing_gen_units['pct_missing_capacity'] = (existing_gen_units['capacity_mw']/existing_gen_units['missing_generator_capacity'])*existing_gen_units['missing_generator_generation']
@@ -312,14 +283,12 @@ technology_rates.columns = ['technology', 'planning_year', 'noxrate_imputed', 'p
 
 existing_gen_units = pd.merge(existing_gen_units, technology_rates, on=['technology', 'planning_year'], how='left')
 
-#%%
 existing_gen_units['noxrate_imputed'] = existing_gen_units['nox_rate'].combine_first(existing_gen_units['noxrate_imputed'])
 existing_gen_units['so2rate_imputed'] = existing_gen_units['so2_rate'].combine_first(existing_gen_units['so2rate_imputed'])
 existing_gen_units['pm25rate_imputed'] = existing_gen_units['pm25_rate'].combine_first(existing_gen_units['pm25rate_imputed'])
 existing_gen_units['vocrate_imputed'] = existing_gen_units['voc_rate'].combine_first(existing_gen_units['vocrate_imputed'])
 existing_gen_units['nh3rate_imputed'] = existing_gen_units['nh3_rate'].combine_first(existing_gen_units['nh3rate_imputed'])
 
-#%%
 ############################################################################################
 ### 5. Calculate marginal emissions by multiplying rates by that generator's share of capacity for its cluster.
 ############################################################################################ 
@@ -342,7 +311,6 @@ existing_gen_units['voc_predicted']=existing_gen_units['pct_total']*existing_gen
 existing_gen_units['nh3_predicted']=existing_gen_units['pct_total']*existing_gen_units['nh3rate_imputed']
 
 
-#%%
 #merge in plant locations
 plants = pd.read_excel('Data/eia860/2___Plant_Y2017.xlsx', skiprows=1)
 plants = plants[['Plant Code', 'Longitude', 'Latitude']]
@@ -350,7 +318,7 @@ plants.columns = ['EIA_PLANT_ID', 'Longitude', 'Latitude']
 
 existing_gen_units = pd.merge(existing_gen_units, plants, on=['EIA_PLANT_ID'], how='left')
 
-#%%
+
 ######################################################
 # 6.  Calculate emissions rates for new sources ######
 ######################################################
@@ -363,14 +331,6 @@ existing_gen_units = pd.merge(existing_gen_units, plants, on=['EIA_PLANT_ID'], h
 #Moreover in typical scenarios, you'll see a lot more new capacity than retired capacity so it doesn't really make sense to put, say 200MW of capacity at a site that used to have a 25MW capacity.
 # 
 # This actually makes things easier though. For all new capacity, I'll just distribute it based on capacity to *all* sites (operating and retired).
-
-# %%
-## Calculate emissions rates for new sources
-generators_data_2030['planning_year']=2030
-generators_data_2040['planning_year']=2040
-generators_data_2050['planning_year']=2050
-generators_data = pd.concat([generators_data_2030, generators_data_2040, generators_data_2050])
-
 
 ## Calculate rates for new sources
 existing_gen_units['operating_date']=pd.to_datetime(existing_gen_units['operating_date'])
@@ -395,18 +355,16 @@ new_sites = new_sites[new_sites['Technology'].str.contains('Natural Gas')]
 new_sites = pd.merge(new_sites, plants, how='left', on='EIA_PLANT_ID')
 ipm_regions = gpd.read_file('Data/IPM_Regions/national_emm_boundaries.shp')
 
-# %%
 #make retired sites a geopandas
 geometry = [Point(lon, lat) for lon, lat in zip(new_sites['Longitude'], new_sites['Latitude'])]
 new_sites = gpd.GeoDataFrame(new_sites, geometry=geometry, crs='EPSG:4326')
 
-# %%
+
 #ipm_regions['region'] = ipm_regions['IPM_Region'].map({region: val for val, regions in cost_multiplier_region_map.items() for region in regions})
 ipm_regions = ipm_regions.to_crs('EPSG:4326')
 
 new_sites = gpd.sjoin(new_sites, ipm_regions, how="left", op="intersects")
 
-# %%
 new_sites_df = pd.DataFrame(new_sites)
 new_sites_df = new_sites_df.dropna(subset=['model_regi'])
 
@@ -426,14 +384,14 @@ new_sites_df['pct_total']=new_sites_df['Capacity']/new_sites_df['Tot_Capacity']
 new_sites_df = new_sites_df[['pct_total', 'Longitude', 'Latitude', 'model_regi']]
 new_sites_df = new_sites_df.rename(columns={'model_regi':'region'})
 
-newgenerators = generators_data[generators_data['Resource'].str.contains('naturalgas_')]
-newgenerators.loc[newgenerators['Resource'].str.contains('_ccavg'), 'technology']= 'Natural Gas Fired Combined Cycle'
-newgenerators.loc[newgenerators['Resource'].str.contains('_ctavg'), 'technology']= 'Natural Gas Fired Combustion Turbine'
-newgenerators.loc[newgenerators['Resource'].str.contains('_ccccsavg'), 'technology']= 'Natural Gas Fired Combined Cycle With CCS'
+newgenerators = generators_data[generators_data['GENERATION_PROJECT'].str.contains('naturalgas_')]
+newgenerators.loc[newgenerators['GENERATION_PROJECT'].str.contains('_ccavg'), 'technology']= 'Natural Gas Fired Combined Cycle'
+newgenerators.loc[newgenerators['GENERATION_PROJECT'].str.contains('_ctavg'), 'technology']= 'Natural Gas Fired Combustion Turbine'
+newgenerators.loc[newgenerators['GENERATION_PROJECT'].str.contains('_ccccsavg'), 'technology']= 'Natural Gas Fired Combined Cycle With CCS'
 
 newgenerators = pd.merge(newgenerators, technology_rates_newsources, how='left', on=['technology', 'planning_year'])
 newgenerators = newgenerators.merge(new_sites_df, how="cross")
-newgenerators = newgenerators[newgenerators['region_x']==newgenerators['region_y']]
+newgenerators = newgenerators[newgenerators['gen_load_zone']==newgenerators['region']]
 
 newgenerators['nox_predicted']=newgenerators['pct_total']*newgenerators['nox_rate']
 newgenerators['so2_predicted']=newgenerators['pct_total']*newgenerators['so2_rate']
@@ -441,13 +399,13 @@ newgenerators['pm25_predicted']=newgenerators['pct_total']*newgenerators['pm25_r
 newgenerators['voc_predicted']=newgenerators['pct_total']*newgenerators['voc_rate']
 newgenerators['nh3_predicted']=newgenerators['pct_total']*newgenerators['nh3_rate']
 
-newgenerators = newgenerators[['Longitude', 'Latitude', 'Resource', 'planning_year', 'nox_predicted', 'so2_predicted', 'pm25_predicted', 'voc_predicted', 'nh3_predicted']]
+newgenerators = newgenerators[['Longitude', 'Latitude', 'GENERATION_PROJECT', 'planning_year', 'nox_predicted', 'so2_predicted', 'pm25_predicted', 'voc_predicted', 'nh3_predicted']]
 
-# %%
 #bind all emissions sources together
 
 existing_gen_units = existing_gen_units[['Longitude', 'Latitude', 'Resource', 'planning_year', 'nox_predicted', 'so2_predicted', 'pm25_predicted', 'voc_predicted', 'nh3_predicted']]
 emissions=pd.concat([existing_gen_units, newgenerators], ignore_index=True)
+emissions['Resource']= emissions['Resource'].fillna(emissions['GENERATION_PROJECT'])
 
 print(emissions.shape[0])
 #aggregate emissions in same spot/cluster
@@ -456,57 +414,13 @@ print(emissions.shape[0])
 
 
 # ## 7. Split the emissions output by planning year and write to shapefiles.
+for year,input in year_inputs.items():
+    emissions_temp = emissions[emissions['planning_year']==year]
+    
+    emissions_temp.columns = ['Longitude', 'Latitude', 'Resource', 'planning_year', 'NOx', 'SOx', 'PM2_5', 'VOC', 'NH3']
+    emissions_temp = gpd.GeoDataFrame(
+        emissions_temp, geometry = gpd.points_from_xy(emissions_temp.Longitude, emissions_temp.Latitude), crs='EPSG:4326')
+    emissions_temp = emissions_temp.dropna().reset_index(drop=True)
 
-# %%
-#####
-## 2030
-#####
-emissions_2030 = emissions.query('planning_year==2030')
-
-emissions_2030 = emissions_2030[['Longitude', 'Latitude', 'nox_predicted', 'so2_predicted', 'pm25_predicted', 'voc_predicted', 'nh3_predicted', 'Resource']]
-emissions_2030.columns = ['Longitude', 'Latitude', 'NOx', 'SOx', 'PM2_5', 'VOC', 'NH3', 'Resource']
-
-emissions_2030 = gpd.GeoDataFrame(
-    emissions_2030, geometry = gpd.points_from_xy(emissions_2030.Longitude, emissions_2030.Latitude), crs='EPSG:4326')
-
-emissions_2030 = emissions_2030.dropna().reset_index(drop=True)
-
-emissions_2030.to_file(filename='InMap/MIP_Emissions/marginal_emissions_2030.shp')
-
-#####
-## 2040
-#####
-
-emissions_2040 = emissions.query('planning_year==2040')
-
-emissions_2040 = emissions_2040[['Longitude', 'Latitude', 'nox_predicted', 'so2_predicted', 'pm25_predicted', 'voc_predicted', 'nh3_predicted','Resource']]
-emissions_2040.columns = ['Longitude', 'Latitude', 'NOx', 'SOx', 'PM2_5', 'VOC', 'NH3', 'Resource']
-
-emissions_2040 = gpd.GeoDataFrame(
-    emissions_2040, geometry = gpd.points_from_xy(emissions_2040.Longitude, emissions_2040.Latitude), crs='EPSG:4326')
-
-emissions_2040 = emissions_2040.dropna().reset_index(drop=True)
-
-emissions_2040.to_file(filename='InMap/MIP_Emissions/marginal_emissions_2040.shp')
-
-#####
-## 2050
-#####
-
-emissions_2050 = emissions.query('planning_year==2050')
-
-emissions_2050 = emissions_2050[['Longitude', 'Latitude', 'nox_predicted', 'so2_predicted', 'pm25_predicted', 'voc_predicted', 'nh3_predicted', 'Resource']]
-emissions_2050.columns = ['Longitude', 'Latitude', 'NOx', 'SOx', 'PM2_5', 'VOC', 'NH3', 'Resource']
-
-emissions_2050 = gpd.GeoDataFrame(
-    emissions_2050, geometry = gpd.points_from_xy(emissions_2050.Longitude, emissions_2050.Latitude), crs='EPSG:4326')
-
-emissions_2050 = emissions_2050.dropna().reset_index(drop=True)
-
-
-emissions_2050.to_file(filename='InMap/MIP_Emissions/marginal_emissions_2050.shp')
-
-
-
-
+    emissions_temp.to_file(filename='MIP_Air_OutData/MIP_Emissions/'+scenario+'_marginal_emissions_'+str(input)+'.shp')
 
