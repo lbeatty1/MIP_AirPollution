@@ -11,10 +11,10 @@ Follow the steps at <https://github.com/switch-model/Switch-USA-PG>. Then clone 
 3. Generate inputs for switch `python pg_to_switch.py MIP_results_comparison/case_settings/26-zone/settings-atb2023 switch/26-zone/in/ --case-id base_short`
 4. Generate emissions locations then cluster-year exposure coefficients with `Gen_Emissions_Locations.py` and `InMap_SR_GenConstraints.py`, respectively.
 5. Run switch with the exposure module
-    a. set `switch` as the working directory -- `cd switch`
-    b. `python setup_exposure_scenarios.py`
-    c. Run the base cost-minimization. `switch solve-scenarios --scenario-list scenarios_1.txt`
-    d. Run the minimizing exposure part. `switch solve-scenarios --scenario-list scenarios_2.txt`
+    - set `switch` as the working directory -- `cd switch`
+    - `python setup_exposure_scenarios.py`
+    - Run the base cost-minimization. `switch solve-scenarios --scenario-list scenarios_1.txt`
+    - Run the minimizing exposure part. `switch solve-scenarios --scenario-list scenarios_2.txt`
 
 ## Data
 EIA Data comes from EIA-860 and EIA-923 which can be downloaded at:
