@@ -5,8 +5,16 @@ This repo is designed to model air pollution and jobs from least-cost electricit
 
 Follow the steps at <https://github.com/switch-model/Switch-USA-PG>. Then clone this repository within `Switch-USA-PG`.  This code has a few dependencies so you will also need to type `mamba env update -n switch-pg -f MIP_AirPollution/environment.yml` when you are in the `(base)` environment.
 
-# Gen_Plant_Emissions -- EDIT TITLE
-Code to analyze emissions from generation facilities, and impute emissions for clusters from PowerGenome.
+# Running the Endogenous Model
+1. Navigate into the Switch-USA-PG folder and activate the `switch-pg` environment.
+2. Type `python download_pg_data.py`into the terminal to download necessary data.
+3. Generate inputs for switch `python pg_to_switch.py MIP_results_comparison/case_settings/26-zone/settings-atb2023 switch/26-zone/in/ --case-id base_short`
+4. Generate emissions locations then cluster-year exposure coefficients with `Gen_Emissions_Locations.py` and `InMap_SR_GenConstraints.py`, respectively.
+5. Run switch with the exposure module
+  a. set `switch` as the working directory -- `cd switch
+  b. `python setup_exposure_scenarios.py`
+  c. Run the base cost-minimization. `switch solve-scenarios --scenario-list scenarios_1.txt
+  d. Run the minimizing exposure part. ` switch solve-scenarios --scenario-list scenarios_2.txt`
 
 ## Data
 EIA Data comes from EIA-860 and EIA-923 which can be downloaded at:
