@@ -1,3 +1,10 @@
+# Introduction
+This repo is designed to model air pollution and jobs from least-cost electricity planning models.  The scripts in `/Downscaled/` are used to take output from `MIP_results_comparison` and project air pollution and jobs impacts.  The scripts in `\Endogenous\` are used to generate cluster-level coefficients that can be used to endogenize air pollution exposure within Switch.
+
+# Installation
+
+Follow the steps at <https://github.com/switch-model/Switch-USA-PG>. Then clone this repository within `Switch-USA-PG`.  This code has a few dependencies so you will also need to type `mamba env update -n switch-pg -f MIP_AirPollution/environment.yml` when you are in the `(base)` environment.
+
 # Gen_Plant_Emissions -- EDIT TITLE
 Code to analyze emissions from generation facilities, and impute emissions for clusters from PowerGenome.
 
