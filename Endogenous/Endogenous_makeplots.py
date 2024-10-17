@@ -7,6 +7,8 @@ import numpy as np
 import pandas as pd
 import math
 from matplotlib.colors import LinearSegmentedColormap
+from matplotlib.colors import ListedColormap
+
 
 
 os.chdir('C:/Users/laure/Documents/Switch-USA-PG/')
@@ -322,3 +324,26 @@ for y in years:
     ax.legend()
 
     plt.savefig(f'MIP_AirPollution/Figures/EndogenousResults/{scenario}/exposure_by_scenario_{y}.png', dpi=300, bbox_inches='tight')  # DPI for high resolution
+
+##
+## PPF
+
+group_exposure_max = group_exposure.groupby(['SetProduct_OrderedSet_2', 'scenario']).agg({'GroupExposure':'max'}).reset_index()
+group_exposure_max['cost'] = group_exposure_max['scenario'].str.replace(f'{scenario}', '', regex=False)
+group_exposure_max['cost'] = group_exposure_max['cost'].str.replace('_', '', regex=False)
+group_exposure_max['cost'] = pd.to_numeric(group_exposure_max['cost'])
+group_exposure_max.fillna(0, inplace=True)
+
+colors = {2027: 'blue', 2030: 'green'}  # Assign specific colors to each year
+
+for year in group_exposure_max['SetProduct_OrderedSet_2'].unique():
+    subset = group_exposure_max[group_exposure_max['SetProduct_OrderedSet_2'] == year]
+    plt.scatter(subset['cost'], subset['GroupExposure'], color=colors[year], label=str(year))
+
+plt.xlabel('Cost')
+plt.ylabel('Result')
+plt.title('Cost vs Result (Colored by Year)')
+
+plt.legend(title='Year')
+
+plt.savefig(f'MIP_AirPollution/Figures/EndogenousResults/{scenario}/exposure_cost_PPF.png', dpi=300, bbox_inches='tight')  # DPI for high resolution
