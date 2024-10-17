@@ -1,5 +1,3 @@
-#%%
-
 from __future__ import (absolute_import, division, print_function, unicode_literals)
 from builtins import * 
 from io import BytesIO, TextIOWrapper
@@ -18,10 +16,10 @@ import geopandas as gpd
 import s3fs
 import os
 
+## Code lifted (almost) directly from https://www.inmap.run/blog/2022/12/15/tutorial/
 
-os.chdir('C:/Users/lbeatty/Documents/Lauren_MIP_Contribution/')
+os.chdir('C:/Users/laure/Documents/Switch-USA-PG/')
 
-#%%
 def rect(i, w, s, e, n):
     x = [w[i], e[i], e[i], w[i], w[i]]
     y = [s[i], s[i], n[i], n[i], s[i]]
@@ -47,10 +45,11 @@ sr = zarr.open(s3fs.S3Map(url, s3=fs, check=False), mode="r")
 
 p = poly(sr)
 
-#%%
-years = ['2030', '2040', '2050']
+years = ['2045', '2050']
+scenario = 'base_short'
 for year in years:
-    emis = gpd.read_file('InMap/MIP_Emissions/marginal_emissions_'+year+'.shp')
+    filename='MIP_Air_OutData/MIP_Emissions/'+ scenario+ '_marginal_emissions_'+str(year)+'.shp'
+    emis = gpd.read_file(filename)
     fact = 28766.639
 
     df = pd.DataFrame({'Location': range(52411)})
@@ -120,6 +119,6 @@ for year in years:
     exposure_data_collapsed = exposure_data.groupby(['Race', 'Cluster','Pollutant']).agg({'Exposure':'sum'}).reset_index()
     exposure_data_collapsed['year']=year
 
-    exposure_data_collapsed.to_csv('MIP_AirPollution/marginal_gen_exposure_coefs_'+year+'.csv')
+    exposure_data_collapsed.to_csv('MIP_Air_OutData/Marginal_Coefficients/' + scenario+'_marginal_exposure_coefs_'+year+'.csv')
 
 

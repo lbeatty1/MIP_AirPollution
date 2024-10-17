@@ -113,11 +113,12 @@ nei['ann_value']=nei['ann_value']
 nei = nei.pivot(index=['oris_facility_code', 'oris_boiler_id'], columns='poll', values='ann_value').reset_index()
 nei = nei.rename(columns = {'oris_facility_code': 'CAMD_PLANT_ID', 'oris_boiler_id': 'CAMD_UNIT_ID'})
 
-
+print("Finished Reading Data")
 
 #####################
 ## Format columns ###
 #####################
+print("Formatting Data")
 existing_gen_units = existing_gen_units.rename(columns={'generator_id': 'EIA_GENERATOR_ID', 'plant_id_eia':'EIA_PLANT_ID'})
 
 ## EPA-EIA crosswalk
@@ -230,6 +231,7 @@ existing_gen_units['NET_GEN_GENERATOR'] = existing_gen_units['NET_GEN_GENERATOR'
 
 #looks like there's broad agreement between camd and nei
 #fill in missing camd data with nei data
+print("Calculating Emissions Rates")
 
 existing_gen_units['nox_tons'] = existing_gen_units['nox_tons'].combine_first(existing_gen_units['NOX_nei_tons'])
 existing_gen_units['so2_tons'] = existing_gen_units['so2_tons'].combine_first(existing_gen_units['SO2_nei_tons'])
@@ -292,7 +294,7 @@ existing_gen_units['nh3rate_imputed'] = existing_gen_units['nh3_rate'].combine_f
 ############################################################################################
 ### 5. Calculate marginal emissions by multiplying rates by that generator's share of capacity for its cluster.
 ############################################################################################ 
-
+print("Calculating Cluster Emissions Rates")
 column = 'capacity_mw'
 
 technology_year_total = existing_gen_units.groupby(['Resource', 'planning_year']).agg({column : 'sum'}).reset_index()
@@ -414,13 +416,16 @@ print(emissions.shape[0])
 
 
 # ## 7. Split the emissions output by planning year and write to shapefiles.
-for year,input in year_inputs.items():
+print("Writing emissions data to shapefiles")
+for input,year in year_inputs.items():
     emissions_temp = emissions[emissions['planning_year']==year]
     
     emissions_temp.columns = ['Longitude', 'Latitude', 'Resource', 'planning_year', 'NOx', 'SOx', 'PM2_5', 'VOC', 'NH3']
+    print(emissions_temp.shape[0])
+
     emissions_temp = gpd.GeoDataFrame(
         emissions_temp, geometry = gpd.points_from_xy(emissions_temp.Longitude, emissions_temp.Latitude), crs='EPSG:4326')
     emissions_temp = emissions_temp.dropna().reset_index(drop=True)
 
-    emissions_temp.to_file(filename='MIP_Air_OutData/MIP_Emissions/'+scenario+'_marginal_emissions_'+str(input)+'.shp')
+    emissions_temp.to_file(filename='MIP_Air_OutData/MIP_Emissions/'+scenario+'_marginal_emissions_'+str(year)+'.shp')
 
