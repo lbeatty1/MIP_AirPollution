@@ -53,7 +53,7 @@
 \end{center}
 
 \begin{abstract}
-Renewed interest in the distributional impacts of policies require going beyond typical methods of analysis such as benefit-cost analysis.  In this paper we show how to use least-cost electricity planning models to design equitable systems by turning their logic upside-down.  Rather than using the models to minimize costs, we provide the model with a min-max objective function on distributional health effects of electricity generation and subject the solution to a total cost constraint.  This provides a model result that 
+Renewed interest in the distributional impacts of policies require going beyond typical methods of analysis such as benefit-cost analysis.  In this paper we show how to use least-cost electricity planning models to design equitable systems by modifying their objective functions.  Rather than using the models to minimize costs, we provide the model with a min-max objective function on the distributional health effects of electricity generation and subject the solution to a total cost constraint.  This method provides a menu of plans that equitably reduce pollution exposure.
 \end{abstract}
 
 
@@ -61,15 +61,16 @@ Renewed interest in the distributional impacts of policies require going beyond 
 \section{Introduction}
 Climate change mitigation will require deep cuts to greenhouse gas emissions from the electricity sector.  Least-cost electricity planning models are powerful tools that allow policymakers and capacity planners to select portfolios of generation technologies that meet reliability requirements and emissions goals.  
 
-There is a large body of work on the health effects of air pollution, and a large body of work on the effects of electricity generation on air pollution. 
-Air pollution is linked with numerous health impacts such as chronic obstructive pulmonary disease (COPD), acture lower respiratory illness, cerebrovascular disease, ischaemic heart disease, and lung cancer. \cite{Lelieveld2015TheScale} estimate that power generation is linked with 31$\%$ of premature mortality caused by outdoor air pollution in the U.S.
+However, these models have historically ignored some of the external costs of electricity generation. 
+ One major external costs is the generation of local air pollutants.  There is a large body of work on the health effects of air pollution, and a large body of work on the effects of electricity generation on air pollution. 
+Air pollution is linked with numerous health impacts such as chronic obstructive pulmonary disease (COPD), acute lower respiratory illness, cerebrovascular disease, ischaemic heart disease, and lung cancer. \cite{Lelieveld2015TheScale} estimate that power generation is linked with 31$\%$ of premature mortality caused by outdoor air pollution in the U.S.
 
 There is also work that has shown that air pollution exposures vary drastically across racial and socioeconomic groups.   \cite{Thind2019FineGeography} find that Black and non-Hispanic white people are exposed to more pollution than other groups and that exposures for low-income people are higher than for high-income people, even after controlling for race.  This highlights the importance for developing planning methods that alleviate rather than reinforce disproportionate burdens.
 
 Related work has included co-benefits involved with reducing electricity generation from fossil fuels in the objective function \citet{Sergi2020OptimizingBenefits}.
-Related work has also been used to project how the electricity transmission might affect the distributional consequences of air pollution exposure \citep{Goforth2022AirStrategies}. However, in this paper, rather than modifying the objective function to include health effects, or use model outputs to project health changes, we endogenize pollution exposure within the electricity model in a way that explicity considers distributional effects.  This allows us to use the model to produce results that don't unfairly saddle certain groups with disproportionate pollution exposure.  It also can be used to answer questions such as "How much can pollution exposure be reduced for $\$100$ billion?" 
+or projected how the electricity transmission might affect the distributional consequences of air pollution exposure \citep{Goforth2022AirStrategies}. However, in this paper, rather than modifying the objective function to include health effects, or use model outputs to project health changes, we endogenize pollution exposure within the electricity model in a way that explicitly considers distributional effects.  This allows us to use the model to produce results that don't unfairly burden certain groups with disproportionate pollution exposure.  It also can be used to answer questions such as "How much can pollution exposure be equitably reduced for $\$100$ billion?" 
 
-In future work, we hope to apply a similar methodology to jobs.  This will help policymakers and planners design electricity systems that avoid causing disruptive employment declines in certain regions. Previous work has linked declines in employment from  coal extraction to negative impacts such as decreases in home values, increases in poverty, and increases in credit utilization and delinquency. Moreover, these studies also suggest that even residents who are not employed by the industry also suffer the negatives consequences associated with the industry's decline (\citet{Kraynak2023TheCountry}, \citet{Blonz2023TheFuels}). 
+This method could also be used to help design electricity transition plans that are equitable in other dimensions.  For example, one concern with the energy transition is that some regions will lose jobs.  This method could help policymakers and planners design electricity systems that avoid causing disruptive employment declines in certain regions. Previous work has linked declines in employment from  coal extraction to negative impacts such as decreases in home values, increases in poverty, and increases in credit utilization and delinquency. Moreover, these studies also suggest that even residents who are not employed by the industry also suffer the negatives consequences associated with the industry's decline (\citet{Kraynak2023TheCountry}, \citet{Blonz2023TheFuels}). 
 
 \section{Data}
 \subsection{Emissions Data}
@@ -80,7 +81,11 @@ Stuff about PowerGenome.
 
 \section{Methods}
 
-The goal of this paper is to use least-cost electricity planning models to design power systems that produce equitable distributions of air pollution exposure.  The modelling can be broken into the following parts: modelling air pollution from electricity generation and modifying Switch to accommodate our min-max objective function.
+Least-cost electricity planning models are the gold-standard models used to model capacity expansion in policy.  However, these models tend to have a narrow focus on minimizing costs -- potentially at the expense of distributional concerns.  The energy transition will have wide-ranging effects --such as shifts in the spatial distribution of jobs, or changes in air pollution, that are of interest to policy-makers, but are currently unincorporated into least-cost models.
+
+Previous attempts to consider the health impacts of air pollution have monetized air pollution harms, and inserted them into the cost minimization.  While this is certainly an improvement over not considering these costs at all, this method ignores the fact that inequity in the past has driven current differences in air pollution exposure, and that certain groups may experience higher burdens from air pollution than others.
+
+In this paper, we outline a method to use least-cost electricity planning models to design power systems that produce equitable distributions of air pollution exposure.  We pull inspiration from Rawls and formulate our model as a min-max problem where the social planner minimizes the maximum pollution exposure subject to a cost constraint, rather than minimizing costs.  Running multiple iterations of the model at different cost constraints allows us to understand, how much can we equitably improve air quality and at what costs.
 
 \subsection{Air Pollution Modelling}
 The end product necessary to endogenize air pollution within electricity planning models are a set of coefficients that describe the marginal effect of a unit of electricity generation on population-weighted mean pollution exposure for different racial groups (though you could also apply the same logic and methodology to differing socio-economic groups more broadly).  
