@@ -86,13 +86,13 @@ fill=green!30]
 \begin{frame}{Background on Least-Cost Electricity Planning Models}
 \begin{center}
 \begin{tikzpicture}[node distance=2cm]
-\node (start) [start, text width=5cm] {\shortstack[l]{• Electricity Demand \\ • Costs of New Generation \\ • Generation Characteristics\\
+\node (start) [start, text width=5cm] {\shortstack[l]{Inputs\\• Electricity Demand \\ • Costs of New Generation \\ • Generation Characteristics\\
 • Constraints}};
 
 \node(obj)[process, below of=start, text width=8cm]{\shortstack[l]{$\min \sum \text{Costs}$ \\ \textit{ 
    s.t.   }\text{Everyone gets electricity and nothing breaks }}};
 
-\node (result) [stop, below of=obj] {\shortstack[l]{• Time-varying generation for each resource \\ • New Generation Capacity \\ • New Transmission Capacity}};
+\node (result) [stop, below of=obj] {\shortstack[l]{Outputs\\• Time-varying generation for each resource \\ • New Generation Capacity \\ • New Transmission Capacity}};
 
 \draw [arrow] (start) -- (obj);
 \draw [arrow] (obj) -- (result);
@@ -106,13 +106,13 @@ fill=green!30]
 \begin{center}
 \begin{tikzpicture}[node distance=2cm]
 
-\node (start) [start, text width=5cm] {\shortstack[l]{• Electricity Demand \\ • Costs of New Generation \\ • Generation Characteristics\\
+\node (start) [start, text width=5cm] {\shortstack[l]{Inputs\\• Electricity Demand \\ • Costs of New Generation \\ • Generation Characteristics\\
 • Constraints}};
 
 \node(obj)[process, below of=start, text width=8cm]{\shortstack[l]{$\min \sum \text{Costs} + \text{Monetized Air Pollution Impacts}$ \\ \textit{ 
    s.t.   }\text{Everyone gets electricity and nothing breaks }}};
 
-\node (result) [stop, below of=obj] {\shortstack[l]{• Time-varying generation for each resource \\ • New Generation Capacity \\ • New Transmission Capacity}};
+\node (result) [stop, below of=obj] {\shortstack[l]{Outputs\\• Time-varying generation for each resource \\ • New Generation Capacity \\ • New Transmission Capacity}};
 
 \draw [arrow] (start) -- (obj);
 \draw [arrow] (obj) -- (result);
@@ -132,7 +132,7 @@ fill=green!30]
     \begin{center}
 \begin{tikzpicture}[node distance=2cm]
 
-\node (start) [start, text width=5cm] {\shortstack[l]{• Electricity Demand \\ • Costs of New Generation \\ • Generation Characteristics\\
+\node (start) [start, text width=5cm] {\shortstack[l]{Inputs\\• Electricity Demand \\ • Costs of New Generation \\ • Generation Characteristics\\
 • Constraints}};
 
 \node (air) [start, text width=4cm, right of= start, xshift=3cm] {\shortstack[l]{• Air Pollution Model\\
@@ -143,9 +143,9 @@ fill=green!30]
 
 \node(obj2)[process, below of=obj, text width=8cm, xshift=0cm]{\shortstack[l]{$\min \max\{\text{PollutionExp}_1,...,\text{PollutionExp}_N\}$ \\ \textit{ 
    s.t.   }\text{Everyone gets electricity and nothing breaks,} \\
-    $\text{      }\sum \text{Costs}<= C^*+Threshold$ }};
+    $\text{      }\sum \text{Costs} \leq C^*+Threshold$ }};
 
-\node (result) [stop, below of=obj2] {\shortstack[l]{• Time-varying generation for each resource \\ • New Generation Capacity \\ • New Transmission Capacity}};
+\node (result) [stop, below of=obj2] {\shortstack[l]{Outputs\\• Time-varying generation for each resource \\ • New Generation Capacity \\ • New Transmission Capacity}};
 
 \draw [arrow] (start) -- (obj);
 \draw [arrow] (air) |- (obj2);
@@ -157,20 +157,13 @@ fill=green!30]
 \end{center}
 \end{frame}}
 
-\begin{frame}{A Point About Calculus}
-    \includegraphics[width=0.48\textwidth]{Figures/Slide Pictures/Transmission1.png} \includegraphics[width=0.48\textwidth]{Figures/Slide Pictures/Transmission2.png}
-
-    The effect of deviations from the least-cost optimum will depend on the shape of the objective function.  This is an \textit{empirical} question!\\
-    \vspace{.5cm}
-    $\Rightarrow$ Perhaps you can get large improvements in health or jobs at only modest increases in cost.
-\end{frame}
 
 \begin{frame}{Our Approach}
     \begin{enumerate}
         \item Use EPA emissions data to calculate emissions rates (Pounds per MWh)
         \item Use InMap Source-Receptor Matrix to calculate how one MWh of generation for each resource affects population-weighted average exposure for different groups.
         \item Use Switch to calculate least cost planning costs.
-        \item Modify and run switch to minimize air pollution exposure subject to a cost constraint.
+        \item Modify and run Switch to minimize air pollution exposure subject to a cost constraint.
     \end{enumerate}
 
 \paragraph{Benefits}
@@ -181,6 +174,15 @@ fill=green!30]
 \end{itemize}
 \end{frame}
 
+
+\begin{frame}{A Point About Calculus}
+    \includegraphics[width=0.48\textwidth]{Figures/Slide Pictures/Transmission1.png} \includegraphics[width=0.48\textwidth]{Figures/Slide Pictures/Transmission2.png}
+
+    The effect of deviations from the least-cost optimum will depend on the shape of the objective function.  This is an \textit{empirical} question!\\
+    \vspace{.5cm}
+    $\Rightarrow$ Perhaps you can get large improvements in health or jobs at only modest increases in cost.
+\end{frame}
+
 \begin{frame}{Thanks!}
 \label{Thanks}
 
@@ -188,14 +190,23 @@ fill=green!30]
     Please feel free to contact me at:
     \href{mailto:lbeatty@edf.org}{lbeatty@edf.org}\\
     \vspace{1cm}
+\end{frame}
 
-\begin{frame}{Bonus Slides}
+\begin{frame}{Bonus Slide!}
+    This project started as a side-project to the Model Intercomparison Project -- a project aimed at harmonizing the inputs and comparing multiple open-source electricity planning models.
+
+    \vspace{.4cm}
     
-\end{frame}
+    \includegraphics[width=0.3\textwidth]{Figures/Output/ISRM_deathrate_by_scenario_2030.jpg}
+    \includegraphics[width=0.3\textwidth]{Figures/Output/ISRM_deathrate_by_scenario_2040.jpg}
+    \includegraphics[width=0.3\textwidth]{Figures/Output/ISRM_deathrate_by_scenario_2050.jpg}
+
+\begin{itemize}
+    \item Death rates vary widely across racial groups.
+    \item Aggressive carbon policies reduce pollution exposure the fastest.
+    \item Optimistic -- even under current policies future generations should have much better air quality.
+\end{itemize}
 
 \end{frame}
-
-
-
 
 \end{document}
