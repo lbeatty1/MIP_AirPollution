@@ -276,22 +276,49 @@ for tech in ['Wind', 'Solar', 'Naturalgas', 'Coal', 'Electricity']:
             plotdata = plotdata[plotdata['period']==y]
 
             plotdata = plotdata.merge(base, on='model_regi', how='left')
-            plotdata['GenDif'] = plotdata[f'Energy_GWh_{tech}']/plotdata['Base_Energy_GWh']
+            plotdata['GenDif'] = plotdata[f'Energy_GWh_{tech}']-plotdata['Base_Energy_GWh']
+
+            vmin = plotdata['GenDif'].min()
+            vmax = plotdata['GenDif'].max()
 
             fig, ax = plt.subplots(1, 1, figsize=(10, 6))
             plotdata.plot(column='GenDif', 
-                            ax=ax, 
-                            legend=True, 
-                            cmap='OrRd',
-                            edgecolor='black')
+                        ax=ax, 
+                        legend=True, 
+                        cmap='OrRd',
+                        edgecolor='black',
+                        vmin=vmin,  # Set minimum value for the colormap
+                        vmax=vmax,
+                        legend_kwds={'label': 'Generation Difference (GWh)',  # Title for the colorbar
+                                     'orientation': 'vertical'})  # Set maximum value for the colormap
 
-            # Optional: Customize the plot further
             ax.set_title(f'Generation Relative to Base: {tech}', fontsize=15)
-            ax.set_axis_off()  # Turn off the axis for a cleaner look
-
-            # Show the plot
+            ax.set_axis_off() 
             plt.savefig(f'MIP_AirPollution/Figures/EndogenousResults/{scenario}/Dispatch_Relative_{tech}_{y}_{c}.png', dpi=300, bbox_inches='tight')  # DPI for high resolution
 
+
+dispatch = dispatch.groupby(['gen_tech', 'period', 'scenario']).agg({'Energy_GWh_typical_yr':'sum'}).reset_index()
+
+other_techs = dispatch[dispatch['scenario']==scenario]
+other_techs = other_techs[other_techs['Energy_GWh_typical_yr']<1000]
+other_techs = other_techs['gen_tech'].tolist()
+dispatch.loc[dispatch['gen_tech'].isin(other_techs), 'gen_tech'] = 'other'
+
+for year in years:
+    data_year = dispatch[dispatch['period'] == year]
+    
+    data_pivot = data_year.pivot_table(index='scenario', columns='gen_tech', values='Energy_GWh_typical_yr', aggfunc='sum')
+    
+    ax = data_pivot.plot(kind='bar', stacked=True, figsize=(10, 6), cmap='tab20')
+    
+    ax.set_title(f'Energy (GWh) by Scenario and Technology - Year {year}', fontsize=16)
+    ax.set_ylabel('Energy (GWh)', fontsize=12)
+    ax.set_xlabel('Scenario', fontsize=12)
+    
+    plt.legend(title='Technology', bbox_to_anchor=(1.05, 1), loc='upper left')
+    
+    plt.tight_layout()
+    plt.savefig(f'MIP_AirPollution/Figures/EndogenousResults/{scenario}/Dispatch_Relative_by_scenario_{year}.png', dpi=300, bbox_inches='tight')  # DPI for high resolution
 
 #####################
 ## Group Exposure
