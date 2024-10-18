@@ -1,3 +1,0 @@
---scenario-name base_50 --inputs-dir in/foresight/base --outputs-dir out/base_50 --input-alias financials.csv=financials.base_50.csv --include-module mip_modules.cap_pollution_exposure --save-expression GroupExposure --solver-options-string "method=2 crossover=0 BarHomogeneous=1 NumericFocus=1"
---scenario-name current_policies_50 --inputs-dir in/foresight/current_policies --outputs-dir out/current_policies_50 --input-alias financials.csv=financials.current_policies_50.csv --include-module mip_modules.cap_pollution_exposure --save-expression GroupExposure  --solver-options-string "method=2 crossover=0 BarHomogeneous=1 NumericFocus=1"
-
