@@ -13,7 +13,7 @@ from matplotlib.colors import ListedColormap
 
 os.chdir('C:/Users/laure/Documents/Switch-USA-PG/')
 
-scenario = 'base_short'
+scenario = 'base_short_simplified'
 years = [2027, 2030]
 result_dir = f'switch/26-zone/out/foresight/'
 cost_limits = [50,100,200]
@@ -300,7 +300,7 @@ for tech in ['Wind', 'Solar', 'Naturalgas', 'Coal', 'Electricity']:
 dispatch = dispatch.groupby(['gen_tech', 'period', 'scenario']).agg({'Energy_GWh_typical_yr':'sum'}).reset_index()
 
 other_techs = dispatch[dispatch['scenario']==scenario]
-other_techs = other_techs[other_techs['Energy_GWh_typical_yr']<1000]
+other_techs = other_techs[other_techs['Energy_GWh_typical_yr']<100]
 other_techs = other_techs['gen_tech'].tolist()
 dispatch.loc[dispatch['gen_tech'].isin(other_techs), 'gen_tech'] = 'other'
 
@@ -367,9 +367,9 @@ for year in group_exposure_max['SetProduct_OrderedSet_2'].unique():
     subset = group_exposure_max[group_exposure_max['SetProduct_OrderedSet_2'] == year]
     plt.scatter(subset['cost'], subset['GroupExposure'], color=colors[year], label=str(year))
 
-plt.xlabel('Cost')
+plt.xlabel('Budget')
 plt.ylabel('Result')
-plt.title('Cost vs Result (Colored by Year)')
+plt.title('Budget vs Max(Pollution Exposure)')
 
 plt.legend(title='Year')
 
