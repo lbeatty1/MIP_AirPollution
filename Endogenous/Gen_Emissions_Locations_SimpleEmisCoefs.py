@@ -63,11 +63,7 @@ for filename, year in year_inputs.items():
 existing_gen_units = existing_gen_units.query('retirement_year>=planning_year')
 
 #PG generators data
-generators_data=pd.DataFrame()
-for filename,year in year_inputs.items():
-    generators_data_temp = pd.read_csv('switch/26-zone/in/'+str(year)+'/'+scenario+'/gen_info.csv')
-    generators_data_temp['planning_year']=year
-    generators_data=pd.concat([generators_data, generators_data_temp])
+generators_data = pd.read_csv('switch/26-zone/in/foresight/'+scenario+'/gen_info.csv')
 
 #EIA-EPA Crosswalk
 crosswalk = pd.read_csv("Data/epa_eia_crosswalk.csv")
@@ -364,7 +360,12 @@ newgenerators.loc[newgenerators['GENERATION_PROJECT'].str.contains('_ccavg'), 't
 newgenerators.loc[newgenerators['GENERATION_PROJECT'].str.contains('_ctavg'), 'technology']= 'Natural Gas Fired Combustion Turbine'
 newgenerators.loc[newgenerators['GENERATION_PROJECT'].str.contains('_ccccsavg'), 'technology']= 'Natural Gas Fired Combined Cycle With CCS'
 
-newgenerators = pd.merge(newgenerators, technology_rates, how='left', on=['technology', 'planning_year'])
+
+newgenerators.loc[newgenerators['GENERATION_PROJECT'].str.contains('_cc_'), 'technology']= 'Natural Gas Fired Combined Cycle'
+newgenerators.loc[newgenerators['GENERATION_PROJECT'].str.contains('_ct_'), 'technology']= 'Natural Gas Fired Combustion Turbine'
+newgenerators.loc[newgenerators['GENERATION_PROJECT'].str.contains('_cc_95_ccs'), 'technology']= 'Natural Gas Fired Combined Cycle With CCS'
+
+newgenerators = pd.merge(newgenerators, technology_rates, how='left', on=['technology'])
 newgenerators = newgenerators.merge(new_sites_df, how="cross")
 newgenerators = newgenerators[newgenerators['gen_load_zone']==newgenerators['region']]
 
@@ -374,7 +375,13 @@ newgenerators['pm25_predicted']=newgenerators['pct_total']*newgenerators['pm25ra
 newgenerators['voc_predicted']=newgenerators['pct_total']*newgenerators['vocrate_imputed']
 newgenerators['nh3_predicted']=newgenerators['pct_total']*newgenerators['nh3rate_imputed']
 
-newgenerators = newgenerators[['Longitude', 'Latitude', 'GENERATION_PROJECT', 'planning_year', 'nox_predicted', 'so2_predicted', 'pm25_predicted', 'voc_predicted', 'nh3_predicted']]
+newgenerators = newgenerators[['Longitude', 'Latitude', 'GENERATION_PROJECT', 'nox_predicted', 'so2_predicted', 'pm25_predicted', 'voc_predicted', 'nh3_predicted']]
+
+newgenerators_temp = newgenerators
+newgenerators = pd.DataFrame()
+for item,year in year_inputs.items():
+    newgenerators_temp['planning_year']=year
+    newgenerators = pd.concat([newgenerators, newgenerators_temp])
 
 #bind all emissions sources together
 

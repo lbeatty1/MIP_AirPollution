@@ -13,10 +13,13 @@ from matplotlib.colors import ListedColormap
 
 os.chdir('C:/Users/laure/Documents/Switch-USA-PG/')
 
-scenario = 'base_short_simplified'
+scenario = 'current_policies_short_simplified'
 years = [2027, 2030]
 result_dir = f'switch/26-zone/out/foresight/'
 cost_limits = [50,100,200]
+
+if not os.path.exists('MIP_AirPollution/Figures/EndogenousResults/'+scenario+'/'):
+    os.mkdir('MIP_AirPollution/Figures/EndogenousResults/'+scenario+'/')
 
 #read in exposure coefs
 coefs=pd.DataFrame()
@@ -351,7 +354,7 @@ for y in years:
     ax.legend()
 
     plt.savefig(f'MIP_AirPollution/Figures/EndogenousResults/{scenario}/exposure_by_scenario_{y}.png', dpi=300, bbox_inches='tight')  # DPI for high resolution
-
+    plt.show()
 ##
 ## PPF
 

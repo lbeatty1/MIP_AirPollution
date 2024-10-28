@@ -46,13 +46,11 @@ sr = zarr.open(s3fs.S3Map(url, s3=fs, check=False), mode="r")
 p = poly(sr)
 
 years = ['2027', '2030', '2035', '2040']
-scenario = 'base_short'
+scenario = 'current_policies_short_simplified'
 simplified=True
 
 for year in years:
     filename='MIP_Air_OutData/MIP_Emissions/'+ scenario+ '_marginal_emissions_'+str(year)+'.shp'
-    if simplified==True:
-             filename='MIP_Air_OutData/MIP_Emissions/'+ scenario+ '_marginal_emissions_'+str(year)+'_simplified.shp'
 
     emis = gpd.read_file(filename)
     fact = 28766.639
@@ -124,10 +122,7 @@ for year in years:
     exposure_data_collapsed = exposure_data.groupby(['Race', 'Cluster','Pollutant']).agg({'Exposure':'sum'}).reset_index()
     exposure_data_collapsed['year']=year
 
-    if simplified==False:
-        exposure_data_collapsed.to_csv('MIP_Air_OutData/Marginal_Coefficients/' + scenario+'_marginal_exposure_coefs_'+year+'.csv')
-    if simplified==True:
-        exposure_data_collapsed.to_csv('MIP_Air_OutData/Marginal_Coefficients/' + scenario+'_marginal_exposure_coefs_'+year+'_simplified.csv')
+    exposure_data_collapsed.to_csv('MIP_Air_OutData/Marginal_Coefficients/' + scenario+'_marginal_exposure_coefs_'+year+'.csv')
 
 
 
