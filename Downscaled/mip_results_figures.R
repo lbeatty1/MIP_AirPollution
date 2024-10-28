@@ -1,14 +1,13 @@
-require(supportR)
-require(usethis)
-require(readr)
-require(RCurl)
-require(ggplot2)
-require(dplyr)
-require(tidyr)
+library(ggplot2)
+library(tidyverse)
 library(sf)
 library(RColorBrewer)
 
 setwd("C:/Users/laure/Documents/Switch-USA-PG/")
+
+pal = brewer.pal(9, 'BuGn')
+pal2 = brewer.pal(9, 'YlOrRd')
+
 
 annual_tx_expansion = read.csv('MIP_results_comparison/compiled_results/transmission_expansion/annual_tx_expansion.csv')
 capacity = read.csv('MIP_results_comparison/compiled_results/transmission_expansion/capacity.csv')
@@ -60,7 +59,7 @@ cases$tx <- ifelse(grepl("tx-0", cases$case), "tx 0 perc  ",
 
 
 
-# create dataframe to simplify labels
+#make transmission expansion map
 annual_tx_expansion = left_join(annual_tx_expansion, 
                                 regions_centroids, 
                                 by=c('start_region'='model_regi'))
@@ -204,39 +203,50 @@ for(case_id in c('full-base-200-tx-0', 'full-base-200-tx-15', 'full-base-200-tx-
 
 
 
-#explore substitution
+#explore substitution with transmission overlay
+models = c('SWITCH', 'GenX')
+tech_types = c('Solar', 'Wind', 'CCS')
 for(case_id in c('full-base-200-tx-0', 'full-base-200-tx-15', 'full-base-200-tx-50')){
   print(paste0('making capacity chart for: ', case_id))
   tempdat = capacity%>%
     filter(planning_year==2050,
            case%in%c(case_id, 'full-base-200'),
-           tech_type%in%c('Solar', 'Wind', 'CCS'))%>%
+           tech_type%in%tech_types,
+           model %in%models)%>%
     group_by(model, zone, tech_type, case)%>%
     summarise(end_value=sum(end_value))
   
   tempdat = pivot_wider(tempdat, id_cols = c('model','tech_type', 'zone'), names_from='case', values_from='end_value')
+  #make sure to get missings
+  missings = expand.grid(model=models, zone=unique(tempdat$zone), tech_type=tech_types)
+  tempdat = full_join(tempdat, missings, by=c('model', 'zone', 'tech_type'))
   tempdat = left_join(tempdat, regions, by=c("zone"='model_regi'))
   
   tempdat = tempdat%>%
-    mutate(dif_mw = `full-base-200`- !!sym(case_id))%>%
+    mutate(across(starts_with('full-base'), ~ replace_na(.x, 0)),
+           dif_mw = `full-base-200`- !!sym(case_id),
+           dif_pct = dif_mw/`full-base-200`)%>%
     st_sf()
   
   tempdat_transmission = annual_tx_expansion%>%filter(case==case_id|case=='full-base-200')
   tempdat_transmission = pivot_wider(tempdat_transmission, id_cols = c('model', 'planning_year', 'geometry'), names_from='case', values_from='tot_transmission')
   
   tempdat_transmission = tempdat_transmission%>%
-    mutate(dif_mw = `full-base-200`- !!sym(case_id))%>%
-    filter(planning_year==2050)%>%
+    mutate(across(starts_with('full-base'), ~ replace_na(.x, 0)),
+           dif_mw = `full-base-200`- !!sym(case_id),
+           dif_pct = dif_mw/`full-base-200`)%>%
+    filter(planning_year==2050,
+           model%in%c('SWITCH', 'GenX'))%>%
     st_sf()
   
-  ggplot(tempdat)+
-    geom_sf(aes(geometry=geometry, fill=dif_mw))+
-    geom_sf(data=tempdat_transmission, aes(geometry=geometry, col=dif_mw))+
-    scale_fill_viridis_c(name="Generation Capacity \n Dif (MW)")+
-    scale_color_viridis_c(name="Transmission Capacity \n Dif (MW)")+
-    ggtitle(paste0('Differences in Generation and Transmission Capacity Relative to Unconstrained: \n', case_id))+
-    facet_grid(rows=vars(tech_type), cols=vars(model))+
-    theme_bw()+
+  ggplot(tempdat) +
+    geom_sf(aes(geometry = geometry, fill = dif_mw)) +
+    geom_sf(data = tempdat_transmission, aes(geometry = geometry, color = dif_mw), linewidth=1.5) +
+    scale_fill_gradientn(colours = pal, name = "Generation Capacity \n Dif (MW)") + 
+    scale_color_gradientn(colours = pal2, name = "Transmission Capacity \n Dif (MW)") +
+    ggtitle(paste0('Differences in Generation and Transmission Capacity Relative to Unconstrained: \n', case_id)) +
+    facet_grid(rows = vars(tech_type), cols = vars(model)) +
+    theme_bw() +
     theme(
       axis.text.x = element_blank(),
       axis.text.y = element_blank(),
@@ -246,6 +256,6 @@ for(case_id in c('full-base-200-tx-0', 'full-base-200-tx-15', 'full-base-200-tx-
   
   ggsave(filename = paste0('MIP_AirPollution/Figures/MIP_Paper/capacity_relative_with_transmission_', case_id, '.png'),
          device='png',
-         width=8,
-         height=6)
+         width=10,
+         height=8)
 }
