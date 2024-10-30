@@ -20,6 +20,13 @@ regions = regions%>%
   mutate(model_regi=replace(model_regi, model_regi=='TRE_WEST', 'TREW'))
 regions_centroids = st_centroid(regions)
 
+case_id_dict = c(
+  'full-base-200' = '52-week, $200,Unconstrained',
+  'full-base-200-tx-50' = '52-week, $200,50% Constraint',
+  'full-base-200-tx-15' = '52-week, $200, 15% Constraint',
+  'full-base-200-tx-0' = '52-week, $200, 0% Constraint'
+)
+
 techs <- data.frame(tech_type = levels(factor(generation$tech_type)), 
                     plot = c("Battery", 
                              "CCS", 
@@ -148,11 +155,21 @@ for(case_id in c('full-base-200-tx-0', 'full-base-200-tx-15', 'full-base-200-tx-
 emissions = emissions%>%
   group_by(model, planning_year, case)%>%
   summarise(value=sum(value))%>%
-  filter(planning_year>=2030)
+  filter(planning_year>=2035)%>%
+  mutate(case=factor(case,
+                     levels=c('full-base-200-tx-0','full-base-200-tx-15','full-base-200-tx-50','full-base-200')))
 
-ggplot(emissions, aes(x = planning_year, y = value/1e8, color = model, shape = case)) +
-  geom_line(size = 1) +  
-  geom_point(size = 3) + 
+ggplot(emissions, aes(x = planning_year, y = value / 1e8, color = case, shape = model)) +
+  geom_line(size = 0.5) +  
+  geom_point(size = 2) + 
+  scale_shape_manual(values = c('GenX' = 15, 
+                                'SWITCH' = 16, 
+                                'USENSYS' = 17, 
+                                'TEMOA' = 18)) +
+  scale_color_discrete(labels = c('full-base-200' = '52-week, $200,\nunlimited expansion\n',
+                                'full-base-200-tx-0' = '52-week, $200,\n0% expansion\n',
+                                'full-base-200-tx-15' = '52-week, $200,\n15% expansion\n',
+                                'full-base-200-tx-50' = '52-week, $200,\n50% expansion\n')) +
   theme_bw() +
   labs(
     title = "Emissions",
@@ -161,6 +178,7 @@ ggplot(emissions, aes(x = planning_year, y = value/1e8, color = model, shape = c
     color = "Model",
     shape = "Case"
   )
+
 
 ggsave(filename='MIP_AirPollution/Figures/MIP_Paper/emissions_transmission.png',
        device='png',
@@ -208,6 +226,8 @@ models = c('SWITCH', 'GenX')
 tech_types = c('Solar', 'Wind', 'CCS')
 for(case_id in c('full-base-200-tx-0', 'full-base-200-tx-15', 'full-base-200-tx-50')){
   print(paste0('making capacity chart for: ', case_id))
+  formatted_case_id = case_id_dict[case_id]
+  
   tempdat = capacity%>%
     filter(planning_year==2050,
            case%in%c(case_id, 'full-base-200'),
@@ -244,7 +264,7 @@ for(case_id in c('full-base-200-tx-0', 'full-base-200-tx-15', 'full-base-200-tx-
     geom_sf(data = tempdat_transmission, aes(geometry = geometry, color = dif_mw), linewidth=1.5) +
     scale_fill_gradientn(colours = pal, name = "Generation Capacity \n Dif (MW)") + 
     scale_color_gradientn(colours = pal2, name = "Transmission Capacity \n Dif (MW)") +
-    ggtitle(paste0('Differences in Generation and Transmission Capacity Relative to Unconstrained: \n', case_id)) +
+    ggtitle(paste0('Differences in Generation and Transmission Capacity Relative to Unconstrained: \n', formatted_case_id)) +
     facet_grid(rows = vars(tech_type), cols = vars(model)) +
     theme_bw() +
     theme(
@@ -258,4 +278,99 @@ for(case_id in c('full-base-200-tx-0', 'full-base-200-tx-15', 'full-base-200-tx-
          device='png',
          width=10,
          height=8)
+  
+  #can't figure out how to set easy x-y limits with this wonky crs
+  tempdat = st_transform(tempdat, crs='WGS84')
+  tempdat_transmission = st_transform(tempdat_transmission, crs='WGS84')
+  
+  #keep scales fixed
+  min_gendif = min(tempdat$dif_mw)
+  max_gendif = max(tempdat$dif_mw)
+  
+  min_transdif = min(tempdat_transmission$dif_mw)
+  max_transdif = 0
+  
+  #ERCOT-ish region
+  x_min = -106
+  x_max = -90 
+  y_min = 26  
+  y_max = 40  
+  
+  box = st_sfc(st_polygon(list(rbind(c(x_min, y_min), 
+                                     c(x_max, y_min), 
+                                     c(x_max, y_max), 
+                                     c(x_min, y_max), 
+                                     c(x_min, y_min)))),
+               crs='WGS84')
+  
+  
+  # Filter the regions based on the x and y limits
+  tempdat_region = st_intersection(tempdat, box)
+  tempdat_transmission_region = st_intersection(tempdat_transmission, box)
+    
+  ggplot(tempdat_region) +
+    geom_sf(aes(geometry = geometry, fill = dif_mw)) +
+    geom_sf(data = tempdat_transmission_region, aes(geometry = geometry, color = dif_mw), linewidth=1.5) +
+    scale_fill_gradientn(colours = pal, name = "Generation Capacity \n Dif (MW)") + 
+    scale_color_gradientn(colours = pal2, name = "Transmission Capacity \n Dif (MW)") +
+    ggtitle(paste0('Differences in Generation and Transmission Capacity Relative to Unconstrained: \n', formatted_case_id)) +
+    geom_sf_text(aes(label = zone), 
+                 size = 3,    
+                 nudge_y = 0.1)+
+    facet_grid(rows = vars(tech_type), cols = vars(model)) +
+    theme_bw() +
+    theme(
+      axis.text.x = element_blank(),
+      axis.text.y = element_blank(),
+      axis.ticks.x = element_blank(),
+      axis.ticks.y = element_blank()
+    )
+  
+  ggsave(filename = paste0('MIP_AirPollution/Figures/MIP_Paper/capacity_relative_with_transmission_ERCOT_', case_id, '.png'),
+         device='png',
+         width=10,
+         height=8)
+
+  #NE-ish region
+  x_min = -86
+  x_max = -75 
+  y_min = 35  
+  y_max = 45  
+  
+  box = st_sfc(st_polygon(list(rbind(c(x_min, y_min), 
+                                     c(x_max, y_min), 
+                                     c(x_max, y_max), 
+                                     c(x_min, y_max), 
+                                     c(x_min, y_min)))),
+               crs='WGS84')
+  
+  
+  # Filter the regions based on the x and y limits
+  tempdat_region = st_intersection(tempdat, box)
+  tempdat_transmission_region = st_intersection(tempdat_transmission, box)
+  
+  ggplot(tempdat_region) +
+    geom_sf(aes(geometry = geometry, fill = dif_mw)) +
+    geom_sf(data = tempdat_transmission_region, aes(geometry = geometry, color = dif_mw), linewidth=1.5) +
+    scale_fill_gradientn(colours = pal, name = "Generation Capacity \n Dif (MW)") + 
+    scale_color_gradientn(colours = pal2, name = "Transmission Capacity \n Dif (MW)") +
+    ggtitle(paste0('Differences in Generation and Transmission Capacity Relative to Unconstrained: \n', formatted_case_id)) +
+    geom_sf_text(aes(label = zone), 
+                 size = 3,    
+                 nudge_y = 0.7,
+                 nudge_x = 0.2)+
+    facet_grid(rows = vars(tech_type), cols = vars(model)) +
+    theme_bw() +
+    theme(
+      axis.text.x = element_blank(),
+      axis.text.y = element_blank(),
+      axis.ticks.x = element_blank(),
+      axis.ticks.y = element_blank()
+    )
+  
+  ggsave(filename = paste0('MIP_AirPollution/Figures/MIP_Paper/capacity_relative_with_transmission_NORTHEAST_', case_id, '.png'),
+         device='png',
+         width=10,
+         height=8)
+  
 }
