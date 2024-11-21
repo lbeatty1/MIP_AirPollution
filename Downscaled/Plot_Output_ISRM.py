@@ -253,7 +253,6 @@ plt.xlabel('Year', fontsize=12)
 plt.ylabel('Death Rate', fontsize=12)
 plt.legend(title='Race / Scenario', bbox_to_anchor=(1.05, 1), loc='upper left')
 plt.tight_layout()
-plt.show()
 
 plt.savefig('MIP_AirPollution/Figures/Output/ISRM_deathrate_by_scenario_by_year_selectedscenarios.jpg', format='jpg',dpi=300, bbox_inches='tight')
 plt.savefig('MIP_results_comparison/AirPollution/ISRM_deathrate_by_scenario_by_year_selectedscenarios.jpg', format='jpg',
