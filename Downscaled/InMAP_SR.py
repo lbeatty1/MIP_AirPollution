@@ -20,7 +20,7 @@ import s3fs
 import os
 
 
-os.chdir('C:/Users/lbeatty/Documents/Lauren_MIP_Contribution/')
+os.chdir('C:/Users/laure/Documents/Switch-USA-PG/')
 
 #pull in settings from settings file
 from MIP_AirPollution.Downscaled.settings import *

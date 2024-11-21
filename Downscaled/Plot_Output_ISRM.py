@@ -8,10 +8,10 @@ import numpy as np
 import pandas as pd
 import math
 from matplotlib.colors import LinearSegmentedColormap
+import seaborn as sns
 
 
-
-os.chdir('C:/Users/lbeatty/Documents/Lauren_MIP_Contribution/')
+os.chdir('C:/Users/laure/Documents/Switch-USA-PG/')
 
 from MIP_AirPollution.Downscaled.settings import *
 model='GenX'
@@ -40,7 +40,7 @@ for scenario in scenario_dictionary:
 
 #Plot output -- map of concentrations
 #read in states
-states = gpd.read_file('tl_2022_us_state/tl_2022_us_state.shp')
+states = gpd.read_file('Data/tl_2022_us_state/tl_2022_us_state.shp')
 states = states[~states['STUSPS'].isin(['AS', 'AK', 'GU', 'MP', 'VI', 'HI', 'PR'])]
 
 print('finding intersection with land')
@@ -203,3 +203,58 @@ for file, year in year_inputs.items():
                 dpi=300, bbox_inches='tight')
 
 # %%
+df_long = death_rates.melt(
+    id_vars=['year', 'scenario'],
+    value_vars=['WhiteNoLatrate', 'Nativerate', 'Latinorate', 'Blackrate', 'Asianrate'],
+    var_name='Race',
+    value_name='Rate'
+)
+
+# Create the plot
+plt.figure(figsize=(12, 6))
+sns.lineplot(
+    data=df_long,
+    x='year',
+    y='Rate',
+    hue='Race',     
+    style='scenario',  
+    markers=True,
+    dashes=False
+)
+
+plt.title('Death Rates Across Time by Race and Scenario', fontsize=14)
+plt.xlabel('Year', fontsize=12)
+plt.ylabel('Death Rate', fontsize=12)
+plt.legend(title='Race / Scenario', bbox_to_anchor=(1.05, 1), loc='upper left')
+plt.tight_layout()
+plt.show()
+
+plt.savefig('MIP_AirPollution/Figures/Output/ISRM_deathrate_by_scenario_by_year.jpg', format='jpg',dpi=300, bbox_inches='tight')
+plt.savefig('MIP_results_comparison/AirPollution/ISRM_deathrate_by_scenario_by_year.jpg', format='jpg',
+            dpi=300, bbox_inches='tight')
+
+###
+#Filter out a few scenarios
+
+# Create the plot
+plt.figure(figsize=(12, 6))
+sns.lineplot(
+    data=df_long[df_long['scenario'].isin(['full-current-policies', 'full-base-200'])],
+    x='year',
+    y='Rate',
+    hue='Race',     
+    style='scenario',  
+    markers=True,
+    dashes=False
+)
+
+plt.title('Death Rates Across Time by Race and Scenario', fontsize=14)
+plt.xlabel('Year', fontsize=12)
+plt.ylabel('Death Rate', fontsize=12)
+plt.legend(title='Race / Scenario', bbox_to_anchor=(1.05, 1), loc='upper left')
+plt.tight_layout()
+plt.show()
+
+plt.savefig('MIP_AirPollution/Figures/Output/ISRM_deathrate_by_scenario_by_year_selectedscenarios.jpg', format='jpg',dpi=300, bbox_inches='tight')
+plt.savefig('MIP_results_comparison/AirPollution/ISRM_deathrate_by_scenario_by_year_selectedscenarios.jpg', format='jpg',
+            dpi=300, bbox_inches='tight')
