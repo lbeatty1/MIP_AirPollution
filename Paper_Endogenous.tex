@@ -98,26 +98,31 @@ Air pollution is linked with numerous health impacts such as chronic obstructive
 There is also work that has shown that air pollution exposures vary drastically across racial and socioeconomic groups.   \cite{Thind2019FineGeography} find that Black and non-Hispanic white people are exposed to more pollution than other groups and that exposures for low-income people are higher than for high-income people, even after controlling for race.  This highlights the importance for developing planning methods that alleviate rather than reinforce disproportionate burdens.
 
 Previous work has included co-benefits involved with reducing electricity generation from fossil fuels in the objective function \citet{Sergi2020OptimizingBenefits}.
-or projected how the electricity transmission might affect the distributional consequences of air pollution exposure \citep{Goforth2022AirStrategies}. However, in this paper, rather than modifying the objective function to include health effects, or use model outputs to project health changes, we endogenize pollution exposure within the electricity model in a way that explicitly considers distributional effects.  This allows us to use the model to produce results that don't unfairly burden certain groups with disproportionate pollution exposure.  It also can be used to answer questions such as "How much can pollution exposure be equitably reduced for $\$100$ billion?" 
+or projected how the electricity transmission might affect the distributional consequences of air pollution exposure \citep{Goforth2022AirStrategies}. 
+
+Least-cost electricity planning models are the gold-standard models used to model capacity expansion in policy.  However, these models tend to have a narrow focus on minimizing costs -- potentially at the expense of distributional concerns.  The energy transition will have wide-ranging effects --such as shifts in the spatial distribution of jobs, or changes in air pollution, that are of interest to policy-makers, but are currently unincorporated into least-cost models.
+
+Previous attempts to consider the health impacts of air pollution have monetized air pollution harms, and inserted them into the cost minimization.  While this is certainly an improvement over not considering these costs at all, this method ignores the fact that inequity in the past has driven current differences in air pollution exposure, and that certain groups may experience higher burdens from air pollution than others.
+
+However, in this paper, rather than modifying the objective function to include health effects, or use model outputs to project health changes, we endogenize pollution exposure within the electricity model in a way that explicitly considers distributional effects.  We pull inspiration from Rawls and formulate our model as a min-max problem where the social planner minimizes the maximum pollution exposure subject to a cost constraint, rather than minimizing costs.  Running multiple iterations of the model at different cost constraints allows us to understand how much can we equitably improve air quality and at what costs.
+
+This allows us to use the model to produce results that don't unfairly burden certain groups with disproportionate pollution exposure.  It also can be used to answer questions such as "How much can pollution exposure be equitably reduced for $\$100$ billion?" 
 
 This method could also be used to help design electricity transition plans that are equitable in other dimensions.  For example, one concern with the energy transition is that some regions will lose jobs.  This method could help policymakers and planners design electricity systems that avoid causing disruptive employment declines in certain regions. Previous work has linked declines in employment from  coal extraction to negative impacts such as decreases in home values, increases in poverty, and increases in credit utilization and delinquency. Moreover, these studies also suggest that even residents who are not employed by the industry also suffer the negatives consequences associated with the industry's decline (\citet{Kraynak2023TheCountry}, \citet{Blonz2023TheFuels}). 
 
-In this paper, we use
+This paper makes an important contribution to the environmental justice literature by ...
+
 
 \section{Data}
 \subsection{Emissions Data}
 Emissions data comes from two sources: EPA's Clean Air Markets Program Data (CAMD) and EPA's National Emissions Inventory (NEI).  The CAMD was created to track compliance with clean air programs, and thus, tracks emissions of CO$_2$, NO$_x$, and SO$_2$.  The NEI was created to track criteria pollutants, criteria precursors, and hazardous air pollutants from \textit{all} sources.  I get emissions of NH$_3$, VOC, and PM2.5 from the NEI. 
 
 \subsection{Power Sector Modelling Inputs}
-Stuff about PowerGenome.
+Stuff about PowerGenome?
 
 \section{Methods}
+\subsection{Overview}
 
-Least-cost electricity planning models are the gold-standard models used to model capacity expansion in policy.  However, these models tend to have a narrow focus on minimizing costs -- potentially at the expense of distributional concerns.  The energy transition will have wide-ranging effects --such as shifts in the spatial distribution of jobs, or changes in air pollution, that are of interest to policy-makers, but are currently unincorporated into least-cost models.
-
-Previous attempts to consider the health impacts of air pollution have monetized air pollution harms, and inserted them into the cost minimization.  While this is certainly an improvement over not considering these costs at all, this method ignores the fact that inequity in the past has driven current differences in air pollution exposure, and that certain groups may experience higher burdens from air pollution than others.
-
-In this paper, we outline a method to use least-cost electricity planning models to design power systems that produce equitable distributions of air pollution exposure.  We pull inspiration from Rawls and formulate our model as a min-max problem where the social planner minimizes the maximum pollution exposure subject to a cost constraint, rather than minimizing costs.  Running multiple iterations of the model at different cost constraints allows us to understand, how much can we equitably improve air quality and at what costs.
 \begin{figure}
     \begin{center}
         \begin{tikzpicture}[node distance=2cm]
@@ -170,9 +175,15 @@ In this paper, we outline a method to use least-cost electricity planning models
 \end{figure}
 
 \subsection{Air Pollution Modelling}
-The end product necessary to endogenize air pollution within electricity planning models are a set of coefficients that describe the marginal effect of a unit of electricity generation on population-weighted mean pollution exposure for different racial groups (though you could also apply the same logic and methodology to differing socio-economic groups more broadly).  
+The end product necessary to endogenize air pollution within electricity planning models are a set of coefficients that describe the marginal effect of a unit of electricity generation on population-weighted mean pollution exposure for different racial groups (though you could also apply the same logic and methodology to differing socio-economic groups more broadly, or more fine slices of the population to more closely approximate a true min-max).  
 
-To do this we employ a reduced-form source receptor matrix that that describe the marginal effect of a unit of pollution on downwind concentration of pollution exposure called the InMap Source Receptor Matrix (ISRM).  InMap is a reduced-form emissions to exposure model that uses annual-average parameters to reduce computation complexity relative to a time-resolved chemical transport model. InMap is designed to model annual average PM2.5 pollution exposure, and takes as inputs annual emissions of volatile organic compounds (VOCs), nitrous oxides (NOx), ammonia (NH3), sulfur oxides (SOx), and primary PM2.5.
+Eulerian chemical transportation models are computationally expensive and time consuming, so it's infeasible to embed this type of model within SWITCH.  Rather we use the InMAP Source-Receptor Matrix (ISRM) which is a reduced-form source-receptor matrix that describes the marginal effect of a unit of pollution on downwind concentrations of pollution exposure.
+
+InMap itself is a reduced-form emissions-to-exposure model that uses annual-average parameters to reduce computation complexity relative to a time-resolved chemical transport model. InMap is designed to model annual average PM2.5 pollution exposure, and takes as inputs the annual emissions of volatile organic compounds (VOCs), nitrous oxides (NOx), ammonia (NH3), sulfur oxides (SOx), and primary PM2.5 \citep{Tessum2017InMAP:Interventions}.
+
+The ISRM was developed to simplify InMAP even further \citep{Goodkind2019Fine-scaleEmissions}.  Initially, the ISRM was developed to describe the marginal damages from individual sources.  We simplify the ISRM even further by collapsing it so that, for each source, we save the marginal effect of one MWh of generation on \textit{population-weighted average exposure} by race.
+
+\subsection{Switch}
 
 \section{Results}
 
@@ -189,9 +200,9 @@ In figure \ref{EmissionsExposureCoefs} we plot both average emissions rates, and
 
 \begin{figure}
     \centering
-    \includegraphics[width=0.5\linewidth]{}
-    \caption{Caption}
-    \label{fig:enter-label}
+    \subcaptionbox{2027}{\includegraphics[width=0.45\textwidth]{Figures/EndogenousResults/base_short/Dispatch_Relative_by_scenario_2027.png}}
+    \subcaptionbox{2030}{\includegraphics[width=0.45\textwidth]{Figures/EndogenousResults/base_short/Dispatch_Relative_by_scenario_2030.png}}
+    \caption{Generation by Technology by Scenario}
 \end{figure}
 
 \begin{figure}
@@ -201,9 +212,10 @@ In figure \ref{EmissionsExposureCoefs} we plot both average emissions rates, and
     \label{PPF}
 \end{figure}
 
-
-
 \section{Conclusion}
+In this paper, we demonstrate how to endogenize air pollution exposure into a least-cost electricity planning model to create equitable reductions in air pollution burdens.    
+
+While this method provides a map of how to produce equitable reductions in air pollution, it does not solve for what policies will get
 
 
 \begin{singlespace}
