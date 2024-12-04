@@ -25,6 +25,8 @@ sys.path.append(os.path.abspath('C:/Users/laure/Documents/Switch-USA-PG/'))
 from MIP_AirPollution.Downscaled.settings import *
 models=['USENSYS']
 
+popgrowth = pd.read_excel('Data/np2023-t4.xlsx', sheet_name='Sheet1')
+
 def rect(i, w, s, e, n):
     x = [w[i], e[i], e[i], w[i], w[i]]
     y = [s[i], s[i], n[i], n[i], s[i]]
@@ -42,7 +44,7 @@ def poly(sr):
                             [x[3],y[3]],[x[4],y[4]]]))
     return ret
 
-def run_sr(emis, model, emis_units="tons/year"):
+def run_sr(emis, model, year, emis_units="tons/year"):
     start = time.time()
     url = 's3://inmap-model/isrm_v1.2.1.zarr/'
     fs = s3fs.S3FileSystem(anon=True, client_kwargs=dict(region_name='us-east-2'))
@@ -105,25 +107,44 @@ def run_sr(emis, model, emis_units="tons/year"):
     Native = sr['Native'][0:52411]
     Latino = sr['Latino'][0:52411]
     WhiteNoLat = sr['WhiteNoLat'][0:52411]
-    deathsK = (np.exp(np.log(1.06)/10 * TotalPM25) - 1) * TotalPop * 1.07353545 * MortalityRate / 100000 * 1.025229357798165
-    deathsL = (np.exp(np.log(1.14)/10 * TotalPM25) - 1) * TotalPop * 1.07353545 * MortalityRate / 100000 * 1.025229357798165
 
-    AsiandeathsK = (np.exp(np.log(1.06)/10 * TotalPM25) - 1) * Asian * 1.07353545 * MortalityRate / 100000 * 1.025229357798165
-    AsiandeathsL = (np.exp(np.log(1.14)/10 * TotalPM25) - 1) * Asian * 1.07353545 * MortalityRate / 100000 * 1.025229357798165
+    pop_growth_value = popgrowth.loc[popgrowth['Race'] == 'Total', year].values[0]
+    pop_growth_base = popgrowth.loc[popgrowth['Race'] == 'Total', 2010].values[0]
+    deathsK = (np.exp(np.log(1.06)/10 * TotalPM25) - 1) * TotalPop * pop_growth_value/pop_growth_base * MortalityRate / 100000
+    deathsL = (np.exp(np.log(1.14)/10 * TotalPM25) - 1) * TotalPop * pop_growth_value/pop_growth_base * MortalityRate / 100000
+    TotalPop = TotalPop * pop_growth_value/pop_growth_base 
 
-    BlackdeathsK = (np.exp(np.log(1.06)/10 * TotalPM25) - 1) * Black * 1.07353545 * MortalityRate / 100000 * 1.025229357798165
-    BlackdeathsL = (np.exp(np.log(1.14)/10 * TotalPM25) - 1) * Black * 1.07353545 * MortalityRate / 100000 * 1.025229357798165
+    pop_growth_value = popgrowth.loc[popgrowth['Race'] == 'Asian', year].values[0]
+    pop_growth_base = popgrowth.loc[popgrowth['Race'] == 'Asian', 2010].values[0]
+    AsiandeathsK = (np.exp(np.log(1.06)/10 * TotalPM25) - 1) * Asian * pop_growth_value/pop_growth_base * MortalityRate / 100000
+    AsiandeathsL = (np.exp(np.log(1.14)/10 * TotalPM25) - 1) * Asian * pop_growth_value/pop_growth_base * MortalityRate / 100000
+    Asian = Asian * pop_growth_value/pop_growth_base 
+
+    pop_growth_value = popgrowth.loc[popgrowth['Race'] == 'Black', year].values[0]
+    pop_growth_base = popgrowth.loc[popgrowth['Race'] == 'Black', 2010].values[0]
+    BlackdeathsK = (np.exp(np.log(1.06)/10 * TotalPM25) - 1) * Black * pop_growth_value/pop_growth_base * MortalityRate / 100000
+    BlackdeathsL = (np.exp(np.log(1.14)/10 * TotalPM25) - 1) * Black * pop_growth_value/pop_growth_base * MortalityRate / 100000
+    Black = Black * pop_growth_value/pop_growth_base 
+
+    pop_growth_value = popgrowth.loc[popgrowth['Race'] == 'AmericanIndian', year].values[0]
+    pop_growth_base = popgrowth.loc[popgrowth['Race'] == 'AmericanIndian', 2010].values[0]
+    NativedeathsK = (np.exp(np.log(1.06)/10 * TotalPM25) - 1) * Native * pop_growth_value/pop_growth_base * MortalityRate / 100000
+    NativedeathsL = (np.exp(np.log(1.14)/10 * TotalPM25) - 1) * Native * pop_growth_value/pop_growth_base * MortalityRate / 100000
+    Native = Native * pop_growth_value/pop_growth_base 
+
+    pop_growth_value = popgrowth.loc[popgrowth['Race'] == 'Hispanic', year].values[0]
+    pop_growth_base = popgrowth.loc[popgrowth['Race'] == 'Hispanic', 2010].values[0]
+    LatinodeathsK = (np.exp(np.log(1.06)/10 * TotalPM25) - 1) * Latino * pop_growth_value/pop_growth_base * MortalityRate / 100000
+    LatinodeathsL = (np.exp(np.log(1.14)/10 * TotalPM25) - 1) * Latino * pop_growth_value/pop_growth_base * MortalityRate / 100000
+    Latino = Latino * pop_growth_value/pop_growth_base 
     
-    NativedeathsK = (np.exp(np.log(1.06)/10 * TotalPM25) - 1) * Native * 1.07353545 * MortalityRate / 100000 * 1.025229357798165
-    NativedeathsL = (np.exp(np.log(1.14)/10 * TotalPM25) - 1) * Native * 1.07353545 * MortalityRate / 100000 * 1.025229357798165
-    
-    LatinodeathsK = (np.exp(np.log(1.06)/10 * TotalPM25) - 1) * Latino * 1.07353545 * MortalityRate / 100000 * 1.025229357798165
-    LatinodeathsL = (np.exp(np.log(1.14)/10 * TotalPM25) - 1) * Latino * 1.07353545 * MortalityRate / 100000 * 1.025229357798165
+    pop_growth_value = popgrowth.loc[popgrowth['Race'] == 'NonHispanicWhite', year].values[0]
+    pop_growth_base = popgrowth.loc[popgrowth['Race'] == 'NonHispanicWhite', 2010].values[0]
+    WhiteNoLatdeathsK = (np.exp(np.log(1.06)/10 * TotalPM25) - 1) * WhiteNoLat * pop_growth_value/pop_growth_base * MortalityRate / 100000
+    WhiteNoLatdeathsL = (np.exp(np.log(1.14)/10 * TotalPM25) - 1) * WhiteNoLat * pop_growth_value/pop_growth_base * MortalityRate / 100000
+    WhiteNoLat = WhiteNoLat * pop_growth_value/pop_growth_base 
 
-    WhiteNoLatdeathsK = (np.exp(np.log(1.06)/10 * TotalPM25) - 1) * WhiteNoLat * 1.07353545 * MortalityRate / 100000 * 1.025229357798165
-    WhiteNoLatdeathsL = (np.exp(np.log(1.14)/10 * TotalPM25) - 1) * WhiteNoLat * 1.07353545 * MortalityRate / 100000 * 1.025229357798165
-    #1.07353545 is the ratio of 2020 population to 2010 population (in the model)
-    #1.025229357798165 is the ratio of 2016 mortality rate to 2005 (but I'm going to keep this since 2020 was likely an abnormal deaths years)
+    #pop_growth_value/pop_growth_base is the ratio of year y population to 2010 population (in the model)
     ret = gpd.GeoDataFrame(pd.DataFrame({'SOA': fact * SOA_data,
                                          'pNO3': fact * pNO3_data,
                                          'pNH4': fact * pNH4_data,
@@ -163,7 +184,7 @@ for model in models:
             if emis['Longitude'].sum()==0:
                 print('something wrong with emissions for this scenario.. skipping...')
                 continue
-            resultsISRM = run_sr(emis, model="isrm")
+            resultsISRM = run_sr(emis, model="isrm", year=year)
             resultsISRM = resultsISRM.set_crs('PROJCS["Lambert_Conformal_Conic",GEOGCS["GCS_unnamed ellipse",DATUM["D_unknown",SPHEROID["Unknown",6370997,0]],PRIMEM["Greenwich",0],UNIT["Degree",0.0174532925199433]],PROJECTION["Lambert_Conformal_Conic_2SP"],PARAMETER["latitude_of_origin",40],PARAMETER["central_meridian",-97],PARAMETER["standard_parallel_1",33],PARAMETER["standard_parallel_2",45],PARAMETER["false_easting",0],PARAMETER["false_northing",0],UNIT["metre",1,AUTHORITY["EPSG","9001"]],AXIS["Easting",EAST],AXIS["Northing",NORTH]]')
 
             resultsISRM.to_file(filename='InMap/MIP_InMap_Output/'+scenario+'/'+model+'/ISRM_result_'+f"{year}"+'.shp', driver='ESRI Shapefile')
