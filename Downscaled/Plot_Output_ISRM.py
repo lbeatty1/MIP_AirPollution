@@ -67,252 +67,260 @@ def find_intersection_with_states(input_gdf, states_gfd):
 
 #%%
 # #Make concentration plots
+def make_concentration_plots(models, scenarios, columns, states):
+    print('making concentration plots')
+    for model in models:
+        for scenario in scenarios:
+            quant_dict= {}
+            key = f'{model}_{scenario}'
+            if key in data_dict:
+                plot_data = data_dict[key]
+            else:
+                data_dict[key]=read_scenario_data(scenario, model, states)
+                plot_data = data_dict[key]
+
+            for file,year in year_inputs.items():
+                plot_temp = plot_data[plot_data['year']==year]
+                for column in columns_to_plot:
+
+                    #want scales to be the same for each plot
+                    if year==2027:
+                        print("Defining scale")
+                        q = 0.99  # Truncate results at the 99th percentile for better visualization
+                        cut = np.quantile(plot_temp[column], q)
+                        quant_dict[column]=cut
+
+                    fig, ax = plt.subplots(figsize=(10, 8))
+
+                    # Plot data with color scale truncated at the specified quantile
+                    plot_temp.plot(vmin=0, vmax=cut, cmap="OrRd", column=column, ax=ax)
+
+                    # Plot states boundaries
+                    states = states.to_crs(plot_temp.crs)
+                    states.boundary.plot(ax=ax, color='black', linewidth=0.2)
+
+                    # Add color bar
+                    sm = plt.cm.ScalarMappable(cmap='OrRd', norm=plt.Normalize(vmin=0, vmax=quant_dict[column]))
+                    sm._A = []  # Fake empty array for the colorbar
+                    cbar = fig.colorbar(sm, fraction=0.03)  
+                    cbar.set_label(column+' concentration (μg m$^{-3}$)', fontsize=18)  # Set color bar label
+                    cbar.ax.tick_params(labelsize=14)
+
+                    plt.axis('off')
+                    plt.savefig(f'MIP_AirPollution/Figures/Output/{scenario}/{model}/ISRM_{year}_{column}_concentrationmap.jpg', format='jpg',
+                                dpi=300, bbox_inches='tight')
+                    plt.savefig(f'MIP_results_comparison/AirPollution/{scenario}/{model}/ISRM_{year}_{column}_{model}_concentrationmap.jpg', format='jpg',
+                                dpi=300, bbox_inches='tight')
+
+
 columns_to_plot = ['TotalPM25']
 models = ['GenX', 'SWITCH']
 scenarios = ['full-base-200', 'full-base-50', 'full-base-1000']
-print('making concentration plots')
-for model in models:
-    for scenario in scenarios:
-        quant_dict= {}
-        key = f'{model}_{scenario}'
-        if key in data_dict:
-            plot_data = data_dict[key]
-        else:
-            data_dict[key]=read_scenario_data(scenario, model, states)
-            plot_data = data_dict[key]
-
-        for file,year in year_inputs.items():
-            plot_temp = plot_data[plot_data['year']==year]
-            for column in columns_to_plot:
-
-                #want scales to be the same for each plot
-                if year==2027:
-                    print("Defining scale")
-                    q = 0.99  # Truncate results at the 99th percentile for better visualization
-                    cut = np.quantile(plot_temp[column], q)
-                    quant_dict[column]=cut
-
-                fig, ax = plt.subplots(figsize=(10, 8))
-
-                # Plot data with color scale truncated at the specified quantile
-                plot_temp.plot(vmin=0, vmax=cut, cmap="OrRd", column=column, ax=ax)
-
-                # Plot states boundaries
-                states = states.to_crs(plot_temp.crs)
-                states.boundary.plot(ax=ax, color='black', linewidth=0.2)
-
-                # Add color bar
-                sm = plt.cm.ScalarMappable(cmap='OrRd', norm=plt.Normalize(vmin=0, vmax=quant_dict[column]))
-                sm._A = []  # Fake empty array for the colorbar
-                cbar = fig.colorbar(sm, fraction=0.03)  
-                cbar.set_label(column+' concentration (μg m$^{-3}$)', fontsize=18)  # Set color bar label
-                cbar.ax.tick_params(labelsize=14)
-
-                plt.axis('off')
-                plt.savefig(f'MIP_AirPollution/Figures/Output/{scenario}/{model}/ISRM_{year}_{column}_concentrationmap.jpg', format='jpg',
-                            dpi=300, bbox_inches='tight')
-                plt.savefig(f'MIP_results_comparison/AirPollution/{scenario}/{model}/ISRM_{year}_{column}_{model}_concentrationmap.jpg', format='jpg',
-                            dpi=300, bbox_inches='tight')
-
+make_concentration_plots(models = models, scenarios=scenarios, states=states)
 
 #%%
-print('making death over time plots')
+def make_death_timeseries(models, scenarios):
+    print('making death over time plots')
+
+    for model in models:
+        for scenario in scenarios:
+            key = f'{model}_{scenario}'
+            if key in data_dict:
+                plot_data = data_dict[key]
+                print(f'{key} already in memory')
+            else:
+                data_dict[key]=read_scenario_data(scenario, model, states)
+                plot_data = data_dict[key]
+                
+            deaths = pd.DataFrame(plot_data[['Asiandeath', 'Blackdeath', 'Latinodeat', 'Nativedeat', 'WhiteNoL_1', 'year', 'scenario', 'model']])
+            deaths = deaths.groupby(['scenario','model', 'year']).sum().reset_index()
+
+            plt.figure(figsize=(10, 6))
+            print('deaths: '+scenario)
+
+            # Plot mortality rates
+            plt.plot(deaths['year'], deaths['Latinodeat'], marker='o', label='Latino Deaths')
+            plt.plot(deaths['year'], deaths['WhiteNoL_1'], marker='o', label='White/Non-hispanic Deaths')
+            plt.plot(deaths['year'], deaths['Blackdeath'], marker='o', label='Black Deaths')
+            plt.plot(deaths['year'], deaths['Asiandeath'], marker='o', label='Asian Deaths')
+
+            # Add labels and title
+            plt.xlabel('Year', fontsize=16)
+            plt.ylabel('Total Deaths', fontsize=16)
+            plt.title('Deaths Attributable to PM2.5 by Racial Group', fontsize=20)
+            plt.legend(fontsize=14)
+
+            plt.xticks(fontsize=12)
+            plt.yticks(fontsize=12)
+
+            # Show plot
+            plt.grid(True)
+            plt.savefig(f'MIP_AirPollution/Figures/Output/{scenario}/{model}/ISRM_death_by_group.jpg', format='jpg',dpi=300, bbox_inches='tight')
+            plt.savefig(f'MIP_results_comparison/AirPollution/{scenario}/{model}/ISRM_death_by_group.jpg', format='jpg',
+                        dpi=300, bbox_inches='tight')
+            
+
+            death_rates = pd.DataFrame(plot_data[['Asiandeath', 'Blackdeath', 'Latinodeat', 'Nativedeat', 'WhiteNoL_1', 'Asian', 'Black', 'Latino', 'Native', 'WhiteNoLat', 'year', 'scenario', 'model']])
+            death_rates = death_rates.groupby(['scenario','year', 'model']).sum().reset_index()
+            death_rates['Asianrate'] = death_rates['Asiandeath']/death_rates['Asian']
+            death_rates['Blackrate'] = death_rates['Blackdeath']/death_rates['Black']
+            death_rates['Latinorate'] = death_rates['Latinodeat']/death_rates['Latino']
+            death_rates['Nativerate'] = death_rates['Nativedeat']/death_rates['Native']
+            death_rates['WhiteNoLatrate'] = death_rates['WhiteNoL_1']/death_rates['WhiteNoLat']
+
+
+            print('deathrates: '+scenario)
+            plt.figure(figsize=(10, 6))
+
+            # Plot mortality rates
+            plt.plot(death_rates['year'], death_rates['Latinorate'], marker='o', label='Latino Death Rate')
+            plt.plot(death_rates['year'], death_rates['WhiteNoLatrate'], marker='o', label='White/Non-hispanic Death Rate')
+            plt.plot(death_rates['year'], death_rates['Blackrate'], marker='o', label='Black Death Rate')
+            plt.plot(death_rates['year'], death_rates['Asianrate'], marker='o', label='Asian Death Rate')
+            plt.plot(death_rates['year'], death_rates['Nativerate'], marker='o', label='Native Death Rate')
+
+            # Add labels and title
+            plt.xlabel('Year', fontsize=16)
+            plt.ylabel('Death Rate', fontsize=16)
+            plt.title('Death Rate Attributable to PM2.5 by Racial Group', fontsize=20)
+            plt.legend(fontsize=14)
+            plt.xticks(fontsize=12)
+            plt.yticks(fontsize=12)
+
+            # Show plot
+            plt.grid(True)
+            plt.savefig(f'MIP_AirPollution/Figures/Output/{scenario}/{model}/ISRM_deathrate_by_group.jpg', format='jpg',dpi=300, bbox_inches='tight')
+            plt.savefig(f'MIP_results_comparison/AirPollution/{scenario}/{model}/ISRM_deathrate_by_group.jpg', format='jpg',
+                        dpi=300, bbox_inches='tight')
+
+
 models = ['GenX', 'SWITCH']
 scenarios = ['full-base-200', 'full-current-policies']
-for model in models:
-    for scenario in scenarios:
-        key = f'{model}_{scenario}'
-        if key in data_dict:
-            plot_data = data_dict[key]
-            print(f'{key} already in memory')
-        else:
-            data_dict[key]=read_scenario_data(scenario, model, states)
-            plot_data = data_dict[key]
-            
-        deaths = pd.DataFrame(plot_data[['Asiandeath', 'Blackdeath', 'Latinodeat', 'Nativedeat', 'WhiteNoL_1', 'year', 'scenario', 'model']])
-        deaths = deaths.groupby(['scenario','model', 'year']).sum().reset_index()
-
-        plt.figure(figsize=(10, 6))
-        print('deaths: '+scenario)
-
-        # Plot mortality rates
-        plt.plot(deaths['year'], deaths['Latinodeat'], marker='o', label='Latino Deaths')
-        plt.plot(deaths['year'], deaths['WhiteNoL_1'], marker='o', label='White/Non-hispanic Deaths')
-        plt.plot(deaths['year'], deaths['Blackdeath'], marker='o', label='Black Deaths')
-        plt.plot(deaths['year'], deaths['Asiandeath'], marker='o', label='Asian Deaths')
-
-        # Add labels and title
-        plt.xlabel('Year', fontsize=16)
-        plt.ylabel('Total Deaths', fontsize=16)
-        plt.title('Deaths Attributable to PM2.5 by Racial Group', fontsize=20)
-        plt.legend(fontsize=14)
-
-        plt.xticks(fontsize=12)
-        plt.yticks(fontsize=12)
-
-        # Show plot
-        plt.grid(True)
-        plt.savefig(f'MIP_AirPollution/Figures/Output/{scenario}/{model}/ISRM_death_by_group.jpg', format='jpg',dpi=300, bbox_inches='tight')
-        plt.savefig(f'MIP_results_comparison/AirPollution/{scenario}/{model}/ISRM_death_by_group.jpg', format='jpg',
-                    dpi=300, bbox_inches='tight')
-
-#### Plot death rates across time
-    
-print('making death rate over time plots')
-for model in models:
-    for scenario in scenario_dictionary:
-        key = f'{model}_{scenario}'
-        if key in data_dict:
-            plot_data = data_dict[key]
-            print(f'{key} already in memory')
-        else:
-            data_dict[key]=read_scenario_data(scenario, model, states)
-            plot_data = data_dict[key]
-        
-        death_rates = pd.DataFrame(plot_data[['Asiandeath', 'Blackdeath', 'Latinodeat', 'Nativedeat', 'WhiteNoL_1', 'Asian', 'Black', 'Latino', 'Native', 'WhiteNoLat', 'year', 'scenario', 'model']])
-        death_rates = death_rates.groupby(['scenario','year', 'model']).sum().reset_index()
-        death_rates['Asianrate'] = death_rates['Asiandeath']/death_rates['Asian']
-        death_rates['Blackrate'] = death_rates['Blackdeath']/death_rates['Black']
-        death_rates['Latinorate'] = death_rates['Latinodeat']/death_rates['Latino']
-        death_rates['Nativerate'] = death_rates['Nativedeat']/death_rates['Native']
-        death_rates['WhiteNoLatrate'] = death_rates['WhiteNoL_1']/death_rates['WhiteNoLat']
-
-
-        print('deathrates: '+scenario)
-        plt.figure(figsize=(10, 6))
-
-        # Plot mortality rates
-        plt.plot(death_rates['year'], death_rates['Latinorate'], marker='o', label='Latino Death Rate')
-        plt.plot(death_rates['year'], death_rates['WhiteNoLatrate'], marker='o', label='White/Non-hispanic Death Rate')
-        plt.plot(death_rates['year'], death_rates['Blackrate'], marker='o', label='Black Death Rate')
-        plt.plot(death_rates['year'], death_rates['Asianrate'], marker='o', label='Asian Death Rate')
-        plt.plot(death_rates['year'], death_rates['Nativerate'], marker='o', label='Native Death Rate')
-
-        # Add labels and title
-        plt.xlabel('Year', fontsize=16)
-        plt.ylabel('Death Rate', fontsize=16)
-        plt.title('Death Rate Attributable to PM2.5 by Racial Group', fontsize=20)
-        plt.legend(fontsize=14)
-        plt.xticks(fontsize=12)
-        plt.yticks(fontsize=12)
-
-        # Show plot
-        plt.grid(True)
-        plt.savefig(f'MIP_AirPollution/Figures/Output/{scenario}/{model}/ISRM_deathrate_by_group.jpg', format='jpg',dpi=300, bbox_inches='tight')
-        plt.savefig(f'MIP_results_comparison/AirPollution/{scenario}/{model}/ISRM_deathrate_by_group.jpg', format='jpg',
-                    dpi=300, bbox_inches='tight')
-
+make_death_timeseries(models, scenarios)
 
 #%%
-models = ['GenX']
-scenarios = ['full-base-50', 'full-base-200', 'full-base-1000']
-scenarios = ['full-base-200', 'full-current-policies']
-scenarios = ['full-base-200-tx-0', 'full-base-200-tx-15', 'full-base-200-tx-50', 'full-base-200']
 ## plot death rates across scenario
-for model in models:
-    #read in data
-    scenarios_compare = pd.DataFrame()
-    scenarios_name = '_'.join(scenarios)
-    for scenario in scenarios:
-        key = f'{model}_{scenario}'
-        if key in data_dict:
-            plot_data = data_dict[key]
-            print(f'{key} already in memory')
-        else:
-            data_dict[key]=read_scenario_data(scenario, model, states)
-            plot_data = data_dict[key]
-        scenarios_compare = pd.concat([scenarios_compare, plot_data])
-        
-    scenarios_compare = scenarios_compare.groupby(['scenario','year', 'model']).sum().reset_index()
-    scenarios_compare['Asianrate'] = scenarios_compare['Asiandeath']/scenarios_compare['Asian']*1e6
-    scenarios_compare['Blackrate'] = scenarios_compare['Blackdeath']/scenarios_compare['Black']*1e6
-    scenarios_compare['Latinorate'] = scenarios_compare['Latinodeat']/scenarios_compare['Latino']*1e6
-    scenarios_compare['Nativerate'] = scenarios_compare['Nativedeat']/scenarios_compare['Native']*1e6
-    scenarios_compare['WhiteNoLatrate'] = scenarios_compare['WhiteNoL_1']/scenarios_compare['WhiteNoLat']*1e6
+def compare_death_scenarios(models, scenarios, scenario_comparison_name):
+    #models should be list of models
+    #scenarios should be list of scenarios
+    #scenario_comparison_name should be a short description of scenarios that are being compared -- eg. transmission_constraint
+    print('making death across scenario figures')
+    for model in models:
+        #read in data
+        scenarios_compare = pd.DataFrame()
+        scenarios_name = '_'.join(scenarios)
+        for scenario in scenarios:
+            key = f'{model}_{scenario}'
+            if key in data_dict:
+                plot_data = data_dict[key]
+                print(f'{key} already in memory')
+            else:
+                data_dict[key]=read_scenario_data(scenario, model, states)
+                plot_data = data_dict[key]
+            scenarios_compare = pd.concat([scenarios_compare, plot_data])
+            
+        scenarios_compare = scenarios_compare.groupby(['scenario','year', 'model']).sum().reset_index()
+        scenarios_compare['Asianrate'] = scenarios_compare['Asiandeath']/scenarios_compare['Asian']*1e6
+        scenarios_compare['Blackrate'] = scenarios_compare['Blackdeath']/scenarios_compare['Black']*1e6
+        scenarios_compare['Latinorate'] = scenarios_compare['Latinodeat']/scenarios_compare['Latino']*1e6
+        scenarios_compare['Nativerate'] = scenarios_compare['Nativedeat']/scenarios_compare['Native']*1e6
+        scenarios_compare['WhiteNoLatrate'] = scenarios_compare['WhiteNoL_1']/scenarios_compare['WhiteNoLat']*1e6
 
-    #first make plot over time
-    columns = ['Asianrate', 'Blackrate', 'Latinorate', 'Nativerate', 'WhiteNoLatrate']
-    melted = scenarios_compare.melt(
-        id_vars=['year', 'scenario'], 
-        value_vars=columns,
-        var_name='Race', 
-        value_name='Rate'
-    )
-    scenarios_shapes = {scenario: marker for scenario, marker in zip(melted['scenario'].unique(), ['o', 's', 'D', '^', 'v'])}
-
-    # Create the plot
-    plt.figure(figsize=(12, 8))
-
-    # Plot the lines
-    sns.lineplot(
-        data=melted,
-        x='year',
-        y='Rate',
-        hue='Race',
-        style='scenario',  # Lines don't depend on scenario
-        linewidth=2,
-        alpha=0.8
-    )
-
-    # Add labels and title
-    plt.title('Death Rates by Race and Scenario Over Time', fontsize=16)
-    plt.xlabel('Year', fontsize=14)
-    plt.ylabel('Death Rate (per million)', fontsize=14)
-    plt.legend(title='Race/Scenario', fontsize=12)
-    plt.xticks(fontsize=12)
-    plt.yticks(fontsize=12)
-
-    # Show the plot
-    plt.tight_layout()
-    plt.savefig(f'MIP_AirPollution/Figures/Output/Compare_scenarios_{scenarios_name}_{model}.jpg', format='jpg',dpi=300, bbox_inches='tight')
-    plt.savefig(f'MIP_results_comparison/AirPollution/Compare_scenarios_{scenarios_name}_{model}.jpg', format='jpg',
-                dpi=300, bbox_inches='tight')
-
-    for file, year in year_inputs.items():
-        
-        deaths_temp = scenarios_compare[scenarios_compare['year']==year]
-
-        #makes scenarios appear in order specified above
-        deaths_temp['scenario'] = pd.Categorical(
-            deaths_temp['scenario'],
-            categories = scenarios,
-            ordered=True
+        #first make plot over time
+        columns = ['Asianrate', 'Blackrate', 'Latinorate', 'Nativerate', 'WhiteNoLatrate']
+        melted = scenarios_compare.melt(
+            id_vars=['year', 'scenario'], 
+            value_vars=columns,
+            var_name='Race', 
+            value_name='Rate'
         )
-        deaths_temp = deaths_temp.sort_values('scenario')
+        scenarios_shapes = {scenario: marker for scenario, marker in zip(melted['scenario'].unique(), ['o', 's', 'D', '^', 'v'])}
 
-        #keeps scale consistent across years
-        if year==2027:
-            cut = deaths_temp[['Asianrate', 'Blackrate', 'Latinorate', 'WhiteNoLatrate', 'Nativerate']].max().max()
-            cut = cut*1.06
+        # Create the plot
+        plt.figure(figsize=(12, 8))
 
+        # Plot the lines
+        sns.lineplot(
+            data=melted,
+            x='year',
+            y='Rate',
+            hue='Race',
+            style='scenario',  # Lines don't depend on scenario
+            linewidth=2,
+            alpha=0.8
+        )
 
-        bar_width = 0.7
-        space_between_groups= 5
-        index = np.arange(len(deaths_temp)) * (bar_width + space_between_groups)
-        plt.figure(figsize=(12, 6))
+        # Add labels and title
+        plt.title('Death Rates by Race and Scenario Over Time', fontsize=16)
+        plt.xlabel('Year', fontsize=14)
+        plt.ylabel('Death Rate (per million)', fontsize=14)
+        plt.legend(title='Race/Scenario', fontsize=12)
+        plt.xticks(fontsize=12)
+        plt.yticks(fontsize=12)
 
-        plt.bar(index, deaths_temp['Asianrate'], bar_width, label='Asian Death Rate', color='blue', alpha=0.7)
-        plt.bar(index + bar_width, deaths_temp['Blackrate'], bar_width, label='Black Death Rate', color='green', alpha=0.7)
-        plt.bar(index + 2*bar_width, deaths_temp['Latinorate'], bar_width, label='Latino Death Rate', color='red', alpha=0.7)
-        plt.bar(index + 3*bar_width, deaths_temp['WhiteNoLatrate'], bar_width, label='White Death Rate', color='yellow', alpha=0.7)
-        plt.bar(index + 4*bar_width, deaths_temp['Nativerate'], bar_width, label='Native Death Rate', color='purple', alpha=0.7)
-        
-        plt.ylim(0, cut)
-
-
-        plt.title('Death Rates by Scenario', fontsize=24)
-        plt.xlabel('Scenario', fontsize=19)
-        plt.ylabel('Death Rate (per million)', fontsize=19)
-        plt.xticks(index + 4*bar_width/2, deaths_temp.scenario, fontsize=11, rotation=-25, ha='left')
-        plt.legend(fontsize=11)
-        plt.yticks(fontsize=11)
-
-
-
-        plt.savefig(f'MIP_AirPollution/Figures/Output/Compare_scenarios_{scenarios_name}_{year}_{model}.jpg', format='jpg',dpi=300, bbox_inches='tight')
-        plt.savefig(f'MIP_results_comparison/AirPollution/Compare_scenarios_{scenarios_name}_{year}_{model}.jpg', format='jpg',
+        # Show the plot
+        plt.tight_layout()
+        plt.savefig(f'MIP_AirPollution/Figures/Output/Compare_scenarios_{scenario_comparison_name}_{model}.jpg', format='jpg',dpi=300, bbox_inches='tight')
+        plt.savefig(f'MIP_results_comparison/AirPollution/Compare_scenarios_{scenario_comparison_name}_{model}.jpg', format='jpg',
                     dpi=300, bbox_inches='tight')
 
+        for file, year in year_inputs.items():
+            
+            deaths_temp = scenarios_compare[scenarios_compare['year']==year]
+
+            #makes scenarios appear in order specified above
+            deaths_temp['scenario'] = pd.Categorical(
+                deaths_temp['scenario'],
+                categories = scenarios,
+                ordered=True
+            )
+            deaths_temp = deaths_temp.sort_values('scenario')
+
+            #keeps scale consistent across years
+            if year==2027:
+                cut = deaths_temp[['Asianrate', 'Blackrate', 'Latinorate', 'WhiteNoLatrate', 'Nativerate']].max().max()
+                cut = cut*1.06
+
+
+            bar_width = 0.7
+            space_between_groups= 5
+            index = np.arange(len(deaths_temp)) * (bar_width + space_between_groups)
+            plt.figure(figsize=(12, 6))
+
+            plt.bar(index, deaths_temp['Asianrate'], bar_width, label='Asian Death Rate', color='blue', alpha=0.7)
+            plt.bar(index + bar_width, deaths_temp['Blackrate'], bar_width, label='Black Death Rate', color='green', alpha=0.7)
+            plt.bar(index + 2*bar_width, deaths_temp['Latinorate'], bar_width, label='Latino Death Rate', color='red', alpha=0.7)
+            plt.bar(index + 3*bar_width, deaths_temp['WhiteNoLatrate'], bar_width, label='White Death Rate', color='yellow', alpha=0.7)
+            plt.bar(index + 4*bar_width, deaths_temp['Nativerate'], bar_width, label='Native Death Rate', color='purple', alpha=0.7)
+            
+            plt.ylim(0, cut)
+
+
+            plt.title('Death Rates by Scenario', fontsize=24)
+            plt.xlabel('Scenario', fontsize=19)
+            plt.ylabel('Death Rate (per million)', fontsize=19)
+            plt.xticks(index + 4*bar_width/2, deaths_temp.scenario, fontsize=11, rotation=-25, ha='left')
+            plt.legend(fontsize=11)
+            plt.yticks(fontsize=11)
+
+
+
+            plt.savefig(f'MIP_AirPollution/Figures/Output/Compare_scenarios_{scenario_comparison_name}_{year}_{model}.jpg', format='jpg',dpi=300, bbox_inches='tight')
+            plt.savefig(f'MIP_results_comparison/AirPollution/Compare_scenarios_{scenario_comparison_name}_{year}_{model}.jpg', format='jpg',
+                        dpi=300, bbox_inches='tight')
+
+models = ['GenX']
+scenarios = ['full-base-50', 'full-base-200', 'full-base-1000']
+compare_death_scenarios(models, scenarios, 'compare-escape-price')
+
+scenarios = ['full-base-200', 'full-current-policies']
+compare_death_scenarios(models, scenarios, 'current-base')
+
+scenarios = ['full-base-200-tx-0', 'full-base-200-tx-15', 'full-base-200-tx-50', 'full-base-200']
+compare_death_scenarios(models, scenarios, 'transmissions-constraint')
+
+scenarios = ['full-base-200-tx-0', 'full-base-200-tx-15', 'full-base-200-tx-50', 'full-base-200', 'full-base-50', 'full-base-1000', 'full-current-policies']
+compare_death_scenarios(models, scenarios, 'all-scenarios')
 #%%
 #Compare across models
 scenarios = ['full-current-policies', 'full-base-200']
@@ -377,7 +385,7 @@ for scenario in scenarios:
                     dpi=300, bbox_inches='tight')
 
 
-
+#%%
 #######################################
 #### COMPARE WITH CO2 EMISSIONS #######
 #######################################
@@ -431,13 +439,11 @@ plt.legend(
     loc='upper left',          
     borderaxespad=0.0          
 )
-plt.show()
-
 # Show the plot
 plt.savefig(f'MIP_AirPollution/Figures/Output/Deaths_vs_Emissions_{model}.png', format='jpg',dpi=300, bbox_inches='tight')
 plt.savefig(f'MIP_AirPollution/Figures/Output/Deaths_vs_Emissions_{model}.png', format='jpg',
             dpi=300, bbox_inches='tight')
-
+plt.close()
 #######################################
 ###### COMPARE WITH COSTS #############
 #######################################
@@ -493,3 +499,5 @@ plt.tight_layout()
 plt.savefig(f'MIP_AirPollution/Figures/Output/Deaths_vs_Costs_{model}.png', format='jpg',dpi=300, bbox_inches='tight')
 plt.savefig(f'MIP_AirPollution/Figures/Output/Deaths_vs_Costs_{model}.png', format='jpg',
             dpi=300, bbox_inches='tight')
+
+# %%
