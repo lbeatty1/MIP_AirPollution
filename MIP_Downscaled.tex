@@ -117,58 +117,77 @@ Once we've obtained predictions for plant-level emissions, we feed these emissio
     \end{subfigure}\\
     \caption{ISRM Output for the Base Scenario in 2027 and 2050.}
 \end{figure}
-We translate concentrations into mortality using total PM2.5 predicted by INMAP in a Cox proportional hazards equation:
+For each grid area, $i$, we translate concentrations into mortality using total PM2.5 predicted by INMAP in a Cox proportional hazards equation:
 
 \begin{equation}
-    Deaths = [\exp(\log(r)/10*PM2.5)-1]\times Pop \times \frac{Pop_y}{Pop_{2010}} \times MortalityRate
+    Deaths_i = [\exp(\log(r)/10*PM2.5_i)-1]\times Pop_i \times \frac{Pop_y}{Pop_{2010}} \times MortalityRate_i
 \end{equation}
 where 
 \begin{itemize}
-    \item $\frac{Pop_y}{Pop_{2010}}=1.0735$ is the ratio between year-$y$ population and year-2010 population (what's natively in the model).  For each model period we calculate this ratio from the 2023 U.S. Census Bureau's National Population Projection Tables.  These tables have projections by race and by year, so our estimates will reflect, for example, the fact that the Hispanic and Latino population is expected to grow by 42$\%$ by 2050, while the Non-Hispanic White population is expected to decrease \citep{Bureau2023Series}.
-    \item $MortalityRate$ is the baseline mortality rate.
     \item $r$ is a parameter describing how mortality rates respond to a 10$\mu g/m^3$ increase in PM2.5 concentrations.  For this paper we use 1.06, reported by \citet{Krewski2009ExtendedInstitute}.
+    \item $Pop_i$ is the population of grid $i$ in 2010.
+    \item $\frac{Pop_y}{Pop_{2010}}$ is the ratio between year-$y$ population and year-2010 population (what's natively in the model).  For each model period we calculate this ratio from the 2023 U.S. Census Bureau's National Population Projection Tables.  These tables have projections by race and by year, so our estimates will reflect, for example, the fact that the Hispanic and Latino population is expected to grow by 42$\%$ by 2050, while the Non-Hispanic White population is expected to decrease \citep{Bureau2023Series}.
+    \item $MortalityRate_i$ is the mortality rate for grid $i$.\footnote{The mortality rate in the model is for 2005.  For simplicty, we don't replace this.  Since it remains constant over time, these projections will not account for changes in mortality rates over time.}
 \end{itemize}
 
-We project deaths forward but keep the calculation of deaths constant.  That means that our projections will not account for idiosyncratic differences across space or groups in migration patterns, or changes to the mortality rate.  Our primary concern is differences in mortality \textit{rates} rather than aggregate mortality.  Moreover, we primarily want our estimates to reflect changes in electricity generation, rather than population projections with wide uncertainty bands.
+While the projection takes into account idiosyncratic changes across groups in population growth, it will not take into acount idiosyncratic changes across groups \textit{across space}.  In addition, our estimates will not reflect differences between groups in mortality rates, which previous work has shown may be an important driver of mortality in models \citep{Spiller2021MortalityOutcomes}.  Lastly, these projections will not take into account expected changes over time in mortality rates. Since our primary concern is differences in mortality \textit{rates} rather than aggregate mortality, we think these are reasonable assumptions and simplifications. Moreover, we primarily want our estimates to reflect changes in electricity generation, rather than population projections with wide uncertainty bands.
 \section{Results: Comparison Across Models}
+Our first result is that there is tight agreement across models.  This is a fairly unsurprising result in light of the results of MIP PROJECT PAPER.  The models have similar amounts of generation and capacity expansion across models, as well as similar CO$_2$ emissions and costs.  The largest difference we observe between race-specific death rates is X$\%$.
+
+\begin{figure}
+    \centering
+    \begin{subfigure}[b]{0.45\textwidth}
+        \includegraphics[width=\textwidth]{Figures/Output/DeathRate_Across_Models_current_policies_52_week_2027.png}
+        \label{2027CompareModels}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[b]{0.45\textwidth}
+        \includegraphics[width=\textwidth]{Figures/Output/DeathRate_Across_Models_current_policies_52_week_2050.png}
+        \label{2050CompareModels}
+    \end{subfigure}\\
+
+    \caption{Comparison of results across models for the current policies scenario in 2027 and 2050}
+    \label{Compare Scenarios}
+\end{figure}
+
 
 \section{Results: Comparison Across Scenarios}
 
 Given the precise agreement between the models, we now turn our attention to comparing pollution exposure across policy scenarios.  In figure \ref{Compare Scenarios}, we plot population-weighted mean death rates by racial group by scenario for each model period.  The first thing that becomes immediately apparent is that the decarbonization scenarios reduce pollution exposure much more quickly and dramatically than the current policy scenarios.  It's also clear that there are wide disparities across racial groups, these disparities decrease in aggregate magnitudes but remain more constant in relative magnitudes over time.
 \begin{figure}
     \centering
-    \begin{subfigure}[b]{0.45\textwidth}
-        \includegraphics[width=\textwidth]{Figures/Output/ISRM_deathrate_by_scenario_2027.jpg}
+    \begin{subfigure}[b]{0.49\textwidth}
+        \includegraphics[width=\textwidth]{Figures/Output/Compare_scenarios_all-scenarios_2027_GenX.jpg}
         \caption{2027}
         \label{Subfig1}
     \end{subfigure}
     \hfill
-    \begin{subfigure}[b]{0.45\textwidth}
-        \includegraphics[width=\textwidth]{Figures/Output/ISRM_deathrate_by_scenario_2030.jpg}
+    \begin{subfigure}[b]{0.49\textwidth}
+        \includegraphics[width=\textwidth]{Figures/Output/Compare_scenarios_all-scenarios_2030_GenX.jpg}
         \caption{2030}
         \label{Subfig2}
     \end{subfigure}\\
 
-        \begin{subfigure}[b]{0.45\textwidth}
-        \includegraphics[width=\textwidth]{Figures/Output/ISRM_deathrate_by_scenario_2030.jpg}
+        \begin{subfigure}[b]{0.49\textwidth}
+        \includegraphics[width=\textwidth]{Figures/Output/Compare_scenarios_all-scenarios_2035_GenX.jpg}
         \caption{2035}
         \label{Subfig2}
     \end{subfigure}
     \hfill
-        \begin{subfigure}[b]{0.45\textwidth}
-        \includegraphics[width=\textwidth]{Figures/Output/ISRM_deathrate_by_scenario_2035.jpg}
+        \begin{subfigure}[b]{0.49\textwidth}
+        \includegraphics[width=\textwidth]{Figures/Output/Compare_scenarios_all-scenarios_2040_GenX.jpg}
         \caption{2040}
         \label{Subfig2}
     \end{subfigure}\\
 
-    \begin{subfigure}[b]{0.45\textwidth}
-        \includegraphics[width=\textwidth]{Figures/Output/ISRM_deathrate_by_scenario_2045.jpg}
+    \begin{subfigure}[b]{0.49\textwidth}
+        \includegraphics[width=\textwidth]{Figures/Output/Compare_scenarios_all-scenarios_2045_GenX.jpg}
         \caption{2045}
         \label{Subfig2}
     \end{subfigure}
     \hfill
-    \begin{subfigure}[b]{0.45\textwidth}
-        \includegraphics[width=\textwidth]{Figures/Output/ISRM_deathrate_by_scenario_2050.jpg}
+    \begin{subfigure}[b]{0.49\textwidth}
+        \includegraphics[width=\textwidth]{Figures/Output/Compare_scenarios_all-scenarios_2050_GenX.jpg}
         \caption{2050}
         \label{Subfig2}
     \end{subfigure}
@@ -176,14 +195,43 @@ Given the precise agreement between the models, we now turn our attention to com
     \label{Compare Scenarios}
 \end{figure}
 
-FIGURE ON CO2 Vs Exposure
+In figure \ref{DeathsCosts} we plot deaths against total system costs.  The policies that seemingly do the best in terms of cost-effectiveness are the full-base-200 scenarios.  NOTE FOR DISCUSSION -- THIS IS ALMOST BY CONSTRUCTION SINCE CO2 COSTS ARE INCLUDED IN TOTAL COSTS
+\begin{figure}
+    \centering
+    \includegraphics[width=0.8\linewidth]{Figures/Output/Deaths_vs_Costs_GenX.png}
+    \caption{Plot of total system costs versus average deaths per year.  Results are from GenX output.}
+    \label{DeathsCosts}
+\end{figure}
 
-FIGURE ON TOTAL COST VS EXPOSURE
-\subsection{Foresight}
+Unsurprisingly, deaths are highly correlated with CO$_2$ emissions, since both are driven by fossil-fuel combustion.  Policies that most dramatically reduce CO$_2$ emissions, also do the most to reduce aggregate deaths.
+\begin{figure}
+    \centering
+    \includegraphics[width=1\linewidth]{Figures/Output/Deaths_vs_Emissions_GenX.png}
+    \caption{Deaths are highly correlated with CO$_2$ emissions}
+    \label{DeathsEmissions}
+\end{figure}
+
+\subsection{Varying the Escape Price}
+In figure \ref{EscapePrice} we plot death rates over time across different escape-price scenarios.  The difference between a $\$50$ escape price and a $\$200$ escape price is quite striking.  However, the change from $\$200$ to $\$1,000$ is far more subtle, and mostly shows up in 2040 and beyond.
+
+\begin{figure}
+    \centering
+    \includegraphics[width=1\linewidth]{Figures/Output/Compare_scenarios_compare-escape-price_GenX.jpg}
+    \caption{Death rates over time across escape-price scenarios}
+    \label{EscapePrice}
+\end{figure}
 
 \subsection{Constraining Transmission Expansion}
+In figure \ref{TransmissionConstraint} we plot death rates over time across the transmission constraint scenarios. Transmission constraints appear to have almost no effect on deaths.  As explored in MIP PAPER, the effects of transmission constraints are mostly localized.
+\begin{figure}
+    \centering
+    \includegraphics[width=1\linewidth]{Figures/Output/Compare_scenarios_transmissions-constraint_GenX.jpg}
+    \caption{Death rates over time for transmission constraint scenarios}
+    \label{TransmissionConstraint}
+\end{figure}
 
 \section{Conclusion}
+This paper presents projections for how numerous different transition scenarios calculated using four different open-source models will affect the distribution of pollution exposure through 2050.  We find that pollution projections are highly synchronized across models.  Moreover, we find that a more aggressive energy transition could save more than 2,000 lives per year.
 
 \begin{singlespace}
 \newpage
