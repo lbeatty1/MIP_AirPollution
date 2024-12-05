@@ -26,6 +26,16 @@ data_dict = {}
 states = gpd.read_file('Data/tl_2022_us_state/tl_2022_us_state.shp')
 states = states[~states['STUSPS'].isin(['AS', 'AK', 'GU', 'MP', 'VI', 'HI', 'PR'])]
 
+#keep palette consistent across plots
+palette = sns.color_palette("bright")
+color_mapping = {
+    'Latino': palette[0],       # Red
+    'WhiteNoL_1': palette[1],  # Blue
+    'Black': palette[2],       # Green
+    'Asian': palette[3],       # Purple
+    'Native': palette[4]       # Orange
+}
+
 ## Read in data
 def read_scenario_data(scenario, model, states_gdf):
     result = pd.DataFrame()
@@ -139,10 +149,10 @@ def make_death_timeseries(models, scenarios):
             print('deaths: '+scenario)
 
             # Plot mortality rates
-            plt.plot(deaths['year'], deaths['Latinodeat'], marker='o', label='Latino Deaths')
-            plt.plot(deaths['year'], deaths['WhiteNoL_1'], marker='o', label='White/Non-hispanic Deaths')
-            plt.plot(deaths['year'], deaths['Blackdeath'], marker='o', label='Black Deaths')
-            plt.plot(deaths['year'], deaths['Asiandeath'], marker='o', label='Asian Deaths')
+            plt.plot(deaths['year'], deaths['Latinodeat'], marker='o', label='Latino Deaths', color=color_mapping['Latino'])
+            plt.plot(deaths['year'], deaths['WhiteNoL_1'], marker='o', label='White/Non-hispanic Deaths', color=color_mapping['WhiteNoL_1'])
+            plt.plot(deaths['year'], deaths['Blackdeath'], marker='o', label='Black Deaths', color=color_mapping['Black'])
+            plt.plot(deaths['year'], deaths['Asiandeath'], marker='o', label='Asian Deaths', color=color_mapping['Asian'])
 
             # Add labels and title
             plt.xlabel('Year', fontsize=16)
@@ -385,6 +395,7 @@ for scenario in scenarios:
                     dpi=300, bbox_inches='tight')
 
 
+
 #%%
 #######################################
 #### COMPARE WITH CO2 EMISSIONS #######
@@ -418,7 +429,7 @@ for model in models:
 
 emissions = pd.merge(emissions, scenarios_compare, how='left', left_on=['model', 'planning_year', 'case'], right_on=['model', 'year', 'scenario'])
 emissions['value'] = emissions['value']/1e8
-emissions['planning_year']=emissions['planning_year'].astype(str)
+
 sns.scatterplot(
     data=emissions, 
     x='value', 
@@ -442,6 +453,66 @@ plt.legend(
 # Show the plot
 plt.savefig(f'MIP_AirPollution/Figures/Output/Deaths_vs_Emissions_{model}.png', format='jpg',dpi=300, bbox_inches='tight')
 plt.savefig(f'MIP_AirPollution/Figures/Output/Deaths_vs_Emissions_{model}.png', format='jpg',
+            dpi=300, bbox_inches='tight')
+plt.close()
+
+# Sort data by scenario and planning_year for proper line connections
+emissions = emissions.sort_values(by=['scenario', 'planning_year'])
+lines = []
+for scenario, group in emissions.groupby('scenario'):
+    group = group.sort_values(by='planning_year')
+    for i in range(len(group) - 1):
+        lines.append({
+            'x_start': group.iloc[i]['value'],
+            'y_start': group.iloc[i]['deathsK'],
+            'x_end': group.iloc[i + 1]['value'],
+            'y_end': group.iloc[i + 1]['deathsK'],
+            'scenario': scenario
+        })
+
+        plt.figure(figsize=(10, 6))
+lines_df = pd.DataFrame(lines)
+
+# Overlay lines for adjacent points
+for _, row in lines_df.iterrows():
+    plt.plot(
+        [row['x_start'], row['x_end']],
+        [row['y_start'], row['y_end']],
+        color=sns.color_palette('bright')[list(emissions['scenario'].unique()).index(row['scenario'])],
+        alpha=0.6
+    )
+
+# Add scatter points
+sns.scatterplot(
+    data=emissions,
+    x='value',
+    y='deathsK',
+    hue='scenario',
+    style='planning_year',
+    palette='bright',
+    s=100,  # Size of points
+    alpha=0.9
+)
+
+# Add labels and title
+plt.title('Tracking Changes in X and Y Over Time', fontsize=16)
+plt.xlabel('CO2 Emissions (100 million Tons)', fontsize=14)
+plt.ylabel('Deaths per year', fontsize=14)
+
+# Customize the legend
+plt.legend(
+    title='Scenario',
+    bbox_to_anchor=(1.05, 1),
+    loc='upper left',
+    borderaxespad=0.0
+)
+
+# Tidy up the layout
+plt.tight_layout()
+
+# Show the plot
+plt.savefig(f'MIP_AirPollution/Figures/Output/Deaths_vs_Emissions_withlines_{model}.png', format='jpg',dpi=300, bbox_inches='tight')
+plt.savefig(f'MIP_AirPollution/Figures/Output/Deaths_vs_Emissions_withlines_{model}.png', format='jpg',
             dpi=300, bbox_inches='tight')
 plt.close()
 #######################################
@@ -484,7 +555,7 @@ sns.scatterplot(
     x='Total', 
     y='deathsK', 
     hue='scenario', 
-    palette='Set1',
+    palette='bright',
     alpha=0.9
 )
 
