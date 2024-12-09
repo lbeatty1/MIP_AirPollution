@@ -495,7 +495,7 @@ sns.scatterplot(
 )
 
 # Add labels and title
-plt.title('Tracking Changes in X and Y Over Time', fontsize=16)
+plt.title('CO2 Emissions vs Deaths', fontsize=16)
 plt.xlabel('CO2 Emissions (100 million Tons)', fontsize=14)
 plt.ylabel('Deaths per year', fontsize=14)
 
@@ -515,6 +515,8 @@ plt.savefig(f'MIP_AirPollution/Figures/Output/Deaths_vs_Emissions_withlines_{mod
 plt.savefig(f'MIP_AirPollution/Figures/Output/Deaths_vs_Emissions_withlines_{model}.png', format='jpg',
             dpi=300, bbox_inches='tight')
 plt.close()
+
+#%%
 #######################################
 ###### COMPARE WITH COSTS #############
 #######################################
@@ -595,7 +597,7 @@ for scenario in scenarios:
     scenarios_compare = pd.concat([scenarios_compare, plot_data])
 scenarios_compare = scenarios_compare.groupby(['scenario', 'model', 'year']).sum().reset_index()
     
-scenarios_compare['Total']=scenarios_compare['deathsK']*7.4*1e6 #VSL
+scenarios_compare['Total']=scenarios_compare['deathsK']*11.51*1e6 #VSL
 scenarios_compare['Costs'] = 'Deaths'
 scenarios_compare['case']=scenarios_compare['scenario']
 scenarios_compare['Total'] = np.where(scenarios_compare['year'] == 2027, scenarios_compare['Total'] * 3, scenarios_compare['Total'] * 5)
