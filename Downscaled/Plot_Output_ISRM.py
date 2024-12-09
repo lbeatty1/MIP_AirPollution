@@ -572,3 +572,72 @@ plt.savefig(f'MIP_AirPollution/Figures/Output/Deaths_vs_Costs_{model}.png', form
             dpi=300, bbox_inches='tight')
 
 # %%
+#########################
+### Break down costs
+#########################
+model='GenX'
+scenarios = ['full-base-50', 'full-base-200', 'full-base-1000','full-base-200-tx-0', 'full-base-200-tx-15', 'full-base-200-tx50', 'full-current-policies', 'full-current-policies-retire', 'full-current-policies-commit']
+costs = pd.read_csv('MIP_results_comparison/compiled_results/all/operational_costs.csv')
+costs = costs[costs['planning_year']=='NPV']
+costs = costs[costs['case'].isin(scenarios)]
+costs = costs[costs['model']==model]
+#read in data
+scenarios_compare = pd.DataFrame()
+scenarios_name = '_'.join(scenarios)
+for scenario in scenarios:
+    key = f'{model}_{scenario}'
+    if key in data_dict:
+        plot_data = data_dict[key]
+        print(f'{key} already in memory')
+    else:
+        data_dict[key]=read_scenario_data(scenario, model, states)
+        plot_data = data_dict[key]
+    scenarios_compare = pd.concat([scenarios_compare, plot_data])
+scenarios_compare = scenarios_compare.groupby(['scenario', 'model', 'year']).sum().reset_index()
+    
+scenarios_compare['Total']=scenarios_compare['deathsK']*7.4*1e6 #VSL
+scenarios_compare['Costs'] = 'Deaths'
+scenarios_compare['case']=scenarios_compare['scenario']
+scenarios_compare['Total'] = np.where(scenarios_compare['year'] == 2027, scenarios_compare['Total'] * 3, scenarios_compare['Total'] * 5)
+scenarios_compare = scenarios_compare.groupby(['Costs', 'case']).agg({'Total':'sum'}).reset_index()
+costs = pd.concat([costs, scenarios_compare])
+
+costs = costs[['Costs', 'Total', 'case']]
+costs['Total']=costs['Total']/1e9
+
+
+#simplify and control order of bars
+other_costs = ['cNSE', 'cNetworkExp', 'cStart', 'cUnmetRsv', 'cVOM']
+costs['Costs'] = np.where(costs['Costs'].isin(other_costs), 'Other', costs['Costs'])
+
+costs['Costs'] = pd.Categorical(costs['Costs'], categories=['Deaths','cCO2', 'cFix','cVar', 'Other'], ordered=True)
+costs = costs.groupby(['case', 'Costs']).agg({'Total':'sum'}).reset_index()
+costs = costs.sort_values(by=['case', 'Costs'])
+
+
+pivot_df = costs.pivot_table(index='case', columns='Costs', values='Total', aggfunc='sum', fill_value=0)
+column_order = ['cCO2', 'cFix', 'cVar', 'Other', 'Deaths']  # Adjust this order as needed
+pivot_df = pivot_df[column_order]
+# Plotting the stacked bar chart
+pivot_df.plot(kind='bar', stacked=True, figsize=(10, 6))
+
+ax = pivot_df.plot(kind='bar', stacked=True, figsize=(10, 6))
+
+handles, labels = ax.get_legend_handles_labels()
+order = list(reversed(column_order))  # Reverse the order
+  # Ensure this matches your column_order
+sorted_handles_labels = sorted(zip(handles, labels), key=lambda x: order.index(x[1]))
+sorted_handles, sorted_labels = zip(*sorted_handles_labels)
+ax.legend(sorted_handles, sorted_labels, title="Costs")
+
+# Adding labels and title
+plt.title('Costs by Case')
+plt.xlabel('Case')
+plt.ylabel('Costs (Billion $)')
+
+# Show the plot
+plt.tight_layout()
+plt.savefig(f'MIP_AirPollution/Figures/Output/Costs_Barchart_{model}.png', format='jpg',dpi=300, bbox_inches='tight')
+plt.savefig(f'MIP_AirPollution/Figures/Output/Costs_Barchart_{model}.png', format='jpg',
+            dpi=300, bbox_inches='tight')
+# %%
