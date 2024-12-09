@@ -61,17 +61,17 @@ Patricia Hildalgo}
 \end{center}
 
 \begin{abstract}
-    In this paper, we provide an overview of how different scenarios for the electricity transition will affect the distribution of air pollution exposure through 2050.  Currently, there are large disparities in pollution exposure across racial and socio-economic groups resulting from historical choices about where generation facilities were cited as well as differences across groups in income and wealth. We use results from the Model Intercomparison Project -- a project aimed at harmonizing the inputs and comparing the outputs of multiple open-source least-cost electricity planning models.  We take those results, predict location-specific emissions of various pollutants over time, then use InMap to calculate average group-level exposures to PM2.5.  We find broad agreement across models.  Moreover, we find that deep decarbonization should lead to major improvements in air quality, and reductions in pollution exposure, along with a reduction in pollution exposure disparities.
+    In this paper, we provide an overview of how different scenarios for the electricity transition will affect the distribution of air pollution exposure through 2050.  Currently, there are large disparities in pollution exposure across racial and socioeconomic groups resulting from historical choices about where generation facilities were cited, historical policies affecting migration and housing choices, and differences across groups in income and wealth. We use results from the Model Intercomparison Project -- a project aimed at harmonizing the inputs and comparing the outputs of multiple open-source least-cost electricity planning models.  We take those results, predict location-specific emissions of various pollutants over time, then use InMap to calculate average group-level exposures to PM2.5.  We find broad agreement across models.  Moreover, we find that deep decarbonization should lead to major improvements in air quality, and reductions in pollution exposure, along with a reduction in pollution exposure disparities.
 \end{abstract}
 
 \newpage
 \section{Introduction}
-Historical inequities have led to large contemporary differences in air pollution exposure across groups.  This paper looks forward and analyzes how different plans for the U.S. electricity transition will affect group-level pollution exposure. 
+Historical inequities have led to large contemporary differences in air pollution exposure across groups.  The academic and policy communities have increasingly been turning their attention towards reducing these inequities, and analyzing the equity impacts of policy.  This paper looks forward and analyzes how different plans for the U.S. electricity transition will affect group-level pollution exposure. 
 
 
-There is a rich literature on the effects of electricity generation on pollution, the effects of pollution on human health and well-being, and papers linking electricity generation to health effects.  Air pollution is linked with numerous health impacts such as chronic obstructive pulmonary disease (COPD), acture lower respiratory illness (ALRI), cerebrovascular disease (CEV), ischaemic heart disease (IHD), and lung cancer, and in the United States, power generation is responsible for $31\%$ of premature mortality linked to outdoor air pollution \citep{Lelieveld2015TheScale}.
+There is a rich literature on the effects of electricity generation on pollution and the effects of pollution on human health and well-being. Air pollution is linked with numerous health impacts such as chronic obstructive pulmonary disease (COPD), acture lower respiratory illness (ALRI), cerebrovascular disease (CEV), ischaemic heart disease (IHD), and lung cancer, and in the United States, power generation is responsible for $31\%$ of premature mortality linked to outdoor air pollution \citep{Lelieveld2015TheScale}.
 
-There is also a rich literature on how policies affect air pollution from power generation.  \citet{Shawhan2024PoliciesAmericans} use the  Engineering, Economic, and Environmental Electricity Simulation Tool (E4ST) to model capacity expansion and system operation combined with InMap to model how policies aimed at reducing air pollution in environmentally overburdened, disadvantaged communities (EO DACs) compare with hypothetical $\$15$ per ton carbon tax.  They find that both CO$_2$ pricing and the best-performing within-DAC policies reduce mortality by approximately 1.4 to 1.5 times as much for EO DAC residences as non-EO DAC residents -- a major win for reducing disparities.  However, they find that the targeted policies are only slightly more effective than the carbon tax at reducing PM2.5, and that the plans are far more costly than a carbon tax.  Similarly, \citet{Goforth2022AirStrategies} use the Regional Energy Deployment System (ReEDS) along with InMAP to project how different U.S. national decarbonization strategies will affect air pollution disparities.  
+There is also a rich literature on how policies affect air pollution from power generation.  \citet{Shawhan2024PoliciesAmericans} use the  Engineering, Economic, and Environmental Electricity Simulation Tool (E4ST) to model capacity expansion and system operation combined with InMap to model how policies aimed at reducing air pollution in environmentally overburdened, disadvantaged communities (EO DACs) compare with hypothetical $\$15$ per ton carbon tax.  They find that both CO$_2$ pricing and the best performing within-DAC policies reduce mortality by approximately 1.4 to 1.5 times as much for EO DAC residences as non-EO DAC residents, a major win for reducing disparities.  However, they find that targeted policies are only slightly more effective than the carbon tax at reducing PM2.5, and that the plans are far more costly than a carbon tax.  Similarly, \citet{Goforth2022AirStrategies} use the Regional Energy Deployment System (ReEDS) along with InMAP to project how different U.S. national decarbonization strategies will affect air pollution disparities.  
 
 This paper extends the literature by projecting air pollution impacts for a wider variety of policy scenarios, across multiple open-source least-cost electricity models.  Our results are in broad agreement with the studies of \citet{Goforth2022AirStrategies} and \citet{Shawhan2024PoliciesAmericans}.  We find that decarbonization strategies should lead to a large decrease in pollution exposure, as well as  a decline in disparities across groups in exposure.  Moreover, we find strong agreement between models.
 
@@ -86,19 +86,20 @@ Emissions data comes from two sources: EPA's Clean Air Markets Program Data (CAM
 Data for the MIP was generated using PowerGenome, then modified on a model-by-model basis.  PowerGenome was designed to produce input files for the GenX capacity expansion model.  PowerGenome relies on a wide variety of data such as the National Renewable Energy Lab's (NREL) Annual Technology Baseline (ATB), the U.S. Energy Information Administration's Annual Energy Outlook, the EPA's Integrated Planning Model, and more.  For more information on PowerGenome, see the release page \citep{PowerGenome/PowerGenome:V0.6.3}.  Further details on the construction of model inputs for TEMOA, SWITCH, and USENSYS can be found in the main MIP paper at INSERT PAPER HERE.
 
 \section{Methods}
+This paper accompanies the Model Intercomparison Project. Once MIP outputs were obtained, we calculate source-specific emissions rates using empirical emissions data, downscale the results from MIP to predict location-specific aggregate emissions, then finally, run those emissions through the InMAP ISRM model. 
 
-\subsection{Calculating source-specific emissions rates}
-\begin{enumerate}
-    \item Join EIA generation data with EPA emissions data to calculate emissions rates in lbs/MWh.
-    \item Calculate emissions from existing plants by taking model-outputted generation and multiplying that by the plant's share of cluster capacity to get a predicted MWh.  Then multiply that by the plant's emissions rates for all five pollutants.
-    \item New fossil generation outputted by these models is only natural gas.  For new plants, I start by allocating capacity to both retired and existing sites, with a preference for siting at retired sites.
-\end{enumerate}
-
-https://ehp.niehs.nih.gov/doi/10.1289/EHP9001
-https://www.rff.org/publications/working-papers/policies-for-reducing-the-impacts-of-power-sector-air-pollution-on-disadvantaged-americans/
 
 \subsection{Least-cost modeling}
 We use four different open-source least-cost electricity planning models to solve many different scenarios. For more information on the models and scenarios, see OTHER PAPER.
+
+
+\subsection{Calculating source-specific emissions rates}
+\begin{enumerate}
+    \item Join EIA generation data with EPA emissions data to calculate emissions rates in tons/MWh.  Many plants are in both the EPA and EIA data and can be matched directly, and have their own specific emissions rates.  For plants that cannot be matched, we take generation-weighted average emissions rates for each technology.
+    \item Calculate emissions from existing plants by taking model-outputted generation and multiplying that by the plant's share of cluster capacity to get a predicted MWh.  Then multiply that by the plant's emissions rates for all five pollutants.
+    \item The new fossil generation produced by these models is only natural gas or natural gas with CCS.  For new plants, we begin by allocating new capacity to retired sites.  Once the new capacity equals the retired capacity, we allocate the remaining new capacity to both existing and retired sites, weighted by capacity.  This is essentially an assumption that the spatial distribution of new generation will mirror existing and retired generation.  
+\end{enumerate}
+
 
 \subsection{Emissions to Exposure: InMap}
 Once we've obtained predictions for plant-level emissions, we feed these emissions into the InMap Source-Receptor Matrix (ISRM).  The ISRM was developed to further simply the InMAP model.  The InMAP model was designed to compute annual-average primary and secondary PM2.5.  InMAP is not a full Eulerian chemical tranport model. Rather, InMAP uses information from chemical transport models along with some simplifying assumptions and estimated reduced-form parameters \citep{Tessum2017InMAP:Interventions}.  The InMAP ISRM was developed by running InMAP hundreds of thousands of times to calculate the average linear relationship between emissions in each source location with annual-average PM2.5 concentrations at receptor locations \citep{Goodkind2019Fine-scaleEmissions}.  The InMAP ISRM uses a variable grid with a finer scale in more population-dense areas, and a coarser definition in less dense areas, greatly reducing the size of the matrix while still maintaining it's ability to make fine-scale spatial prediction.  We plot an example of the ISRM output below in figure \ref{ISRMexample}.
@@ -211,6 +212,8 @@ Unsurprisingly, deaths are highly correlated with CO$_2$ emissions, since both a
     \label{DeathsEmissions}
 \end{figure}
 
+These results mirror previous related work.  \citet{Shawhan2024PoliciesAmericans} found that a carbon tax would decrease deaths by X$\%$.  \citet{Goforth2022AirStrategies} find that THINGS.
+
 \subsection{Varying the Escape Price}
 In figure \ref{EscapePrice} we plot death rates over time across different escape-price scenarios.  The difference between a $\$50$ escape price and a $\$200$ escape price is quite striking.  However, the change from $\$200$ to $\$1,000$ is far more subtle, and mostly shows up in 2040 and beyond.
 
@@ -222,7 +225,7 @@ In figure \ref{EscapePrice} we plot death rates over time across different escap
 \end{figure}
 
 \subsection{Constraining Transmission Expansion}
-In figure \ref{TransmissionConstraint} we plot death rates over time across the transmission constraint scenarios. Transmission constraints appear to have almost no effect on deaths.  As explored in MIP PAPER, the effects of transmission constraints are mostly localized.
+In figure \ref{TransmissionConstraint} we plot death rates over time across the transmission constraint scenarios. Transmission constraints appear to have almost no effect on deaths.  As explored in MIP PAPER, the effects of transmission constraints are mostly localized.  MIP PAPER found that while the transmission constraint did not have a major effect on system costs, it did increase aggregate emissions by $X\%$.  The effects on aggregate deaths are far more muted.  The most severe transmission constraint (zero new inter-regional transmission) only has X more deaths per year than the completely unconstrained scenario.
 \begin{figure}
     \centering
     \includegraphics[width=1\linewidth]{Figures/Output/Compare_scenarios_transmissions-constraint_GenX.jpg}
@@ -231,7 +234,7 @@ In figure \ref{TransmissionConstraint} we plot death rates over time across the 
 \end{figure}
 
 \section{Conclusion}
-This paper presents projections for how numerous different transition scenarios calculated using four different open-source models will affect the distribution of pollution exposure through 2050.  We find that pollution projections are highly synchronized across models.  Moreover, we find that a more aggressive energy transition could save more than 2,000 lives per year.
+This paper presents projections for how numerous different transition scenarios calculated using four different open-source models will affect the distribution of pollution exposure through 2050.  We find that pollution projections are highly synchronized across models.  Moreover, we find that a more aggressive energy transition could save more than 2,000 lives per year relative to the current policies trajectory.  All model results point towards a dramatic decrease in deaths for all racial groups.
 
 \begin{singlespace}
 \newpage
