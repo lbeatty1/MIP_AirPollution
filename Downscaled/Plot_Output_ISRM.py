@@ -10,12 +10,19 @@ import math
 from matplotlib.colors import LinearSegmentedColormap
 import seaborn as sns
 import sys
+import csv
 
 
 os.chdir('C:/Users/laure/Documents/Switch-USA-PG/')
 sys.path.append(os.path.abspath('C:/Users/laure/Documents/Switch-USA-PG/'))
 
 from MIP_AirPollution.Downscaled.settings import *
+
+#write an empty csv to save some summary stats to
+stats_file = 'MIP_AirPollution/Downscaled/stats.csv'
+with open(stats_file, mode='w', newline='') as file:
+    writer = csv.writer(file)
+    writer.writerow([])
 
 #rather than read in all data (very time consuming)
 #I'm going to selectively plot model/scenarios
@@ -121,12 +128,24 @@ def make_concentration_plots(models, scenarios, columns, states):
                                 dpi=300, bbox_inches='tight')
                     plt.savefig(f'MIP_results_comparison/AirPollution/{scenario}/{model}/ISRM_{year}_{column}_{model}_concentrationmap.jpg', format='jpg',
                                 dpi=300, bbox_inches='tight')
+                    
+                    #save population-weighted to stats.csv
+                    plot_temp['TotalPop'] = plot_temp['Black']+plot_temp['Asian']+plot_temp['WhiteNoLat']+plot_temp['Native']+plot_temp['Latino']
+                    weighted_avg = (plot_temp['TotalPM25'] * plot_temp['TotalPop']).sum() / plot_temp['TotalPop'].sum()
+                    with open(stats_file, mode='a', newline='') as file:
+                        writer = csv.writer(file)
+                        writer.writerow([scenario, model, year, weighted_avg])
+
 
 
 columns_to_plot = ['TotalPM25']
 models = ['GenX', 'SWITCH']
 scenarios = ['full-base-200', 'full-base-50', 'full-base-1000']
-make_concentration_plots(models = models, scenarios=scenarios, states=states)
+with open(stats_file, mode='a', newline='') as file:
+    writer = csv.writer(file)
+    writer.writerow(['Population-weighted average concentrations'])
+
+make_concentration_plots(models = models, scenarios=scenarios, columns = columns_to_plot, states=states)
 
 #%%
 def make_death_timeseries(models, scenarios):
@@ -169,7 +188,6 @@ def make_death_timeseries(models, scenarios):
             plt.savefig(f'MIP_results_comparison/AirPollution/{scenario}/{model}/ISRM_death_by_group.jpg', format='jpg',
                         dpi=300, bbox_inches='tight')
             
-
             death_rates = pd.DataFrame(plot_data[['Asiandeath', 'Blackdeath', 'Latinodeat', 'Nativedeat', 'WhiteNoL_1', 'Asian', 'Black', 'Latino', 'Native', 'WhiteNoLat', 'year', 'scenario', 'model']])
             death_rates = death_rates.groupby(['scenario','year', 'model']).sum().reset_index()
             death_rates['Asianrate'] = death_rates['Asiandeath']/death_rates['Asian']
@@ -202,10 +220,17 @@ def make_death_timeseries(models, scenarios):
             plt.savefig(f'MIP_AirPollution/Figures/Output/{scenario}/{model}/ISRM_deathrate_by_group.jpg', format='jpg',dpi=300, bbox_inches='tight')
             plt.savefig(f'MIP_results_comparison/AirPollution/{scenario}/{model}/ISRM_deathrate_by_group.jpg', format='jpg',
                         dpi=300, bbox_inches='tight')
+            
+            death_rates.to_csv(stats_file, mode='a', index=False, header=False)
 
+
+with open(stats_file, mode='a', newline='') as file:
+    writer = csv.writer(file)
+    writer.writerow([])
+    writer.writerow(['Total Deaths/DeathRates'])
 
 models = ['GenX', 'SWITCH']
-scenarios = ['full-base-200', 'full-current-policies']
+scenarios = ['full-base-200', 'full-current-policies', 'full-base-50', 'full-base-1000', 'full-base-200-tx-0', 'full-base-200-tx-50']
 make_death_timeseries(models, scenarios)
 
 #%%
@@ -326,7 +351,7 @@ compare_death_scenarios(models, scenarios, 'compare-escape-price')
 scenarios = ['full-base-200', 'full-current-policies']
 compare_death_scenarios(models, scenarios, 'current-base')
 
-scenarios = ['full-base-200-tx-0', 'full-base-200-tx-15', 'full-base-200-tx-50', 'full-base-200']
+scenarios = ['full-base-200-tx-0', 'full-base-200']
 compare_death_scenarios(models, scenarios, 'transmissions-constraint')
 
 scenarios = ['full-base-200-tx-0', 'full-base-200-tx-15', 'full-base-200-tx-50', 'full-base-200', 'full-base-50', 'full-base-1000', 'full-current-policies']
