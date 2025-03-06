@@ -25,6 +25,8 @@
 
 
 
+
+
 \interfootnotelinepenalty=10000
 
 \newcommand{\R}{\mathbb{R}}
@@ -42,14 +44,14 @@
 \linespread{2}
 \title{The Distributional Impacts of the Electricity Transition on Pollution Exposure}
 
-\author{Lauren Beatty\thanks{Environmental Defense Fund  \hspace{.5cm} E-mail: lbeatty1@edf.org \hspace{.5cm}Website: \href{https://lbeatty1.github.io}{https://lbeatty1.github.io}}, 
-Matthias Fripp, 
-Greg Schivley, 
-Rangrang Zhang, 
-Cameron Wade, \\ 
+\author{Lauren Beatty\thanks{Environmental Defense Fund}, 
+Matthias Fripp\footnotemark[1], 
+Greg Schivley \thanks{Princeton University}, 
+Rangrang Zhang \thanks{University of Hawaii}, 
+Cameron Wade \thanks{Sutubra}, \\ 
 Oleg Lugovoy, 
-Michael Roberts, 
-Patricia Hildalgo}
+Michael Roberts\footnotemark[3], 
+Patricia Hildalgo\thanks{University of California, San Diego}}
 
 
 \date{\today}
@@ -66,12 +68,12 @@ Patricia Hildalgo}
 
 \newpage
 \section{Introduction}
-Historical inequities have led to large contemporary differences in air pollution exposure across groups.  The academic and policy communities have increasingly been turning their attention towards reducing these inequities, and analyzing the equity impacts of policy.  This paper looks forward and analyzes how different plans for the U.S. electricity transition will affect group-level pollution exposure. 
+Historical inequities have led to large contemporary differences in air pollution exposure across groups.  The academic and policy communities have increasingly been turning their attention towards reducing these inequities, as well as analyzing the equity impacts of policy.  This paper looks forward and analyzes how different plans for the U.S. electricity transition will affect group-level pollution exposure. 
 
 
-There is a rich literature on the effects of electricity generation on pollution and the effects of pollution on human health and well-being. Air pollution is linked with numerous health impacts such as chronic obstructive pulmonary disease (COPD), acture lower respiratory illness (ALRI), cerebrovascular disease (CEV), ischaemic heart disease (IHD), and lung cancer, and in the United States, power generation is responsible for $31\%$ of premature mortality linked to outdoor air pollution \citep{Lelieveld2015TheScale}.
+There is a rich literature on the effects of electricity generation on pollution and the effects of pollution on human health and well-being. Air pollution is linked with numerous health impacts such as chronic obstructive pulmonary disease (COPD), acture lower respiratory illness (ALRI), cerebrovascular disease (CEV), ischaemic heart disease (IHD), and lung cancer, and in the United States, power generation is responsible for $31\%$ of premature mortality linked to outdoor air pollution \citep{Lelieveld2015TheScale}.  There are also many retrospective policy analysis of how policies such as the Clean Air Act, the Acid Rain Program, or even EV Tax credits affected air pollution and mortality (\citet{Cropper2023The1970s}, \citet{Chay2003TheJSTOR}, \citet{Holland2019DistributionalAdoption}, \citet{Chan2018}).  These studies broadly find that the monetized health effects from policy changes that affect electricity generation are important components of the overall costs and benefits of these policies.
 
-There is also a rich literature on how policies affect air pollution from power generation.  \citet{Shawhan2024PoliciesAmericans} use the  Engineering, Economic, and Environmental Electricity Simulation Tool (E4ST) to model capacity expansion and system operation combined with InMap to model how policies aimed at reducing air pollution in environmentally overburdened, disadvantaged communities (EO DACs) compare with hypothetical $\$15$ per ton carbon tax.  They find that both CO$_2$ pricing and the best performing within-DAC policies reduce mortality by approximately 1.4 to 1.5 times as much for EO DAC residences as non-EO DAC residents, a major win for reducing disparities.  However, they find that targeted policies are only slightly more effective than the carbon tax at reducing PM2.5, and that the plans are far more costly than a carbon tax.  Similarly, \citet{Goforth2022AirStrategies} use the Regional Energy Deployment System (ReEDS) along with InMAP to project how different U.S. national decarbonization strategies will affect air pollution disparities.  
+There is also an emerging literature aiming to estimate how various transition policies will affect air pollution moving forward.  \citet{Shawhan2024PoliciesAmericans} use the  Engineering, Economic, and Environmental Electricity Simulation Tool (E4ST) to model capacity expansion and system operation combined with InMap to model how policies aimed at reducing air pollution in environmentally overburdened, disadvantaged communities (EO DACs) compare with hypothetical $\$15$ per ton carbon tax.  They find that both CO$_2$ pricing and the best performing within-DAC policies reduce mortality by approximately 1.4 to 1.5 times as much for EO DAC residences as non-EO DAC residents, a major win for reducing disparities.  However, they find that targeted policies are only slightly more effective than the carbon tax at reducing PM2.5, and that the plans are far more costly than a carbon tax.  Similarly, \citet{Goforth2022AirStrategies} use the Regional Energy Deployment System (ReEDS) along with InMAP to project how different U.S. national decarbonization strategies will affect air pollution disparities.  Lastly, \citet{Jordan2024ClimateGeneration} uses the multi-sectoral ability of TEMOA to jointly model the air pollution effects of model electricity generation and transportation.  
 
 This paper extends the literature by projecting air pollution impacts for a wider variety of policy scenarios, across multiple open-source least-cost electricity models.  Our results are in broad agreement with the studies of \citet{Goforth2022AirStrategies} and \citet{Shawhan2024PoliciesAmericans}.  We find that decarbonization strategies should lead to a large decrease in pollution exposure, as well as  a decline in disparities across groups in exposure.  Moreover, we find strong agreement between models.
 
@@ -83,21 +85,25 @@ This paper extends the literature by projecting air pollution impacts for a wide
 Emissions data comes from two sources: EPA's Clean Air Markets Program Data (CAMD) and EPA's National Emissions Inventory (NEI).  The CAMD was created to track compliance with clean air programs, and thus, tracks emissions of CO$_2$, NO$_x$, and SO$_2$.  The NEI was created to track criteria pollutants, criteria precursors, and hazardous air pollutants from \textit{all} sources.  I get emissions of NH$_3$, VOC, and PM2.5 from the NEI. 
 
 \subsection{Data for PowerGenome}
-Data for the MIP was generated using PowerGenome, then modified on a model-by-model basis.  PowerGenome was designed to produce input files for the GenX capacity expansion model.  PowerGenome relies on a wide variety of data such as the National Renewable Energy Lab's (NREL) Annual Technology Baseline (ATB), the U.S. Energy Information Administration's Annual Energy Outlook, the EPA's Integrated Planning Model, and more.  For more information on PowerGenome, see the release page \citep{PowerGenome/PowerGenome:V0.6.3}.  Further details on the construction of model inputs for TEMOA, SWITCH, and USENSYS can be found in the main MIP paper at INSERT PAPER HERE.
+Data for the MIP was generated using PowerGenome, then modified on a model-by-model basis.  PowerGenome was designed to produce input files for the GenX capacity expansion model.  PowerGenome relies on a wide variety of data such as the National Renewable Energy Lab's (NREL) Annual Technology Baseline (ATB), the U.S. Energy Information Administration's Annual Energy Outlook, the EPA's Integrated Planning Model, and more.  For more information on PowerGenome, see the release page \citep{SchivleyPowerGenome/PowerGenome:V0.6.3}.  Further details on the construction of model inputs for TEMOA, SWITCH, and USENSYS can be found in the main MIP paper at INSERT PAPER HERE.
 
 \section{Methods}
 This paper accompanies the Model Intercomparison Project. Once MIP outputs were obtained, we calculate source-specific emissions rates using empirical emissions data, downscale the results from MIP to predict location-specific aggregate emissions, then finally, run those emissions through the InMAP ISRM model. 
 
 
 \subsection{Least-cost modeling}
-We use four different open-source least-cost electricity planning models to solve many different scenarios. For more information on the models and scenarios, see OTHER PAPER.
+We use four different open-source least-cost electricity planning models to solve many different scenarios. Each model is a least-cost model, so the model takes as inputs assumptions about costs for various generation technologies, assumptions about policies, assumptions about demand, and the current state of the electrical system, then aims to find a portfolio of new capacity combined with feasible hourly generation that minimizes costs subject to reliability and physical constraints.
+
+Each of these models was solved using 26 zones, and a whole year of hourly demand and weather data.  For more information on the models and scenarios, see OTHER PAPER.
 
 
 \subsection{Calculating source-specific emissions rates}
+The exercise here is two-fold.  First, we need to calculate emissions rates for plants.  Then we need to calculate model-zone specific emissions rates that are spatially-explicity.  For example, a model run may tell you that combined-cycle natural gas in PJM-East should generate 100,000 MWh per year.  We need to make assumptions to assign those 100,000 MWh to specific locations to calculate location-specific aggregate emissions.
+
 \begin{enumerate}
     \item Join EIA generation data with EPA emissions data to calculate emissions rates in tons/MWh.  Many plants are in both the EPA and EIA data and can be matched directly, and have their own specific emissions rates.  For plants that cannot be matched, we take generation-weighted average emissions rates for each technology.
     \item Calculate emissions from existing plants by taking model-outputted generation and multiplying that by the plant's share of cluster capacity to get a predicted MWh.  Then multiply that by the plant's emissions rates for all five pollutants.
-    \item The new fossil generation produced by these models is only natural gas or natural gas with CCS.  For new plants, we begin by allocating new capacity to retired sites.  Once the new capacity equals the retired capacity, we allocate the remaining new capacity to both existing and retired sites, weighted by capacity.  This is essentially an assumption that the spatial distribution of new generation will mirror existing and retired generation.  
+    \item The new fossil generation produced by these models is only natural gas or natural gas with CCS.  For new plants, we begin by allocating new capacity to retired sites.  Once the new capacity equals the retired capacity, we allocate the remaining new capacity to both existing and retired sites, weighted by capacity.  This is essentially an assumption that the spatial distribution of new generation will mirror existing and retired generation. In the literature, this is known as a ``grow-in-place" assumption, and is used by other studies such as \citet{Jordan2024ClimateGeneration}.  We don't have data on emissions rates of CCS, so we inflate emissions rates for CCS by the model assumption about the ratio of CCS heat-rates to heat-rates at plants without pollution control technologies.  Of course, if CCS technologies also scrub some or many air pollutants, our estimates of pollution will be overstated, especially in later planning years. 
 \end{enumerate}
 
 
@@ -117,6 +123,7 @@ Once we've obtained predictions for plant-level emissions, we feed these emissio
         \label{Subfig2}
     \end{subfigure}\\
     \caption{ISRM Output for the Base Scenario in 2027 and 2050.}
+    \label{ISRMexample}
 \end{figure}
 For each grid area, $i$, we translate concentrations into mortality using total PM2.5 predicted by INMAP in a Cox proportional hazards equation:
 
@@ -131,9 +138,12 @@ where
     \item $MortalityRate_i$ is the mortality rate for grid $i$.\footnote{The mortality rate in the model is for 2005.  For simplicty, we don't replace this.  Since it remains constant over time, these projections will not account for changes in mortality rates over time.}
 \end{itemize}
 
-While the projection takes into account idiosyncratic changes across groups in population growth, it will not take into acount idiosyncratic changes across groups \textit{across space}.  In addition, our estimates will not reflect differences between groups in mortality rates, which previous work has shown may be an important driver of mortality in models \citep{Spiller2021MortalityOutcomes}.  Lastly, these projections will not take into account expected changes over time in mortality rates. Since our primary concern is differences in mortality \textit{rates} rather than aggregate mortality, we think these are reasonable assumptions and simplifications. Moreover, we primarily want our estimates to reflect changes in electricity generation, rather than population projections with wide uncertainty bands.
+While the projection takes into account idiosyncratic changes across groups in population growth, it will not take into acount idiosyncratic changes across groups \textit{across space}.  In addition, our estimates will not reflect differences between groups in mortality rates, which previous work has shown may be an important driver of mortality in models \citep{Spiller2021MortalityOutcomes}.  Lastly, these projections will not take into account expected changes over time in mortality rates. If mortality rates fall over time, then our estimates will be biased upwards.
+
+Since our primary concern is differences in mortality rates across groups, rather than aggregate mortality, we think these are reasonable assumptions and simplifications. Moreover, we primarily want our estimates to reflect changes in electricity generation, rather than population projections with wide uncertainty bands.
+
 \section{Results: Comparison Across Models}
-Our first result is that there is tight agreement across models.  This is a fairly unsurprising result in light of the results of MIP PROJECT PAPER.  The models have similar amounts of generation and capacity expansion across models, as well as similar CO$_2$ emissions and costs.  The largest difference we observe between race-specific death rates is X$\%$.
+Our first result is that there is tight agreement across models.  This is a fairly unsurprising result in light of the results of MIP PROJECT PAPER.  The models have similar amounts of generation and capacity expansion across models, as well as similar CO$_2$ emissions and costs.  The largest difference we observe between race-specific death rates is the 15$\%$ discrepancy between USENSYS and SWITCH in the projected death rate for Black individuals in 2050.  For the earlier planning periods (2027 and 2030) where death rates are higher, model discrepancies are less than 10$\%$.
 
 \begin{figure}
     \centering
@@ -154,7 +164,10 @@ Our first result is that there is tight agreement across models.  This is a fair
 
 \section{Results: Comparison Across Scenarios}
 
-Given the precise agreement between the models, we now turn our attention to comparing pollution exposure across policy scenarios.  In figure \ref{Compare Scenarios}, we plot population-weighted mean death rates by racial group by scenario for each model period.  The first thing that becomes immediately apparent is that the decarbonization scenarios reduce pollution exposure much more quickly and dramatically than the current policy scenarios.  It's also clear that there are wide disparities across racial groups, these disparities decrease in aggregate magnitudes but remain more constant in relative magnitudes over time.
+Given the precise agreement between the models, we now turn our attention to comparing pollution exposure across policy scenarios.  For brevity, we present outputs from GenX model runs, but additional results can be found in our project dashboard.  
+
+In figure \ref{Compare Scenarios}, we plot population-weighted mean death rates by racial group by scenario for each model period.  The first thing that becomes immediately apparent is that aggressive decarbonization scenarios reduce pollution exposure much more quickly and dramatically than current policy scenarios.  It is also clear that there are wide disparities across racial groups and that these disparities decrease in aggregate magnitudes but remain more constant in relative magnitudes over time.  For example, in the base $\$200$ scenario, the disparity between Black and white mortality rates is 2.02 per million in 2027, or a $22\%$ difference.  By 2050, the disparity falls to 2.63 per 10 million but this represents a 33$\%$ difference.
+
 \begin{figure}
     \centering
     \begin{subfigure}[b]{0.49\textwidth}
@@ -200,11 +213,23 @@ In figure \ref{DeathsCosts} we plot deaths against total system costs.  The poli
 \begin{figure}
     \centering
     \includegraphics[width=0.8\linewidth]{Figures/Output/Deaths_vs_Costs_GenX.png}
-    \caption{Plot of total system costs versus average deaths per year.  Results are from GenX output.}
+    \caption{Plot of total system costs versus average deaths per year.  Results are from GenX output.  Note that the monetized damages from mortality are \textit{not} included in the costs.}
     \label{DeathsCosts}
 \end{figure}
 
-Unsurprisingly, deaths are highly correlated with CO$_2$ emissions, since both are driven by fossil-fuel combustion.  Policies that most dramatically reduce CO$_2$ emissions, also do the most to reduce aggregate deaths.
+In figure \ref{CostsBarchart}, we monetize the costs of mortality and show the breakdown of costs across scenarios.  The cost of deaths can be a sizable portion of overall system costs.  We use EPA's Value of Statistical Life, which is currently $\$7.4$ million in U.S. $\$ 2006$, which we inflation-adjust to $\$11.51$ million in 2024 dollars \citep{U.S.EnvironmentalProtectionAgencyMortalityEPA}.  In the current policy scenarios, which have higher levels of emissions and deaths, the NPV of deaths is on a similar order of magnitude as total variable costs.
+
+\begin{figure}
+    \centering
+    \includegraphics[width=0.8\linewidth]{Figures/Output/Costs_Barchart_GenX.png}
+    \caption{Breakdown of costs by scenario}
+    \label{CostsBarchart}
+\end{figure}
+
+Unsurprisingly, deaths are highly correlated with CO$_2$ emissions since both are driven by fossil-fuel combustion.  Policies that most dramatically reduce CO$_2$ emissions, also do the most to reduce aggregate deaths.  In figure \ref{DeathsEmissions} we plot emissions and deaths in various scenarios.  This plot shows both the strong correlation between CO$_2$ emissions and shows how each scenario evolves over the model time horizon.  
+
+Although this figure \textit{ does} highlight that deaths and emissions are highly correlated, it does show that the correlation is imperfect.  For example, between 2040 and 2045, aggregate CO$_2$ emissions increase in the current policy scenarios while deaths fall.
+
 \begin{figure}
     \centering
     \includegraphics[width=1\linewidth]{Figures/Output/Deaths_vs_Emissions_withlines_GenX.png}
@@ -212,19 +237,13 @@ Unsurprisingly, deaths are highly correlated with CO$_2$ emissions, since both a
     \label{DeathsEmissions}
 \end{figure}
 
-The cost of deaths can be a sizable portion of overall system costs.  In figure \ref{CostsBarchart}, we plot total costs (in NPV) across scenarios, including a component for monetized costs of air pollution deaths.  We use EPA's Value of Statistical Life, which is currently $\$7.4 million$ in U.S. $\$ 2006$, which we inflation-adjust to $\$11.51$ million in 2024 dollars.
 
-\begin{figure}
-    \centering
-    \includegraphics[width=0.5\linewidth]{Figures/Output/Costs_Barchart_GenX.png}
-    \caption{Caption}
-    \label{CostsBarchart}
-\end{figure}
 
-These results mirror previous related work.  \citet{Shawhan2024PoliciesAmericans} found that a carbon tax would decrease deaths by X$\%$.  \citet{Goforth2022AirStrategies} find that THINGS.
+These results mirror previous related work, though results are difficult to compare since each paper uses their own scenarios. 
+ \citet{Shawhan2024PoliciesAmericans} found that a $\$15$ carbon tax would decrease annual deaths by around 2,000 through 2030.  Our estimate for the base $\$50$ scenario is that annual deaths would decrease by around 3,000 through 2030. 
 
-\subsection{Varying the Escape Price}
-In figure \ref{EscapePrice} we plot death rates over time across different escape-price scenarios.  The difference between a $\$50$ escape price and a $\$200$ escape price is quite striking.  However, the change from $\$200$ to $\$1,000$ is far more subtle, and mostly shows up in 2040 and beyond.
+\subsection{Varying the Carbon/Escape Price}
+In figure \ref{EscapePrice} we plot death rates over time across different escape-price scenarios.  The difference between a $\$50$ escape price and a $\$200$ escape price is quite striking.  However, the change from $\$200$ to $\$1,000$ is far more subtle, and mostly shows up in 2040 and beyond.  Like, CO$_2$ emissions, it appears that marginal costs of abatement (or maginal cost of reducing deaths) increase with the abatement level.
 
 \begin{figure}
     \centering
@@ -243,7 +262,9 @@ In figure \ref{TransmissionConstraint} we plot death rates over time across the 
 \end{figure}
 
 \section{Conclusion}
-This paper presents projections for how numerous different transition scenarios calculated using four different open-source models will affect the distribution of pollution exposure through 2050.  We find that pollution projections are highly synchronized across models.  Moreover, we find that a more aggressive energy transition could save more than 2,000 lives per year relative to the current policies trajectory.  All model results point towards a dramatic decrease in deaths for all racial groups.
+This paper presents projections for how numerous different transition scenarios calculated using four different open-source models will affect the distribution of pollution exposure through 2050.  We find that the pollution projections are highly synchronized between the models.  
+
+Moreover, we find that a more aggressive energy transition could save more than 2,000 lives per year relative to the current policies trajectory.  All model results point towards a dramatic decrease in deaths across all racial groups, and a convergence over time across groups in death rates.
 
 \begin{singlespace}
 \newpage
