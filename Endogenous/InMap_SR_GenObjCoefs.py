@@ -19,6 +19,7 @@ import os
 ## Code lifted (almost) directly from https://www.inmap.run/blog/2022/12/15/tutorial/
 
 os.chdir('C:/Users/laure/Documents/Switch-USA-PG/')
+from MIP_AirPollution.Endogenous.settings import *
 
 def rect(i, w, s, e, n):
     x = [w[i], e[i], e[i], w[i], w[i]]
@@ -45,14 +46,16 @@ sr = zarr.open(s3fs.S3Map(url, s3=fs, check=False), mode="r")
 
 p = poly(sr)
 
-years = ['2027', '2030', '2035', '2040']
-scenario = 'current_policies_short_simplified'
-simplified=True
+scenario = 'current_policies_short'
 
-for year in years:
-    filename='MIP_Air_OutData/MIP_Emissions/'+ scenario+ '_marginal_emissions_'+str(year)+'.shp'
+for year in year_inputs.values():
+    filename='MIP_Air_OutData/'+ scenario+ '_simplified_marginal_emissions_'+str(year)+'.shp'
 
     emis = gpd.read_file(filename)
+    emis = emis.query('SOx>0|PM2_5>0|VOC>0|NOx>0|NH3>0').reset_index()
+
+    #switch will place 0s for missings, so might as well drop zeros and reduce run-time
+
     fact = 28766.639
 
     df = pd.DataFrame({'Location': range(52411)})
@@ -122,7 +125,8 @@ for year in years:
     exposure_data_collapsed = exposure_data.groupby(['Race', 'Cluster','Pollutant']).agg({'Exposure':'sum'}).reset_index()
     exposure_data_collapsed['year']=year
 
-    exposure_data_collapsed.to_csv('MIP_Air_OutData/Marginal_Coefficients/' + scenario+'_marginal_exposure_coefs_'+year+'.csv')
+    year = str(year)
+    exposure_data_collapsed.to_csv('MIP_Air_OutData/' + scenario+'_marginal_exposure_coefs_'+year+'.csv')
 
 
 

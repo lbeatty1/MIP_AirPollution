@@ -74,7 +74,10 @@ urls = [
     "https://www2.census.gov/programs-surveys/popest/tables/2020-2024/counties/totals/co-est2024-pop.xlsx",
     "https://www.eia.gov/electricity/data/eia860/archive/xls/eia8602022.zip",
     "https://www.eia.gov/electricity/data/eia923/archive/xls/f923_2022.zip",
-    "https://gaftp.epa.gov/Air/emismod/2020/2020emissions/2020ha2_point_inventory_22sep2023.zip"
+    "https://gaftp.epa.gov/Air/emismod/2020/2020emissions/2020ha2_point_inventory_22sep2023.zip",
+    "https://github.com/USEPA/camd-eia-crosswalk/releases/download/v0.3/epa_eia_crosswalk.csv",
+    'https://www.epa.gov/system/files/documents/2024-06/egrid-draft-pm-emissions.xlsx',
+    'https://www.epa.gov/sites/production/files/2019-08/ipm_v6_regions.zip'
 ]
 
 for url in urls:

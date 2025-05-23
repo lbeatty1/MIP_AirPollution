@@ -8,14 +8,20 @@ import pandas as pd
 import math
 from matplotlib.colors import LinearSegmentedColormap
 from matplotlib.colors import ListedColormap
+import yaml
 
 
 
 os.chdir('C:/Users/laure/Documents/Switch-USA-PG/')
 
-scenario = 'current_policies_short_simplified'
-years = [2027, 2030]
-result_dir = f'switch/26-zone/out/foresight/'
+with open("MIP_results_comparison/case_settings/26-zone/settings-atb2023/model_definition.yml", "r") as file:
+    region_aggregations = yaml.safe_load(file)["region_aggregations"]
+region_aggregations['FRCC']=['FRCC']
+
+
+scenario = 'current_policies_short'
+years = [2027, 2030, 2035, 2040, 2045, 2050]
+result_dir = f'switch/26-zone/out/'
 cost_limits = [50,100,200]
 
 if not os.path.exists('MIP_AirPollution/Figures/EndogenousResults/'+scenario+'/'):
@@ -26,7 +32,7 @@ coefs=pd.DataFrame()
 for y in years:
     coefs = pd.concat([coefs,
                        pd.read_csv(
-                           f"MIP_Air_OutData/Marginal_Coefficients/{scenario}_marginal_exposure_coefs_{y}.csv",
+                           f"MIP_Air_OutData/{scenario}_marginal_exposure_coefs_{y}.csv",
                            index_col=0)]
     )
 
@@ -55,7 +61,7 @@ print(summary)
 
 emis = []
 for year in years:
-    shapefile_path = f'MIP_Air_OutData/MIP_Emissions/{scenario}_marginal_emissions_{y}.shp'
+    shapefile_path = f'MIP_Air_OutData/{scenario}_simplified_marginal_emissions_{y}.shp'
 
     gdf = gpd.read_file(shapefile_path)
     
@@ -144,23 +150,29 @@ for c in cost_limits:
     tempdat['scenario']=f'{scenario}_{c}'
     capacity = pd.concat([capacity,tempdat])
 
-ipm_regions = gpd.read_file('Data/IPM_Regions/national_emm_boundaries.shp')
+ipm_regions = gpd.read_file('AirPollution_Data/IPM_Regions_201770405.shp')
+zone_to_region = {
+    zone: region for region, zones in region_aggregations.items() for zone in zones
+}
+ipm_regions["model_region"] = ipm_regions["IPM_Region"].map(zone_to_region)
+ipm_regions = ipm_regions.dissolve(by="model_region", as_index=False)
+
 capacity_spatial = capacity.groupby(['gen_load_zone', 'PERIOD', 'scenario']).agg({'GenCapacity':'sum'}).reset_index()
-ipm_regions = ipm_regions.merge(capacity_spatial, left_on='model_regi', right_on='gen_load_zone', how='left')
+ipm_regions = ipm_regions.merge(capacity_spatial, left_on='model_region', right_on='gen_load_zone', how='left')
 
 #plot capacity in each region relative to base scenario
 for c in cost_limits:
     for y in years:
         base = ipm_regions[ipm_regions['scenario']==f'{scenario}']
         base = base[base['PERIOD']==y]
-        base = pd.DataFrame(base[['model_regi', 'GenCapacity']])
+        base = pd.DataFrame(base[['model_region', 'GenCapacity']])
         base.rename(columns={'GenCapacity': 'Base_GenCapacity'}, inplace=True)
 
 
         plotdata = ipm_regions[ipm_regions['scenario']==f'{scenario}_{c}']
         plotdata = plotdata[plotdata['PERIOD']==y]
 
-        plotdata = plotdata.merge(base, on='model_regi', how='left')
+        plotdata = plotdata.merge(base, on='model_region', how='left')
         plotdata['GenDif'] = plotdata['GenCapacity']/plotdata['Base_GenCapacity']
 
         fig, ax = plt.subplots(1, 1, figsize=(10, 6))
@@ -181,21 +193,21 @@ for tech in ['Wind', 'Solar', 'Naturalgas', 'Coal']:
     capacity_spatial_temp = capacity_spatial_temp[['scenario', 'PERIOD', 'gen_load_zone', 'GenCapacity']]
     capacity_spatial_temp.rename(columns={'GenCapacity': f'GenCapacity_{tech}'}, inplace=True)
 
-    ipm_regions = ipm_regions.merge(capacity_spatial_temp, left_on=['model_regi', 'PERIOD', 'scenario'], right_on=['gen_load_zone','PERIOD', 'scenario'], how='left')
+    ipm_regions = ipm_regions.merge(capacity_spatial_temp, left_on=['model_region', 'PERIOD', 'scenario'], right_on=['gen_load_zone','PERIOD', 'scenario'], how='left')
 
     #plot capacity in each region relative to base scenario
     for c in cost_limits:
         for y in years:
             base = ipm_regions[ipm_regions['scenario']==f'{scenario}']
             base = base[base['PERIOD']==y]
-            base = pd.DataFrame(base[['model_regi', f'GenCapacity_{tech}']])
+            base = pd.DataFrame(base[['model_region', f'GenCapacity_{tech}']])
             base.rename(columns={f'GenCapacity_{tech}': 'Base_GenCapacity'}, inplace=True)
 
 
             plotdata = ipm_regions[ipm_regions['scenario']==f'{scenario}_{c}']
             plotdata = plotdata[plotdata['PERIOD']==y]
 
-            plotdata = plotdata.merge(base, on='model_regi', how='left')
+            plotdata = plotdata.merge(base, on='model_region', how='left')
             plotdata['GenDif'] = plotdata[f'GenCapacity_{tech}']/plotdata['Base_GenCapacity']
 
             fig, ax = plt.subplots(1, 1, figsize=(10, 6))
@@ -217,7 +229,7 @@ for tech in ['Wind', 'Solar', 'Naturalgas', 'Coal']:
 ## Plot Results --GENERATION #####
 #################################
 
-#read in capacity results
+#read in dispatch results
 dispatch=pd.read_csv(f"{result_dir}{scenario}/dispatch_gen_annual_summary.csv",
                      index_col=0)
 dispatch['scenario']=scenario
@@ -227,23 +239,26 @@ for c in cost_limits:
     tempdat['scenario']=f'{scenario}_{c}'
     dispatch = pd.concat([dispatch,tempdat])
 
-ipm_regions = gpd.read_file('Data/IPM_Regions/national_emm_boundaries.shp')
+
+ipm_regions = gpd.read_file('AirPollution_Data/IPM_Regions_201770405.shp')
+ipm_regions["model_region"] = ipm_regions["IPM_Region"].map(zone_to_region)
+ipm_regions = ipm_regions.dissolve(by="model_region", as_index=False)
 dispatch_spatial = dispatch.groupby(['gen_load_zone', 'period', 'scenario']).agg({'Energy_GWh_typical_yr':'sum'}).reset_index()
-ipm_regions = ipm_regions.merge(dispatch_spatial, left_on='model_regi', right_on='gen_load_zone', how='left')
+ipm_regions = ipm_regions.merge(dispatch_spatial, left_on='model_region', right_on='gen_load_zone', how='left')
 
 #plot generation in each region relative to base scenario
 for c in cost_limits:
     for y in years:
         base = ipm_regions[ipm_regions['scenario']==f'{scenario}']
         base = base[base['period']==y]
-        base = pd.DataFrame(base[['model_regi', 'Energy_GWh_typical_yr']])
+        base = pd.DataFrame(base[['model_region', 'Energy_GWh_typical_yr']])
         base.rename(columns={'Energy_GWh_typical_yr': 'Base_Energy_GWh'}, inplace=True)
 
 
         plotdata = ipm_regions[ipm_regions['scenario']==f'{scenario}_{c}']
         plotdata = plotdata[plotdata['period']==y]
 
-        plotdata = plotdata.merge(base, on='model_regi', how='left')
+        plotdata = plotdata.merge(base, on='model_region', how='left')
         plotdata['GenDif'] = plotdata['Energy_GWh_typical_yr']/plotdata['Base_Energy_GWh']
 
         fig, ax = plt.subplots(1, 1, figsize=(10, 6))
@@ -264,21 +279,21 @@ for tech in ['Wind', 'Solar', 'Naturalgas', 'Coal', 'Electricity']:
     dispatch_spatial_temp = dispatch_spatial_temp[['scenario', 'period', 'gen_load_zone', 'Energy_GWh_typical_yr']]
     dispatch_spatial_temp.rename(columns={'Energy_GWh_typical_yr': f'Energy_GWh_{tech}'}, inplace=True)
 
-    ipm_regions = ipm_regions.merge(dispatch_spatial_temp, left_on=['model_regi', 'period', 'scenario'], right_on=['gen_load_zone','period', 'scenario'], how='left')
+    ipm_regions = ipm_regions.merge(dispatch_spatial_temp, left_on=['model_region', 'period', 'scenario'], right_on=['gen_load_zone','period', 'scenario'], how='left')
 
     #plot capacity in each region relative to base scenario
     for c in cost_limits:
         for y in years:
             base = ipm_regions[ipm_regions['scenario']==f'{scenario}']
             base = base[base['period']==y]
-            base = pd.DataFrame(base[['model_regi', f'Energy_GWh_{tech}']])
+            base = pd.DataFrame(base[['model_region', f'Energy_GWh_{tech}']])
             base.rename(columns={f'Energy_GWh_{tech}': 'Base_Energy_GWh'}, inplace=True)
 
 
             plotdata = ipm_regions[ipm_regions['scenario']==f'{scenario}_{c}']
             plotdata = plotdata[plotdata['period']==y]
 
-            plotdata = plotdata.merge(base, on='model_regi', how='left')
+            plotdata = plotdata.merge(base, on='model_region', how='left')
             plotdata['GenDif'] = plotdata[f'Energy_GWh_{tech}']-plotdata['Base_Energy_GWh']
 
             vmin = plotdata['GenDif'].min()
@@ -364,7 +379,7 @@ group_exposure_max['cost'] = group_exposure_max['cost'].str.replace('_', '', reg
 group_exposure_max['cost'] = pd.to_numeric(group_exposure_max['cost'])
 group_exposure_max.fillna(0, inplace=True)
 
-colors = {2027: 'blue', 2030: 'green'}  # Assign specific colors to each year
+colors = {2027: 'blue', 2030: 'green', 2035: 'red', 2040: 'orange', 2045: 'purple', 2050: 'lightblue'}  # Assign specific colors to each year
 
 for year in group_exposure_max['SetProduct_OrderedSet_2'].unique():
     subset = group_exposure_max[group_exposure_max['SetProduct_OrderedSet_2'] == year]
