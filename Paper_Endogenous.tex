@@ -72,7 +72,7 @@ fill=green!30]
 \title{Rawls For Electricity Planning Models}
 
 \author{Lauren Beatty\thanks{Environmental Defense Fund  \hspace{.5cm} E-mail: lbeatty1@edf.org \hspace{.5cm}Website: \href{https://lbeatty1.github.io}{https://lbeatty1.github.io}}\\
-Matthias Fripp\thanks{Environmental Defense Fund}}
+Matthias Fripp\thanks{Energy Innovations}}
 
 \date{\today}
 
@@ -89,18 +89,17 @@ Renewed interest in the distributional impacts of policies require going beyond 
 
 \newpage
 \section{Introduction}
-Climate change mitigation will require deep cuts to greenhouse gas emissions from the electricity sector.  Least-cost electricity planning models are powerful tools that help policymakers and capacity planners find portfolios of generation technologies that meet reliability requirements and emissions goals.  
+Climate change mitigation requires deep cuts to greenhouse gas emissions from the electricity sector.  Least-cost electricity planning models are powerful tools that help policymakers and capacity planners find portfolios of generation technologies that meet reliability requirements and emissions goals.  
 
-However, these models have historically ignored some of the external costs of electricity generation.  
- One major external costs is the generation of local air pollutants.  There is a large body of work on the health effects of air pollution, and a large body of work on the effects of electricity generation on air pollution. 
+However, these models have historically ignored some of the external costs of electricity generation. One major external costs is the generation of local air pollutants.  There is a large body of work on the health effects of air pollution, as well as a large body of work on the effects of electricity generation on air pollution. 
 Air pollution is linked with numerous health impacts such as chronic obstructive pulmonary disease (COPD), acute lower respiratory illness, cerebrovascular disease, ischaemic heart disease, and lung cancer. \cite{Lelieveld2015TheScale} estimate that power generation is linked with 31$\%$ of premature mortality caused by outdoor air pollution in the U.S.
 
-There is also work that has shown that air pollution exposures vary drastically across racial and socioeconomic groups.   \cite{Thind2019FineGeography} find that Black and non-Hispanic white people are exposed to more pollution than other groups and that exposures for low-income people are higher than for high-income people, even after controlling for race.  This highlights the importance for developing planning methods that alleviate rather than reinforce disproportionate burdens.
+There is also work that has shown that air pollution exposures vary drastically across racial and socioeconomic groups.   \cite{Thind2019FineGeography} find that Black and non-Hispanic white people are exposed to more pollution than other groups and that exposures for low-income people are higher than for high-income people, even after controlling for race.  This highlights the importance of developing planning methods that alleviate rather than reinforce disproportionate burdens.
 
 Previous work has included co-benefits involved with reducing electricity generation from fossil fuels in the objective function \citet{Sergi2020OptimizingBenefits}.
 or projected how the electricity transmission might affect the distributional consequences of air pollution exposure \citep{Goforth2022AirStrategies}. 
 
-Least-cost electricity planning models are the gold-standard models used to model capacity expansion in policy.  However, these models tend to have a narrow focus on minimizing costs -- potentially at the expense of distributional concerns.  The energy transition will have wide-ranging effects --such as shifts in the spatial distribution of jobs, or changes in air pollution, that are of interest to policy-makers, but are currently unincorporated into least-cost models.
+Least-cost electricity planning models are the gold standard models used to model capacity expansion in policy.  However, these models tend to have a narrow focus on minimizing costs -- potentially at the expense of distributional concerns.  The energy transition will have wide-ranging effects --such as shifts in the spatial distribution of jobs, or changes in air pollution, that are of interest to policy-makers, but are currently unincorporated into least-cost models.
 
 Previous attempts to consider the health impacts of air pollution have monetized air pollution harms, and inserted them into the cost minimization.  While this is certainly an improvement over not considering these costs at all, this method ignores the fact that inequity in the past has driven current differences in air pollution exposure, and that certain groups may experience higher burdens from air pollution than others.
 
@@ -110,12 +109,18 @@ This allows us to use the model to produce results that don't unfairly burden ce
 
 This method could also be used to help design electricity transition plans that are equitable in other dimensions.  For example, one concern with the energy transition is that some regions will lose jobs.  This method could help policymakers and planners design electricity systems that avoid causing disruptive employment declines in certain regions. Previous work has linked declines in employment from  coal extraction to negative impacts such as decreases in home values, increases in poverty, and increases in credit utilization and delinquency. Moreover, these studies also suggest that even residents who are not employed by the industry also suffer the negatives consequences associated with the industry's decline (\citet{Kraynak2023TheCountry}, \citet{Blonz2023TheFuels}). 
 
-This paper makes an important contribution to the environmental justice literature by ...
+This paper makes an important contribution to the environmental justice literature by endogenizing air pollution within a least-cost planning model, and proposing a framework to equitably reduce air pollution. Our findings indicate that major improvements to air pollution can be made with relatively small increases in overall cost.
 
 
 \section{Data}
+The fist task in our method is to construct emissions rates for sources in the model in tons per MWh. These emissions rates are constructed by combining emissions data from the U.S. Environmental Protection Agency (EPA), and generations data from the U.S. Energy Information Administration (EIA). We use the EPA-EIA Power Sector Data Crosswalk to merge generators across the two sources \citep{HuettemanEPA-EIACrosswalk}.
+
 \subsection{Emissions Data}
-Emissions data comes from two sources: EPA's Clean Air Markets Program Data (CAMD) and EPA's National Emissions Inventory (NEI).  The CAMD was created to track compliance with clean air programs, and thus, tracks emissions of CO$_2$, NO$_x$, and SO$_2$.  The NEI was created to track criteria pollutants, criteria precursors, and hazardous air pollutants from \textit{all} sources.  I get emissions of NH$_3$, VOC, and PM2.5 from the NEI. 
+Emissions data comes from two sources: EPA's Clean Air Markets Program Data (CAMD) and EPA's National Emissions Inventory (NEI).  The CAMD was created to track compliance with clean air programs, and thus, tracks emissions of CO$_2$, NO$_x$, and SO$_2$.  The NEI was created to track criteria pollutants, criteria precursors, and hazardous air pollutants from \textit{all} sources.  I get emissions of NH$_3$, VOC, and PM2.5 from the NEI.  Air pollution data is used to calculate source emissions rates in tons per MWh.
+
+\subsection{Generation Data}
+Data on the generation and location of existing plants comes from the EIA.
+
 
 \subsection{Power Sector Modelling Inputs}
 Stuff about PowerGenome?
@@ -186,6 +191,10 @@ The ISRM was developed to simplify InMAP even further \citep{Goodkind2019Fine-sc
 \subsection{Switch}
 
 \section{Results}
+\subsection{Model Inputs}
+There are a few findings from the construction of model inputs that are worth discussing. First, unsurprisingly, empirical data on emissions and generation reveals that coal is a dirty source of generation. However, when we translate emissions into marginal exposure coefficients, we find that the average relative difference between coal and natural gas decreases. In particular, it appears that natural gas plants are on average, closer to Asian and Latino population centers. A unit of electricity generated from coal only causes slightly more damage (in terms of population-weighted PM2.5 exposure) to Asians and Latinos than a unit of electricity generated from natural gas. In figure \ref{EmissionsExposureCoefs} we plot the average empirical emissions rates by technology in panel (a), and the mean coefficients describing how one MWh of generation affects mean group-level exposure of PM2.5 in $\mu$g/m$^3$. 
+
+This start divergence between the relative emissions rates and the relative exposure coefficients highlights one of the central premises of the paper -- that where generation is placed can have large impacts on pollution exposure, and that selectively choosing what generation goes where can lead to large decreases in pollution exposure at low costs.
 
 \begin{figure}
 \centering
@@ -196,7 +205,9 @@ The ISRM was developed to simplify InMAP even further \citep{Goodkind2019Fine-sc
 \caption{Unsurprisingly, coal is far dirtier than other technologies.  However, the discrepancy between technologies is more narrow for exposure.}
 \label{EmissionsExposureCoefs}
 \end{figure}
-In figure \ref{EmissionsExposureCoefs} we plot both average emissions rates, and average exposure coefficients for various technologies.  
+
+\subsection{Model Results}
+Our high-level, key finding is that even a modest budget of $\$50$ billion through 2050 could pay for massive reductions in equitable air quality improvement. Our results have features that you would expect based on economic theory. There are increasing costs of reducing air pollution -- the gains from moving from least-cost to allocating $\$50$ billion are much larger than the gains from moving from allocating $\$50$ billion to $\$100$ billion. Our results also suggest that at the optimum, the min-max objective generates equal average exposures for all groups except Native Americans, who have consistently lower exposure levels.
 
 \begin{figure}
     \centering
@@ -211,6 +222,11 @@ In figure \ref{EmissionsExposureCoefs} we plot both average emissions rates, and
     \caption{Here we show the relationship between the objective function (min-max of exposure) and the cost limit constraint.}
     \label{PPF}
 \end{figure}
+
+\subsection{Comparison with carbon-only cuts}
+While we think these results have important policy implications, namely that improving air quality equitably can happen at low costs, it's important to note that our results don't point to which policies would achieve the optimal solution. Rather, these results are prescriptive -- \textit{"Build X, Y, and Z in regions A,B, and C to achieve the deepest equitable cuts in air pollution at a certain cost."} 
+
+Previous papers have found that carbon policies tend to decrease both total air pollution exposure, and the inequalities in air pollution exposure. This begs the question, how does a portfolio that minimizes air pollution exposure compare to a least-cost portfolio aimed at reducing carbon?
 
 \section{Conclusion}
 In this paper, we demonstrate how to endogenize air pollution exposure into a least-cost electricity planning model to create equitable reductions in air pollution burdens.    
