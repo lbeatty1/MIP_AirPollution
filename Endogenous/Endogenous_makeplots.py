@@ -69,8 +69,6 @@ for year in years:
     emis.append(gdf)
 
 emis = gpd.GeoDataFrame(pd.concat(emis, ignore_index=True))
-
-# Optionally: Set a consistent CRS if they need to match
 emis = pd.DataFrame(emis[['NOx', 'SOx', 'PM2_5', 'NH3', 'VOC', 'Resource']])
 
 emis = emis.groupby(['Resource']).agg({'NOx':'sum', 'PM2_5':'sum', 'NH3':'sum', 'SOx':'sum', 'PM2_5':'sum', 'VOC':'sum'}).reset_index()
