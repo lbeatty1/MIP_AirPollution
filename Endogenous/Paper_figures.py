@@ -85,6 +85,12 @@ def mix(color1, color2, ratio):
     return mcolors.to_hex((1 - ratio) * c1 + ratio * c2)
 
 light_red = mix(dark_red, white, 0.5)
+lighter_blue = mix(dark_blue, white, 0.3)
+
+def round_up_to_step(high, low, step):
+    steps = math.ceil((high - low) / step)
+    return low + steps * step
+
 
 #read in exposure coefs
 coefs=pd.DataFrame()
@@ -458,6 +464,7 @@ fig.savefig("MIP_AirPollution/Figures/EndogenousPaper/wind_capacity_map.png", dp
 ###################
 ## Plot Dispatch ##
 ###################
+
 dispatch_spatial = dispatch.groupby(['gen_energy_source', 'gen_load_zone', 'period', 'scenario']).agg({'Energy_GWh_typical_yr':'sum'}).reset_index()
 
 base = dispatch_spatial[dispatch_spatial['scenario']==f'{scenario}']
@@ -466,30 +473,42 @@ base.rename(columns={'Energy_GWh_typical_yr': 'Base_Gen'}, inplace=True)
 
 dispatch_spatial = pd.merge(dispatch_spatial, base, on=['gen_load_zone', 'gen_energy_source', 'period'], how='left')
 
-#calculate difference in capacity
+#calculate difference in dispatch
 dispatch_spatial['dif']=dispatch_spatial['Energy_GWh_typical_yr']-dispatch_spatial['Base_Gen']
-dispatch_spatial = dispatch_spatial.merge(ipm_regions, right_on='model_region', left_on='gen_load_zone', how='left')
+
+## first, figure out what big, small differences in generation are
+
+max_dif = dispatch_spatial['dif'].max()
+min_dif = dispatch_spatial['dif'].min()
+max_dif = max(abs(max_dif), abs(min_dif))
 
 c=200
 y=2050
 tech = 'Solar'
 
-plotdata = capacity_spatial[capacity_spatial['scenario']==f'{scenario}_{c}']
-plotdata = plotdata[plotdata['PERIOD']==y]
+plotdata = dispatch_spatial[dispatch_spatial['scenario']==f'{scenario}_{c}']
+plotdata = plotdata[plotdata['period']==y]
 plotdata = plotdata[plotdata['gen_energy_source']==tech]
+
+plotdata = ipm_regions.merge(plotdata, left_on='model_region', right_on='gen_load_zone', how='left')
+
 plotdata = gpd.GeoDataFrame(plotdata, geometry='geometry')
 plotdata.to_crs("EPSG:4326", inplace=True)
 
 # Create custom diverging colormap
-low = plotdata['dif'].min()
-high = plotdata['dif'].max()
+low = math.floor(plotdata['dif'].min()/5000)*5000
+high = math.ceil(plotdata['dif'].max()/5000)*5000
+ticks = np.arange(low, high+1, 20000)
+rounded_high = round_up_to_step(high, low, 10000)
 
+plot_red = mix(white, dark_red, abs(low/max_dif))
+plot_blue = mix(white, dark_blue, rounded_high/max_dif)
 custom_cmap = LinearSegmentedColormap.from_list(
     "custom_RdBu_subset",
     [
-        (0.0, light_red),                              # low end
+        (0.0, plot_red),                              # low end
         ((0 - low) / (high - low), white),             # midpoint
-        (1.0, dark_blue)                               # high end
+        (1.0, plot_blue)                               # high end
     ]
 )
 
@@ -511,7 +530,6 @@ plotdata.plot(column='dif',
 sm = plt.cm.ScalarMappable(cmap=custom_cmap, norm=norm)
 sm.set_array([])
 
-ticks = np.arange(-5, high + 1, 5)
 cbar = plt.colorbar(sm, ax=ax, ticks=ticks)
 cbar.set_label("Difference (GWh)")
 
@@ -519,27 +537,34 @@ ax.set_title("Solar Generation in 2050 with $200B Budget \n Relative to Base", f
 ax.set_axis_off()
 fig.savefig("MIP_AirPollution/Figures/EndogenousPaper/solar_generation_map.png", dpi=300, bbox_inches='tight')
 
-
+##############
+## Wind ######
+##############
 
 c=200
 y=2050
 tech = 'Wind'
 
-plotdata = capacity_spatial[capacity_spatial['scenario']==f'{scenario}_{c}']
-plotdata = plotdata[plotdata['PERIOD']==y]
+plotdata = dispatch_spatial[dispatch_spatial['scenario']==f'{scenario}_{c}']
+plotdata = plotdata[plotdata['period']==y]
 plotdata = plotdata[plotdata['gen_energy_source']==tech]
+
+plotdata = ipm_regions.merge(plotdata, left_on='model_region', right_on='gen_load_zone', how='left')
 plotdata = gpd.GeoDataFrame(plotdata, geometry='geometry')
 plotdata.to_crs("EPSG:4326", inplace=True)
 
 # Create custom diverging colormap
-low = plotdata['dif'].min()
-high = plotdata['dif'].max()
+low = 0
+high = math.ceil(plotdata['dif'].max()/5000)*5000
+ticks = np.arange(low, high+1, 20000)
+rounded_high = round_up_to_step(high, low, 20000)
 
+plot_blue = mix(white, dark_blue, rounded_high/max_dif)
 custom_cmap = LinearSegmentedColormap.from_list(
     "custom_RdBu_subset",
     [
         (0.0, white),                              # low end
-        (1.0, dark_blue)                               # high end
+        (1.0, plot_blue)                               # high end
     ]
 )
 
@@ -561,7 +586,6 @@ plotdata.plot(column='dif',
 sm = plt.cm.ScalarMappable(cmap=custom_cmap, norm=norm)
 sm.set_array([])
 
-ticks = np.arange(-5, high + 1, 5)
 cbar = plt.colorbar(sm, ax=ax, ticks=ticks)
 cbar.set_label("Difference (GWh)")
 
@@ -569,28 +593,35 @@ ax.set_title("Wind Generation in 2050 with $200B Budget \n Relative to Base", fo
 ax.set_axis_off()
 fig.savefig("MIP_AirPollution/Figures/EndogenousPaper/wind_generation_map.png", dpi=300, bbox_inches='tight')
 
-### Naturalgas
-
+####################
+### Naturalgas #####
+####################
 c=200
 y=2050
 tech = 'Naturalgas'
 
-plotdata = capacity_spatial[capacity_spatial['scenario']==f'{scenario}_{c}']
-plotdata = plotdata[plotdata['PERIOD']==y]
+plotdata = dispatch_spatial[dispatch_spatial['scenario']==f'{scenario}_{c}']
+plotdata = plotdata[plotdata['period']==y]
 plotdata = plotdata[plotdata['gen_energy_source']==tech]
+
+plotdata = ipm_regions.merge(plotdata, left_on='model_region', right_on='gen_load_zone', how='left')
 plotdata = gpd.GeoDataFrame(plotdata, geometry='geometry')
 plotdata.to_crs("EPSG:4326", inplace=True)
 
 # Create custom diverging colormap
-low = plotdata['dif'].min()
-high = plotdata['dif'].max()
+low = math.floor(plotdata['dif'].min()/5000)*5000
+high = math.ceil(plotdata['dif'].max()/5000)*5000
+ticks = np.arange(low, high+1, 40000)
+rounded_high = round_up_to_step(high, low, 40000)
 
+plot_red = mix(white, dark_red, abs(low/max_dif))
+plot_blue = mix(white, dark_blue, rounded_high/max_dif)
 custom_cmap = LinearSegmentedColormap.from_list(
     "custom_RdBu_subset",
     [
-        (0.0, dark_red),                              # low end
+        (0.0, plot_red),                              # low end
         ((0 - low) / (high - low), white),             # midpoint
-        (1.0, dark_blue)                               # high end
+        (1.0, plot_blue)                               # high end
     ]
 )
 
@@ -612,11 +643,125 @@ plotdata.plot(column='dif',
 sm = plt.cm.ScalarMappable(cmap=custom_cmap, norm=norm)
 sm.set_array([])
 
-ticks = np.arange(5 * math.floor(low / 5), 5 * math.ceil(high / 5), 5)
 cbar = plt.colorbar(sm, ax=ax, ticks=ticks)
 cbar.set_label("Difference (GWh)")
 
 ax.set_title("Natural Gas Generation in 2050 with $200B Budget \n Relative to Base", fontsize=15)
 ax.set_axis_off()
-
 fig.savefig("MIP_AirPollution/Figures/EndogenousPaper/naturalgas_generation_map.png", dpi=300, bbox_inches='tight')
+
+
+## Show that coal gets killed off faster with more money
+
+c=200
+y=2027
+tech = 'Coal'
+
+plotdata = dispatch_spatial
+plotdata = plotdata[plotdata['period']==y]
+plotdata = plotdata[plotdata['gen_energy_source']==tech]
+
+maxdif = plotdata['dif'].min()
+
+plotdata = plotdata[plotdata['scenario']==f'{scenario}_{c}']
+plotdata = ipm_regions.merge(plotdata, left_on='model_region', right_on='gen_load_zone', how='left')
+plotdata['dif'] = plotdata['dif'].fillna(0)
+plotdata = gpd.GeoDataFrame(plotdata, geometry='geometry')
+plotdata.to_crs("EPSG:4326", inplace=True)
+
+# Create custom diverging colormap
+low = math.floor(plotdata['dif'].min()/10000)*10000
+high = 0 
+ticks = np.arange(low, high+1, 20000)
+rounded_high = round_up_to_step(high, low, 20000)
+
+plot_red = mix(white, dark_red, low/maxdif)
+custom_cmap = LinearSegmentedColormap.from_list(
+    "custom_RdBu_subset",
+    [
+        (0.0, plot_red),                              # low end
+        (1.0, white)                               # high end
+    ]
+)
+
+# Use Normalize instead of TwoSlopeNorm for true linear spacing
+norm = Normalize(vmin=low, vmax=high)
+
+
+# 3. Plot
+fig, ax = plt.subplots(1, 1, figsize=(10, 6))
+
+plotdata.plot(column='dif', 
+              ax=ax, 
+              cmap=custom_cmap, 
+              edgecolor='black',
+              norm=norm,
+              legend=False)
+
+# 4. Add colorbar
+sm = plt.cm.ScalarMappable(cmap=custom_cmap, norm=norm)
+sm.set_array([])
+
+cbar = plt.colorbar(sm, ax=ax, ticks=ticks)
+cbar.set_label("Difference (GWh)")
+
+ax.set_title("Coal Generation in 2027 with $200B Budget \n Relative to Base", fontsize=15)
+ax.set_axis_off()
+fig.savefig("MIP_AirPollution/Figures/EndogenousPaper/coal_generation_map_2027_200B.png", dpi=300, bbox_inches='tight')
+
+
+c=50
+y=2027
+tech = 'Coal'
+
+plotdata = dispatch_spatial
+plotdata = plotdata[plotdata['period']==y]
+plotdata = plotdata[plotdata['gen_energy_source']==tech]
+
+maxdif = plotdata['dif'].min()
+
+plotdata = plotdata[plotdata['scenario']==f'{scenario}_{c}']
+plotdata = ipm_regions.merge(plotdata, left_on='model_region', right_on='gen_load_zone', how='left')
+plotdata['dif'] = plotdata['dif'].fillna(0)
+plotdata = gpd.GeoDataFrame(plotdata, geometry='geometry')
+plotdata.to_crs("EPSG:4326", inplace=True)
+
+# Create custom diverging colormap
+low = math.floor(plotdata['dif'].min()/10000)*10000
+high = 0 
+ticks = np.arange(low, high+1, 20000)
+rounded_high = round_up_to_step(high, low, 20000)
+
+plot_red = mix(white, dark_red, low/maxdif)
+custom_cmap = LinearSegmentedColormap.from_list(
+    "custom_RdBu_subset",
+    [
+        (0.0, plot_red),                              # low end
+        (1.0, white)                               # high end
+    ]
+)
+
+# Use Normalize instead of TwoSlopeNorm for true linear spacing
+norm = Normalize(vmin=low, vmax=high)
+
+
+# 3. Plot
+fig, ax = plt.subplots(1, 1, figsize=(10, 6))
+
+plotdata.plot(column='dif', 
+              ax=ax, 
+              cmap=custom_cmap, 
+              edgecolor='black',
+              norm=norm,
+              legend=False)
+
+# 4. Add colorbar
+sm = plt.cm.ScalarMappable(cmap=custom_cmap, norm=norm)
+sm.set_array([])
+
+cbar = plt.colorbar(sm, ax=ax, ticks=ticks)
+cbar.set_label("Difference (GWh)")
+
+ax.set_title("Coal Generation in 2027 with $200B Budget \n Relative to Base", fontsize=15)
+ax.set_axis_off()
+fig.savefig("MIP_AirPollution/Figures/EndogenousPaper/coal_generation_map_2027_50B.png", dpi=300, bbox_inches='tight')
