@@ -6,11 +6,16 @@ import os
 import numpy as np
 import pandas as pd
 import math
+import seaborn as sns
 from matplotlib.colors import LinearSegmentedColormap
 from matplotlib.colors import ListedColormap
 import matplotlib.pyplot as plt
 from matplotlib.colors import LinearSegmentedColormap, Normalize
 import yaml
+from mpl_toolkits.axes_grid1 import make_axes_locatable
+from shapely.geometry import LineString
+# import matplotlib.colors as mcolors
+
 
 
 
@@ -138,6 +143,14 @@ for c in cost_limits:
     tempdat = pd.read_csv(f"{result_dir}{scenario}_{c}/GroupExposure.csv")
     tempdat['scenario']=f'{scenario}_{c}'
     group_exposure = pd.concat([group_exposure,tempdat])
+
+## transmission
+transmission = pd.read_csv(f"{result_dir}{scenario}/transmission.csv")
+transmission['scenario']=scenario
+for c in cost_limits:
+    tempdat = pd.read_csv(f"{result_dir}{scenario}_{c}/transmission.csv")
+    tempdat['scenario']=f'{scenario}_{c}'
+    transmission = pd.concat([transmission, tempdat])
 
 ## Plot coefs and emissions
 coefs['technology'] = coefs.apply(update_technology, axis=1, column='Cluster')
@@ -765,3 +778,161 @@ cbar.set_label("Difference (GWh)")
 ax.set_title("Coal Generation in 2027 with $200B Budget \n Relative to Base", fontsize=15)
 ax.set_axis_off()
 fig.savefig("MIP_AirPollution/Figures/EndogenousPaper/coal_generation_map_2027_50B.png", dpi=300, bbox_inches='tight')
+
+##################
+## Transmission ##
+##################
+base = transmission[transmission['scenario']==f'{scenario}']
+base = pd.DataFrame(base[['PERIOD', 'trans_lz1', 'trans_lz2', 'TxCapacityNameplateAvailable']])
+base.rename(columns={'TxCapacityNameplateAvailable': 'Base_Capacity'}, inplace=True)
+
+transmission = pd.merge(transmission, base, how='left', on=['PERIOD', 'trans_lz1', 'trans_lz2'])
+c=200
+y=2050
+plotdata = transmission[transmission['PERIOD']==y]
+plotdata = plotdata[plotdata['scenario']==f'{scenario}_{c}']
+plotdata['dif']=plotdata['TxCapacityNameplateAvailable']-plotdata['Base_Capacity']
+
+
+#get capacity differences
+capacity_tot = capacity.groupby(['scenario', 'gen_load_zone', 'PERIOD']).agg({'GenCapacity':'sum'}).reset_index()
+base = capacity_tot[capacity_tot['scenario']==f'{scenario}']
+base = pd.DataFrame(base[['PERIOD', 'gen_load_zone', 'GenCapacity']])
+base.rename(columns={'GenCapacity':'Base_Capacity'}, inplace=True)
+capacity_tot = pd.merge(capacity_tot, base, how='left', on=['PERIOD', 'gen_load_zone'])
+capacity_tot = capacity_tot[capacity_tot['scenario']==f'{scenario}_{c}']
+capacity_tot = capacity_tot[capacity_tot['PERIOD']==y]
+capacity_tot['dif'] = capacity_tot['GenCapacity']-capacity_tot['Base_Capacity']
+
+# Ensure the centroids are available
+ipm_regions = ipm_regions.merge(capacity_tot, left_on='model_region', right_on='gen_load_zone', how='left')
+ipm_regions.to_crs("EPSG:4326", inplace=True)
+ipm_regions['centroid'] = ipm_regions.geometry.centroid
+
+# Create a dictionary mapping region names to centroids
+region_centroids = ipm_regions.set_index('model_region')['centroid'].to_dict()
+
+# Function to get centroid from region name
+def get_centroid(region):
+    return region_centroids.get(region)
+
+# Create a GeoDataFrame of transmission lines
+lines = []
+for _, row in plotdata.iterrows():
+    start = get_centroid(row['trans_lz1'])
+    end = get_centroid(row['trans_lz2'])
+    if start is not None and end is not None:
+        line = LineString([start, end])
+        lines.append({'geometry': line, 'dif': row['dif']})
+
+lines_gdf = gpd.GeoDataFrame(lines, crs=ipm_regions.crs)
+
+
+custom_cmap = LinearSegmentedColormap.from_list(
+    "custom_RdBu_subset",
+    [
+        (0.0, white),                              # low end
+        (1.0, dark_blue)                           # high end
+    ]
+)
+
+# Use Normalize instead of TwoSlopeNorm for true linear spacing
+trans_norm = Normalize(vmin=0, vmax=lines_gdf['dif'].max())
+
+trans_cmap = LinearSegmentedColormap.from_list(
+    "yellow_to_red",
+    ["#ffffcc", "#ffeda0", "#feb24c", "#f03b20", "#bd0026"]
+)
+
+# Use Normalize instead of TwoSlopeNorm for true linear spacing
+norm = Normalize(vmin=0, vmax=ipm_regions['dif'].max())
+
+#plot
+fig, ax = plt.subplots(figsize=(10, 10))
+
+# Plot the regions
+ipm_regions.plot(column='dif', cmap=custom_cmap, norm=norm, edgecolor='black', ax=ax)
+
+# Plot transmission lines
+lines_gdf.plot(ax=ax, 
+               linewidth=4, 
+               column='dif', 
+               cmap=trans_cmap, 
+               norm=trans_norm)
+
+# Set map extent
+ax.set_xlim([-107, -82])
+ax.set_ylim([25, 37])
+ax.set_title("Difference in Transmission and Generation Capacity from Base \n with $200B Budget")
+ax.axis('off')
+
+# Add colorbars in separate axes to prevent overlap
+divider = make_axes_locatable(ax)
+cax1 = divider.append_axes("right", size="3%", pad=0.2)  # More padding
+cax2 = divider.append_axes("right", size="3%", pad=0.9)  # Further to the right
+
+# First colorbar
+sm1 = plt.cm.ScalarMappable(norm=norm, cmap=custom_cmap)
+sm1._A = []
+cbar1 = fig.colorbar(sm1, cax=cax1)
+cbar1.set_label("Difference in Total Capacity")
+
+# Second colorbar
+sm2 = plt.cm.ScalarMappable(norm=trans_norm, cmap=trans_cmap)
+sm2._A = []
+cbar2 = fig.colorbar(sm2, cax=cax2)
+cbar2.set_label("Difference in Transmission Capacity")
+
+plt.tight_layout()
+plt.show()
+fig.savefig("MIP_AirPollution/Figures/EndogenousPaper/transmission_capacity_substitution.png", dpi=300, bbox_inches='tight')
+
+####################
+## Emissions #######
+####################
+
+emissions = dispatch.groupby(['period', 'scenario_2', 'scenario']).agg({'DispatchEmissions_tCO2_per_typical_yr':'sum'}).reset_index()
+emissions = pd.merge(emissions, group_exposure_max, how='left', left_on=['period', 'scenario'], right_on=['SetProduct_OrderedSet_2', 'scenario'])
+
+# Sort data for proper line drawing
+emissions_sorted = emissions.sort_values(by=['scenario_2', 'period'])
+emissions_sorted = emissions_sorted.rename(columns={'scenario_2': 'Scenario', 'period':'Year'})
+emissions_sorted['DispatchEmissions_tCO2_per_typical_yr']=emissions_sorted['DispatchEmissions_tCO2_per_typical_yr']/1e9
+
+# Create base scatter plot
+plt.figure(figsize=(10, 6))
+sns.scatterplot(
+    data=emissions_sorted,
+    x='DispatchEmissions_tCO2_per_typical_yr',
+    y='GroupExposure',
+    hue='Year',
+    style='Scenario',
+    palette='viridis',
+    s=130,
+    alpha=0.8
+)
+
+# Draw lines connecting points within each 'scenario_2' group
+for scenario, group_df in emissions_sorted.groupby('Scenario'):
+    plt.plot(
+        group_df['DispatchEmissions_tCO2_per_typical_yr'],
+        group_df['GroupExposure'],
+        marker='',  # no additional markers
+        color='grey',
+        linestyle='-',
+        linewidth=1,
+        alpha=0.5,
+        label=None
+    )
+
+
+# Labels and layout
+plt.xlabel('Dispatch Emissions (Billion tCO₂/year)')
+plt.ylabel('Group Exposure')
+plt.title('CO2 Emissions versus Max(Group Exposure)')
+
+plt.grid(True)
+plt.tight_layout()
+plt.legend(bbox_to_anchor=(1.05, 1), loc='upper left')
+plt.show()
+fig.savefig("MIP_AirPollution/Figures/EndogenousPaper/emissions_vs_exposure.png", dpi=300, bbox_inches='tight')
