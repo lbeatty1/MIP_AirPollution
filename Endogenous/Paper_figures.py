@@ -67,11 +67,11 @@ zone_to_region = {
 
 scenario_mapping = {
     'current_policies_short': 'Base Case',
-    'current_policies_short_50': '$50 Billion Budget',
-    'current_policies_short_100': '$100 Billion Budget',
-    'current_policies_short_200': '$200 Billion Budget'
+    'current_policies_short_50': '$50 Billion',
+    'current_policies_short_100': '$100 Billion',
+    'current_policies_short_200': '$200 Billion'
 }
-scenario_order = ['Base Case', '$50 Billion Budget', '$100 Billion Budget', '$200 Billion Budget']
+scenario_order = ['Base Case', '$50 Billion', '$100 Billion', '$200 Billion']
 
 # Get the RdBu colormap
 rd_bu = plt.cm.get_cmap('RdBu')
@@ -176,17 +176,18 @@ bar4 = ax.bar(index + 3*bar_width, emis_summary['NH3'], bar_width, label='NH3', 
 bar5 = ax.bar(index + 4*bar_width, emis_summary['VOC'], bar_width, label='VOC', color=tab10[4])
 
 # Labels and title
-ax.set_xlabel('Technology', fontsize=14, fontweight='bold')
-ax.set_ylabel('Mean Emissions (Tons/MWh)', fontsize=14, fontweight='bold')
-ax.set_title('Mean Emissions by Technology', fontsize=16, fontweight='bold')
+ax.set_xlabel('Technology', fontsize=16, fontweight='bold')
+ax.set_ylabel('Mean Emissions (Tons/MWh)', fontsize=18, fontweight='bold')
+ax.set_title('Mean Emissions by Technology', fontsize=18, fontweight='bold')
 
 
 # Rotate x-axis labels
 ax.set_xticks(index + 2*bar_width)
 ax.set_xticklabels(emis_summary['technology'], rotation=0, ha='center')
+ax.tick_params(axis='x', labelsize=16)
 
 # Legend and layout
-ax.legend()
+ax.legend(fontsize=16)
 plt.tight_layout()
 
 # Save the figure
@@ -213,16 +214,17 @@ ax.bar(index + 3*bar_width, exposure_wide['Native'], bar_width, label='Native Am
 ax.bar(index + 4*bar_width, exposure_wide['WhiteNoLat'], bar_width, label='White', color=tab10[4])
 
 # Labels and title (bold + larger font)
-ax.set_xlabel('Technology', fontsize=14, fontweight='bold')
-ax.set_ylabel('Marginal Exposure per MWh', fontsize=14, fontweight='bold')
-ax.set_title('Exposure by Technology', fontsize=16, fontweight='bold')
+ax.set_xlabel('Technology', fontsize=16, fontweight='bold')
+ax.set_ylabel('Marginal Exposure per MWh', fontsize=18, fontweight='bold')
+ax.set_title('Exposure by Technology', fontsize=18, fontweight='bold')
 
 # X-axis tick settings
 ax.set_xticks(index + 2*bar_width)
-ax.set_xticklabels(exposure_wide['technology'], rotation=45, ha='right')
+ax.set_xticklabels(exposure_wide['technology'], rotation=0, ha='center')
+ax.tick_params(axis='x', labelsize=16)
 
 # Legend and layout
-ax.legend()
+ax.legend(fontsize=16)
 plt.tight_layout()
 
 # Save figure
@@ -249,16 +251,31 @@ for year in sorted(years, reverse=True):
 
     ax = data_pivot.plot(kind='bar', stacked=True, figsize=(10, 6), cmap='tab20')
     
-    ax.set_title(f'Energy (GWh) by Scenario and Technology - Year {year}', fontsize=16)
-    ax.set_ylabel('Energy (GWh)', fontsize=12)
-    ax.set_xlabel('Scenario', fontsize=12)
-    ax.set_xticklabels(ax.get_xticklabels(), rotation=0)  # <-- This sets x labels to horizontal
+    ax.set_title(f'Energy (GWh) by Scenario and Technology - Year {year}', fontsize=20)
+    ax.set_ylabel('Energy (GWh)', fontsize=18)
+    ax.set_xlabel('Scenario', fontsize=18)
+    ax.set_xticklabels(ax.get_xticklabels(), rotation=0, fontsize=18)  # <-- This sets x labels to horizontal
+
+    # if year == 2050:
+    #         plt.legend(bbox_to_anchor=(1.05, 1), loc='upper left', fontsize=18)
+
+    # else:
+    #     ax.get_legend().remove()
 
     if year == 2050:
-            plt.legend(title='Technology', bbox_to_anchor=(1.05, 1), loc='upper left')
-    else:
-        ax.get_legend().remove()
+        # Get handles and labels from the original axis
+        handles, labels = ax.get_legend_handles_labels()
+        
+        # Create a new figure for the legend
+        fig_legend = plt.figure(figsize=(8, 6))
+        fig_legend.legend(handles, labels, loc='center', fontsize=18, frameon=False, ncol=1)  # Customize as needed
+        fig_legend.tight_layout()
+        
+        # Save legend separately
+        fig_legend.savefig(f'MIP_AirPollution/Figures/EndogenousPaper/Legend_{year}.png', dpi=300, bbox_inches='tight')
+        plt.close(fig_legend)  # Close legend figure
 
+    ax.get_legend().remove()
     plt.tight_layout()
     plt.savefig(f'MIP_AirPollution/Figures/EndogenousPaper/Dispatch_Relative_by_scenario_{year}.png', dpi=300, bbox_inches='tight')  # DPI for high resolution
 
