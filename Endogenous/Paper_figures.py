@@ -265,16 +265,31 @@ for year in sorted(years, reverse=True):
     if year == 2050:
         # Get handles and labels from the original axis
         handles, labels = ax.get_legend_handles_labels()
-        
+
         # Create a new figure for the legend
         fig_legend = plt.figure(figsize=(8, 6))
-        fig_legend.legend(handles, labels, loc='center', fontsize=18, frameon=False, ncol=1)  # Customize as needed
-        fig_legend.tight_layout()
         
-        # Save legend separately
-        fig_legend.savefig(f'MIP_AirPollution/Figures/EndogenousPaper/Legend_{year}.png', dpi=300, bbox_inches='tight')
-        plt.close(fig_legend)  # Close legend figure
+        # Add legend and store it in a variable
+        legend = fig_legend.legend(
+            handles, labels,
+            loc='center',
+            fontsize=18,
+            frameon=False,
+            ncol=2,
+            title='Technology'
+        )
+        
+        # Set legend title font size
+        legend.get_title().set_fontsize(24)
 
+        # Save the figure with the legend
+        fig_legend.savefig(
+            f'MIP_AirPollution/Figures/EndogenousPaper/Legend_{year}.png',
+            dpi=300,
+            bbox_inches='tight'
+        )
+        plt.close(fig_legend)
+        
     ax.get_legend().remove()
     plt.tight_layout()
     plt.savefig(f'MIP_AirPollution/Figures/EndogenousPaper/Dispatch_Relative_by_scenario_{year}.png', dpi=300, bbox_inches='tight')  # DPI for high resolution
